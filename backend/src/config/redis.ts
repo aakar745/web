@@ -190,7 +190,14 @@ export const redisConfig = {
 
 // Connection settings for Bull queues
 export const bullConfig = {
-  redis: redisConfig,
+  redis: {
+    // If Redis password is provided, use the Redis URI format
+    ...(process.env.REDIS_PASSWORD 
+      ? { 
+          url: `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`
+        } 
+      : redisConfig)
+  },
   // Bull queue settings
   defaultJobOptions: {
     attempts: 2,
