@@ -15,6 +15,9 @@ COPY frontend/ ./
 # Build frontend
 RUN npm run build
 
+# Ensure standalone and public directories exist
+RUN mkdir -p .next/standalone .next/static public
+
 # Backend build stage
 FROM node:18-alpine AS backend-build
 
@@ -30,7 +33,7 @@ RUN npm ci
 # Copy backend source
 COPY backend/ ./
 
-# Build TypeScript - using node to directly execute tsc from node_modules
+# Build TypeScript - using node to directly execute tsc
 RUN node ./node_modules/typescript/bin/tsc
 
 # Final stage
