@@ -30,8 +30,8 @@ RUN npm ci
 # Copy backend source
 COPY backend/ ./
 
-# Build TypeScript - using npx to ensure proper execution
-RUN npx tsc
+# Build TypeScript - using node to directly execute tsc from node_modules
+RUN node ./node_modules/typescript/bin/tsc
 
 # Final stage
 FROM node:18-alpine
