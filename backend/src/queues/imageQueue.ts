@@ -171,14 +171,24 @@ const createQueues = async () => {
       // Create Bull queues with Redis
       console.log('Attempting to create Bull queues with Redis...');
       
+      // Use the REDIS_HOST environment variable consistently
+      const redisHost = process.env.REDIS_HOST || 'localhost';
+      
+      // Log the actual Redis host we're using
+      console.log(`Using Redis host: ${redisHost}`);
+      
       // Determine whether to use URL or configuration object
       const redisUrl = process.env.REDIS_PASSWORD 
-        ? `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`
+        ? `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${redisHost}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`
         : undefined;
       
       // Default queue options as a separate variable with proper type
       const queueOptions = { 
-        redis: redisConfig,
+        redis: {
+          ...redisConfig,
+          // Ensure host is explicitly set to the environment variable
+          host: redisHost
+        },
         defaultJobOptions: bullConfig.defaultJobOptions
       };
       

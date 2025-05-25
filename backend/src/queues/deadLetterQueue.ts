@@ -35,12 +35,18 @@ async function initDeadLetterQueue() {
     // Reset error logged flag
     redisErrorLogged = false;
 
-    // Define the Redis connection options
-    let redisOptions;
+    // Get Redis host from environment (ensures consistency with other Redis connections)
+    const redisHost = process.env.REDIS_HOST || 'localhost';
     
+    // Log what host we're using
+    logger.info(`Initializing dead letter queue with Redis host: ${redisHost}`);
+
+    // Define the Redis connection options
     if (process.env.REDIS_PASSWORD) {
       // Use Redis URI format if password is provided
-      const redisUri = `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`;
+      const redisUri = `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${redisHost}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`;
+      
+      logger.info('Using Redis URI format with authentication for dead letter queue');
       
       // Define the dead letter queue with Redis URI
       const queue = new Queue('dead-letter-queue', redisUri, {
@@ -61,7 +67,7 @@ async function initDeadLetterQueue() {
       // Define the dead letter queue with Redis options
       const queue = new Queue('dead-letter-queue', {
         redis: {
-          host: process.env.REDIS_HOST || 'localhost',
+          host: redisHost,
           port: parseInt(process.env.REDIS_PORT || '6379'),
           maxRetriesPerRequest: 1, // Reduce retries
           retryStrategy: (times) => {
