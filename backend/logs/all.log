@@ -6,3 +6,118 @@
 {"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 21:02:59:259"}
 {"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 21:02:59:259"}
 {"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 21:02:59:259"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-05-26 21:04:14:414"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /media/file/blogs/blog-rose-blackpink-3840x2160-22459-89098a34.jpg","timestamp":"2025-05-26 21:04:14:414"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:04:26:426"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:04:26:426"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:04:40:440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:04:40:440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:04:40:440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /media/file/blogs/blog-rose-blackpink-3840x2160-22459-89098a34.jpg","timestamp":"2025-05-26 21:04:40:440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:04:58:458"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/by-slug/my-first-app-with","timestamp":"2025-05-26 21:05:26:526"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:05:26:526"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/by-slug/my-first-app-with","timestamp":"2025-05-26 21:05:26:526"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:05:26:526"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/6832eb0c044c438752ceae4d/like","timestamp":"2025-05-26 21:05:26:526"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/6832eb0c044c438752ceae4d/comments","timestamp":"2025-05-26 21:05:26:526"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/6832eb0c044c438752ceae4d/like","timestamp":"2025-05-26 21:05:27:527"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:05:27:527"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/6832eb0c044c438752ceae4d/comments","timestamp":"2025-05-26 21:05:27:527"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-05-26 21:05:27:527"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/6832eb0c044c438752ceae4d/comments","timestamp":"2025-05-26 21:05:27:527"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/6832eb0c044c438752ceae4d/comments","timestamp":"2025-05-26 21:05:27:527"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:05:28:528"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:05:58:558"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:06:28:628"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:06:58:658"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:07:28:728"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:07:58:758"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:09:14:914"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:09:28:928"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:09:58:958"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:10:28:1028"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:11:14:1114"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:12:14:1214"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:13:14:1314"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:14:14:1414"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:15:14:1514"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:16:14:1614"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:17:14:1714"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 21:18:04:184"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-05-26 21:20:14:2014"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:20:14:2014"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:21:14:2114"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:22:14:2214"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:23:14:2314"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:24:14:2414"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:25:14:2514"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:26:14:2614"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:27:14:2714"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:28:14:2814"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:29:14:2914"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:30:14:3014"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:31:14:3114"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:32:14:3214"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:33:14:3314"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:34:14:3414"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:35:14:3514"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:36:14:3614"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 21:37:14:3714"}
+{"level":"info","message":"Exiting degradation mode - system load has normalized","timestamp":"2025-05-26 21:38:14:3814"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-05-26 22:01:14:114"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:01:14:114"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:02:14:214"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:03:14:314"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:04:14:414"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:05:14:514"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:06:14:614"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:07:14:714"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:08:14:814"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:09:14:914"}
+{"level":"info","message":"Exiting degradation mode - system load has normalized","timestamp":"2025-05-26 22:10:14:1014"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-05-26 22:26:14:2614"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:26:14:2614"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:27:14:2714"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-05-26 22:28:14:2814"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 22:28:35:2835"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-05-26 22:28:46:2846"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-05-26 22:28:46:2846"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-05-26 22:28:46:2846"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-05-26 22:28:47:2847"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-05-26 22:28:47:2847"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 22:28:47:2847"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 22:28:47:2847"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 22:28:47:2847"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 22:32:38:3238"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 22:33:10:3310"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 22:33:10:3310"}

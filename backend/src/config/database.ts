@@ -18,8 +18,6 @@ const connectToDB = async (): Promise<mongoose.Connection> => {
     async () => {
       // All connection options should be in this object
       const options: mongoose.ConnectOptions = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         serverSelectionTimeoutMS: 15000, // Increased timeout
         socketTimeoutMS: 45000, // Socket timeout
         // Do not use connectTimeoutMS directly - it's included in connection options
