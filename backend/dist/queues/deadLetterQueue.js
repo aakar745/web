@@ -35,99 +35,63 @@ async function initDeadLetterQueue() {
         }
         // Reset error logged flag
         redisErrorLogged = false;
-        // Define the dead letter queue
-        const queue = new bull_1.default('dead-letter-queue', {
-            redis: {
-                host: process.env.REDIS_HOST || 'localhost',
-                port: parseInt(process.env.REDIS_PORT || '6379'),
-                password: process.env.REDIS_PASSWORD,
-                maxRetriesPerRequest: 1, // Reduce retries
-                retryStrategy: (times) => {
-                    // Quickly fail after 1 retry
-                    if (times >= 1) {
-                        if (!redisErrorLogged) {
-                            logger_1.default.warn('Redis connection failed - dead letter queue will use fallback mode');
-                            redisErrorLogged = true;
+        // Get Redis host from environment (ensures consistency with other Redis connections)
+        const redisHost = process.env.REDIS_HOST || 'localhost';
+        // Log what host we're using
+        logger_1.default.info(`Initializing dead letter queue with Redis host: ${redisHost}`);
+        // Define the Redis connection options
+        if (process.env.REDIS_PASSWORD) {
+            // Use Redis URI format if password is provided
+            const redisUri = `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${redisHost}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`;
+            logger_1.default.info('Using Redis URI format with authentication for dead letter queue');
+            // Define the dead letter queue with Redis URI
+            const queue = new bull_1.default('dead-letter-queue', redisUri, {
+                defaultJobOptions: {
+                    attempts: 1, // Don't retry jobs in the DLQ
+                    removeOnComplete: false, // Keep completed jobs for auditing
+                    removeOnFail: false, // Keep failed jobs for auditing
+                }
+            });
+            // Handle events
+            setupQueueEvents(queue);
+            deadLetterQueueAvailable = true;
+            logger_1.default.info('Dead letter queue initialized successfully with Redis URI');
+            return queue;
+        }
+        else {
+            // Define the dead letter queue with Redis options
+            const queue = new bull_1.default('dead-letter-queue', {
+                redis: {
+                    host: redisHost,
+                    port: parseInt(process.env.REDIS_PORT || '6379'),
+                    maxRetriesPerRequest: 1, // Reduce retries
+                    retryStrategy: (times) => {
+                        // Quickly fail after 1 retry
+                        if (times >= 1) {
+                            if (!redisErrorLogged) {
+                                logger_1.default.warn('Redis connection failed - dead letter queue will use fallback mode');
+                                redisErrorLogged = true;
+                            }
+                            deadLetterQueueAvailable = false;
+                            return null; // Stop retrying
                         }
-                        deadLetterQueueAvailable = false;
-                        return null; // Stop retrying
-                    }
-                    return 100; // Retry once after 100ms
+                        return 100; // Retry once after 100ms
+                    },
+                    // Add connection timeout
+                    connectTimeout: 3000,
                 },
-                // Add connection timeout
-                connectTimeout: 3000,
-            },
-            defaultJobOptions: {
-                attempts: 1, // Don't retry jobs in the DLQ
-                removeOnComplete: false, // Keep completed jobs for auditing
-                removeOnFail: false, // Keep failed jobs for auditing
-            }
-        });
-        // Handle events
-        queue.on('error', (error) => {
-            // Check if this is a connection error
-            if (error.message.includes('ECONNREFUSED') ||
-                error.message.includes('ECONNABORTED') ||
-                error.message.includes('ECONNRESET') ||
-                error.message.includes('Connection is closed') ||
-                error.message.includes('ended') ||
-                error.message.includes('connection')) {
-                // Log only once
-                if (!redisErrorLogged) {
-                    logger_1.default.error(`Dead letter queue error: ${error.message}`);
-                    redisErrorLogged = true;
-                    deadLetterQueueAvailable = false;
+                defaultJobOptions: {
+                    attempts: 1, // Don't retry jobs in the DLQ
+                    removeOnComplete: false, // Keep completed jobs for auditing
+                    removeOnFail: false, // Keep failed jobs for auditing
                 }
-                // Close the queue connection to prevent further errors
-                try {
-                    queue.close().catch(() => { });
-                }
-                catch (closeError) {
-                    // Ignore errors during close
-                }
-                return;
-            }
-            // For other types of errors, always log
-            logger_1.default.error(`Dead letter queue error: ${error.message}`);
-        });
-        queue.on('completed', (job) => {
-            logger_1.default.info(`Dead letter job ${job.id} processed successfully`);
-        });
-        // Dead letter queue processor
-        queue.process(async (job) => {
-            try {
-                // Log the dead job
-                logger_1.default.error(`Processing dead letter job ${job.id}: ${JSON.stringify(job.data.error)}`);
-                // Store job failure info to a file for auditing
-                const failureRecord = {
-                    id: job.id,
-                    originalQueue: job.data.originalQueue,
-                    originalJobId: job.data.originalJobId,
-                    timestamp: new Date().toISOString(),
-                    error: job.data.error,
-                    data: job.data.originalData
-                };
-                // Ensure the audit directory exists
-                const auditDir = path_1.default.join(__dirname, '../../logs/failed-jobs');
-                if (!fs_1.default.existsSync(auditDir)) {
-                    fs_1.default.mkdirSync(auditDir, { recursive: true });
-                }
-                // Write the failure record
-                const logFile = path_1.default.join(auditDir, `job-${(0, uuid_1.v4)()}.json`);
-                fs_1.default.writeFileSync(logFile, JSON.stringify(failureRecord, null, 2));
-                // You might want to implement additional recovery logic here
-                // such as notifying admins, attempting an alternative processing strategy, etc.
-                logger_1.default.info(`Dead letter job ${job.id} processed and recorded to ${logFile}`);
-                return { status: 'logged', logFile };
-            }
-            catch (error) {
-                logger_1.default.error(`Failed to process dead letter job ${job.id}: ${error.message}`);
-                throw error;
-            }
-        });
-        deadLetterQueueAvailable = true;
-        logger_1.default.info('Dead letter queue initialized successfully');
-        return queue;
+            });
+            // Setup event handlers for the queue
+            setupQueueEvents(queue);
+            deadLetterQueueAvailable = true;
+            logger_1.default.info('Dead letter queue initialized successfully with Redis options');
+            return queue;
+        }
     }
     catch (error) {
         if (!redisErrorLogged) {
@@ -137,6 +101,70 @@ async function initDeadLetterQueue() {
         deadLetterQueueAvailable = false;
         return null;
     }
+}
+// Function to set up queue event handlers
+function setupQueueEvents(queue) {
+    queue.on('error', (error) => {
+        // Check if this is a connection error
+        if (error.message.includes('ECONNREFUSED') ||
+            error.message.includes('ECONNABORTED') ||
+            error.message.includes('ECONNRESET') ||
+            error.message.includes('Connection is closed') ||
+            error.message.includes('ended') ||
+            error.message.includes('connection')) {
+            // Log only once
+            if (!redisErrorLogged) {
+                logger_1.default.error(`Dead letter queue error: ${error.message}`);
+                redisErrorLogged = true;
+                deadLetterQueueAvailable = false;
+            }
+            // Close the queue connection to prevent further errors
+            try {
+                queue.close().catch(() => { });
+            }
+            catch (closeError) {
+                // Ignore errors during close
+            }
+            return;
+        }
+        // For other types of errors, always log
+        logger_1.default.error(`Dead letter queue error: ${error.message}`);
+    });
+    queue.on('completed', (job) => {
+        logger_1.default.info(`Dead letter job ${job.id} processed successfully`);
+    });
+    // Dead letter queue processor
+    queue.process(async (job) => {
+        try {
+            // Log the dead job
+            logger_1.default.error(`Processing dead letter job ${job.id}: ${JSON.stringify(job.data.error)}`);
+            // Store job failure info to a file for auditing
+            const failureRecord = {
+                id: job.id,
+                originalQueue: job.data.originalQueue,
+                originalJobId: job.data.originalJobId,
+                timestamp: new Date().toISOString(),
+                error: job.data.error,
+                data: job.data.originalData
+            };
+            // Ensure the audit directory exists
+            const auditDir = path_1.default.join(__dirname, '../../logs/failed-jobs');
+            if (!fs_1.default.existsSync(auditDir)) {
+                fs_1.default.mkdirSync(auditDir, { recursive: true });
+            }
+            // Write the failure record
+            const logFile = path_1.default.join(auditDir, `job-${(0, uuid_1.v4)()}.json`);
+            fs_1.default.writeFileSync(logFile, JSON.stringify(failureRecord, null, 2));
+            // You might want to implement additional recovery logic here
+            // such as notifying admins, attempting an alternative processing strategy, etc.
+            logger_1.default.info(`Dead letter job ${job.id} processed and recorded to ${logFile}`);
+            return { status: 'logged', logFile };
+        }
+        catch (error) {
+            logger_1.default.error(`Failed to process dead letter job ${job.id}: ${error.message}`);
+            throw error;
+        }
+    });
 }
 // Initialize the queue on module load
 initDeadLetterQueue().then(queue => {

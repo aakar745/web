@@ -114,9 +114,28 @@ const createQueues = async () => {
         try {
             // Create Bull queues with Redis
             console.log('Attempting to create Bull queues with Redis...');
+            // Use the REDIS_HOST environment variable consistently
+            const redisHost = process.env.REDIS_HOST || 'localhost';
+            // Log the actual Redis host we're using
+            console.log(`Using Redis host: ${redisHost}`);
+            // Determine whether to use URL or configuration object
+            const redisUrl = process.env.REDIS_PASSWORD
+                ? `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${redisHost}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`
+                : undefined;
+            // Default queue options as a separate variable with proper type
+            const queueOptions = {
+                redis: {
+                    ...redis_1.redisConfig,
+                    // Ensure host is explicitly set to the environment variable
+                    host: redisHost
+                },
+                defaultJobOptions: redis_1.bullConfig.defaultJobOptions
+            };
             // Create queues with error handling for each creation
             try {
-                exports.compressQueue = compressQueue = new bull_1.default('image-compression', redis_1.bullConfig);
+                exports.compressQueue = compressQueue = redisUrl
+                    ? new bull_1.default('image-compression', redisUrl, { defaultJobOptions: redis_1.bullConfig.defaultJobOptions })
+                    : new bull_1.default('image-compression', queueOptions);
             }
             catch (error) {
                 console.error('Failed to create compression queue:', error);
@@ -124,7 +143,9 @@ const createQueues = async () => {
                 throw error;
             }
             try {
-                exports.resizeQueue = resizeQueue = new bull_1.default('image-resize', redis_1.bullConfig);
+                exports.resizeQueue = resizeQueue = redisUrl
+                    ? new bull_1.default('image-resize', redisUrl, { defaultJobOptions: redis_1.bullConfig.defaultJobOptions })
+                    : new bull_1.default('image-resize', queueOptions);
             }
             catch (error) {
                 console.error('Failed to create resize queue:', error);
@@ -136,7 +157,9 @@ const createQueues = async () => {
                 throw error;
             }
             try {
-                exports.convertQueue = convertQueue = new bull_1.default('image-conversion', redis_1.bullConfig);
+                exports.convertQueue = convertQueue = redisUrl
+                    ? new bull_1.default('image-conversion', redisUrl, { defaultJobOptions: redis_1.bullConfig.defaultJobOptions })
+                    : new bull_1.default('image-conversion', queueOptions);
             }
             catch (error) {
                 console.error('Failed to create convert queue:', error);
@@ -151,7 +174,9 @@ const createQueues = async () => {
                 throw error;
             }
             try {
-                exports.cropQueue = cropQueue = new bull_1.default('image-crop', redis_1.bullConfig);
+                exports.cropQueue = cropQueue = redisUrl
+                    ? new bull_1.default('image-crop', redisUrl, { defaultJobOptions: redis_1.bullConfig.defaultJobOptions })
+                    : new bull_1.default('image-crop', queueOptions);
             }
             catch (error) {
                 console.error('Failed to create crop queue:', error);

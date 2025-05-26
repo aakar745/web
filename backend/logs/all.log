@@ -1,0 +1,8 @@
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-05-26 21:02:34:234"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-05-26 21:02:34:234"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-05-26 21:02:34:234"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-05-26 21:02:34:234"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-05-26 21:02:59:259"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-05-26 21:02:59:259"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-05-26 21:02:59:259"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-05-26 21:02:59:259"}

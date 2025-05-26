@@ -29,14 +29,18 @@ function logDebug(message) {
 async function testRedisConnection() {
     return new Promise((resolve) => {
         try {
-            // Use localhost since Docker is exposing Redis on localhost
+            // Use environment variable for Redis host
             const redisHost = process.env.REDIS_HOST || 'localhost';
             const redisPort = parseInt(process.env.REDIS_PORT || '6379');
             // Log the connection attempt
             logDebug(`Attempting to connect to Redis at ${redisHost}:${redisPort}`);
+            // Create connection URL with authentication if provided
+            const redisUrl = process.env.REDIS_PASSWORD
+                ? `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${redisHost}:${redisPort}/${process.env.REDIS_DB || '0'}`
+                : `redis://${redisHost}:${redisPort}/${process.env.REDIS_DB || '0'}`;
             // Create Redis client using proper import
             const testClient = (0, redis_1.createClient)({
-                url: `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' + process.env.REDIS_PASSWORD + '@' : ''}${redisHost}:${redisPort}/${process.env.REDIS_DB || '0'}`,
+                url: redisUrl
             });
             // Set timeout to prevent hanging
             const timeout = setTimeout(() => {
@@ -140,7 +144,7 @@ setInterval(() => {
  * Redis configuration for the job queue
  */
 exports.redisConfig = {
-    // Use localhost since Docker is exposing Redis on localhost
+    // Use environment variable for Redis host
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD || undefined,
@@ -170,7 +174,11 @@ exports.redisConfig = {
 };
 // Connection settings for Bull queues
 exports.bullConfig = {
-    redis: exports.redisConfig,
+    redis: process.env.REDIS_PASSWORD
+        ? {
+            url: `redis://${process.env.REDIS_USERNAME ? process.env.REDIS_USERNAME + ':' : ''}${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}/${process.env.REDIS_DB || '0'}`
+        }
+        : exports.redisConfig,
     // Bull queue settings
     defaultJobOptions: {
         attempts: 2,
