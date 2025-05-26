@@ -19,8 +19,6 @@ const connectToDB = async () => {
     const dbBreaker = (0, circuitBreaker_1.createBreaker)('mongodb', async () => {
         // All connection options should be in this object
         const options = {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
             serverSelectionTimeoutMS: 15000, // Increased timeout
             socketTimeoutMS: 45000, // Socket timeout
             // Do not use connectTimeoutMS directly - it's included in connection options

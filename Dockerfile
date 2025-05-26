@@ -1,4 +1,4 @@
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 
 # Set working directory for frontend
 WORKDIR /app/frontend
@@ -19,7 +19,7 @@ RUN npm run build
 RUN mkdir -p .next/standalone .next/static public
 
 # Backend build stage
-FROM node:18-alpine AS backend-build
+FROM node:22-alpine AS backend-build
 
 # Set working directory for backend
 WORKDIR /app/backend
@@ -37,7 +37,7 @@ COPY backend/ ./
 RUN node ./node_modules/typescript/bin/tsc
 
 # Final stage
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
