@@ -63,7 +63,7 @@ const fixSlugs = async () => {
   } catch (error) {
     console.error('Error fixing slugs:', error);
   } finally {
-    // Disconnect from MongoDB
+    // Disconnect from_MongoDB
     mongoose.disconnect();
     console.log('MongoDB disconnected');
   }
