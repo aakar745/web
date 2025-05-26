@@ -43,9 +43,9 @@ domain.on('error', (err) => {
 
 domain.run(async () => {
   try {
-    // CORS configuration - temporarily allow all origins for EasyPanel debugging
+    // CORS configuration
     app.use(cors({
-      origin: true, // Allow all origins temporarily
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization']
