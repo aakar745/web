@@ -5,6 +5,23 @@ import { toast } from '@/components/ui/use-toast';
 
 // Get the API base URL from env var or default to localhost
 export function getApiUrl() {
+  // For EasyPanel production, try multiple fallback options
+  if (process.env.NODE_ENV === 'production') {
+    // First try the configured API URL
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    
+    // If running in browser, try relative path (same domain setup)
+    if (typeof window !== 'undefined') {
+      return '/api';
+    }
+    
+    // Server-side fallback for EasyPanel internal networking
+    return process.env.INTERNAL_API_URL || 'http://web-tools-backend:5000/api';
+  }
+  
+  // Development fallback
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 }
 

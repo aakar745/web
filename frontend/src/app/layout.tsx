@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { AppProviders } from '@/components/providers/AppProviders'
+import ConnectionTest from '@/components/ConnectionTest'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,6 +32,7 @@ export default function RootLayout({
             <AppProviders>
               {children}
             </AppProviders>
+            <ConnectionTest />
             <Toaster />
           </ThemeProvider>
         </AuthProvider>
