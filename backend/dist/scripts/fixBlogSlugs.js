@@ -11,7 +11,7 @@ dotenv_1.default.config();
 // Connect to MongoDB
 const connectDB = async () => {
     try {
-        const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/web-tools';
+        const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/web-tools';
         await mongoose_1.default.connect(mongoURI);
         console.log('MongoDB connected...');
     }
