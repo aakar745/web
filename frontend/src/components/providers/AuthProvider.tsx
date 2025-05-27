@@ -32,17 +32,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and validate token
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      
+              if (storedToken && storedUser && storedUser !== "undefined") {
+        try {
+          // Try to parse the stored user first
+          const parsedUser = JSON.parse(storedUser);
+          
+          // Validate the token by making a request to get user profile
+          const response = await apiRequest<{status: string; data: User}>('/auth/me', {
+            requireAuth: true,
+            noRedirect: true // Prevent automatic redirect during validation
+          });
+          
+          // Token is valid, set the user data from response
+          setToken(storedToken);
+          setUser(response.data);
+        } catch (error: any) {
+          console.log('Token validation failed:', error.message);
+          
+          // If it's a network error and we have stored user data, use it temporarily
+          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              setToken(storedToken);
+              setUser(parsedUser);
+              console.log('Using cached user data due to network error');
+            } catch (parseError) {
+              // If can't parse stored user, clear everything
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              setToken(null);
+              setUser(null);
+            }
+          } else {
+            // Token is invalid, clear it
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setToken(null);
+            setUser(null);
+          }
+        }
+      }
+      
+      setIsLoading(false);
+    };
     
-    if (storedToken && storedUser && storedUser !== "undefined") {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    
-    setIsLoading(false);
+    initializeAuth();
   }, []);
 
   // Login function

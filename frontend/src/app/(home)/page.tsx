@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useSeo } from '@/hooks/useSeo'
 import { 
   ArrowRight, 
   Image, 
@@ -34,7 +35,7 @@ interface BlogPost {
   content: string;
   date: string;
   status: string;
-  author: { name: string; email: string } | string;
+  author: { name: string; email: string } | string | null;
   category: string;
   tags: string[];
   featuredImage?: string;
@@ -64,6 +65,9 @@ export default function Home() {
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   
+  // Load SEO data for homepage
+  const { seoData, loading: seoLoading } = useSeo('/')
+  
   // Fetch latest blog posts
   useEffect(() => {
     const fetchLatestPosts = async () => {
@@ -90,16 +94,19 @@ export default function Home() {
   }, [])
   
   // Format author name function
-  const getAuthorName = (author: { name: string; email: string } | string): string => {
-    if (typeof author === 'string') {
+  const getAuthorName = (author: { name: string; email: string } | string | null): string => {
+    if (!author || typeof author === 'string') {
       return 'Anonymous'
     }
-    return author.name
+    return author.name || 'Anonymous'
   }
   
   // Format author initials
-  const getAuthorInitials = (author: { name: string; email: string } | string): string => {
-    if (typeof author === 'string') {
+  const getAuthorInitials = (author: { name: string; email: string } | string | null): string => {
+    if (!author || typeof author === 'string') {
+      return 'A'
+    }
+    if (!author.name) {
       return 'A'
     }
     return author.name.split(' ').map(n => n[0]).join('')
@@ -129,7 +136,7 @@ export default function Home() {
             
             <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
-                Image Tools
+                ToolsCandy
               </span> for Everyone
             </h1>
             
@@ -301,7 +308,7 @@ export default function Home() {
             className="text-center max-w-3xl mx-auto mb-16"
           >
             <div className="inline-block mb-6 px-6 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-600 dark:text-blue-400 font-medium text-sm">
-              WHY CHOOSE WEB TOOLS
+              WHY CHOOSE TOOLSCANDY
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Designed with Your Needs in Mind</h2>
             <p className="text-xl text-muted-foreground">Built with privacy and simplicity as core principles. Process files directly in your browser.</p>

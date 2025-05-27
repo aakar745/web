@@ -72,7 +72,7 @@ const connectToDB = async (): Promise<mongoose.Connection> => {
 
   try {
     // Execute the circuit breaker to attempt the connection
-    const db = await dbBreaker.fire();
+    const db = await dbBreaker.fire() as mongoose.Connection;
     logger.info('MongoDB connected successfully');
     isConnected = true;
     return db;

@@ -1,14 +1,30 @@
 'use client'
 
-import React, { useState, Suspense } from 'react'
+import React, { useState, Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
 import { useAuth } from '@/components/providers/AuthProvider'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
+import { 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Lock, 
+  Shield, 
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  Home,
+  Loader2,
+  KeyRound
+} from 'lucide-react'
 
 // Wrapper component that uses searchParams
 function LoginForm() {
@@ -21,9 +37,102 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  
+  const [showPassword, setShowPassword] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<{email?: string, password?: string}>({})
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 }
+  }
+
+  const errorVariants = {
+    hidden: { opacity: 0, scale: 0.95, height: 0 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      height: "auto",
+      transition: { duration: 0.3 }
+    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.95, 
+      height: 0,
+      transition: { duration: 0.2 }
+    }
+  }
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Real-time validation
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email) return 'Email is required'
+    if (!emailRegex.test(email)) return 'Please enter a valid email address'
+    return ''
+  }
+
+  const validatePassword = (password: string) => {
+    if (!password) return 'Password is required'
+    if (password.length < 6) return 'Password must be at least 6 characters'
+    return ''
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setEmail(value)
+    
+    if (focusedField === 'email' || value.length > 0) {
+      const emailError = validateEmail(value)
+      setValidationErrors(prev => ({ ...prev, email: emailError }))
+    }
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPassword(value)
+    
+    if (focusedField === 'password' || value.length > 0) {
+      const passwordError = validatePassword(value)
+      setValidationErrors(prev => ({ ...prev, password: passwordError }))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate all fields
+    const emailError = validateEmail(email)
+    const passwordError = validatePassword(password)
+    
+    setValidationErrors({ email: emailError, password: passwordError })
+    
+    if (emailError || passwordError) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors below and try again.',
+        variant: 'destructive',
+      })
+      return
+    }
+    
     setIsLoading(true)
     setError('')
     
@@ -31,100 +140,280 @@ function LoginForm() {
       const success = await login(email, password)
       
       if (!success) {
-        setError('Invalid email or password')
+        setError('Invalid email or password. Please check your credentials and try again.')
         toast({
-          title: 'Authentication failed',
-          description: 'Please check your credentials and try again.',
+          title: 'Authentication Failed',
+          description: 'The email or password you entered is incorrect.',
           variant: 'destructive',
         })
       } else {
         toast({
-          title: 'Logged in',
+          title: 'Welcome Back!',
           description: 'You have been successfully logged in.',
+          duration: 2000,
         })
         
+        // Add a small delay for better UX
         setTimeout(() => {
           router.push(callbackUrl)
-        }, 100)
+        }, 500)
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError('A server error occurred. Please try again in a moment.')
+      toast({
+        title: 'Connection Error',
+        description: 'Unable to connect to the server. Please check your internet connection.',
+        variant: 'destructive',
+      })
     } finally {
       setIsLoading(false)
     }
   }
-  
+
+  const isFormValid = email && password && !validationErrors.email && !validationErrors.password
+
+  if (!mounted) {
+    return <LoginLoading />
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>
-            Enter your credentials to access the admin panel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <div className="mb-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-muted-foreground hover:text-primary"
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[5%] w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-[10%] -right-[5%] w-72 h-72 bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-[20%] right-[10%] w-32 h-32 bg-pink-400/10 rounded-full blur-2xl"></div>
+      </div>
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-md relative z-10"
+      >
+        <Card className="border-0 shadow-2xl shadow-black/10 backdrop-blur-sm bg-white/90 dark:bg-slate-900/90">
+          <CardHeader className="space-y-4 text-center pb-8">
+            <motion.div variants={itemVariants} className="flex justify-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants}>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Admin Portal
+              </CardTitle>
+              <CardDescription className="text-base mt-2 text-gray-600 dark:text-gray-400">
+                Sign in to access your dashboard
+              </CardDescription>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex justify-center">
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-700">
+                <KeyRound className="h-3 w-3 mr-1" />
+                Secure Access
+              </Badge>
+            </motion.div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  variants={errorVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 flex items-start space-x-3"
                 >
-                  Forgot password?
+                  <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-red-700 dark:text-red-300">
+                    <p className="font-medium">Authentication Error</p>
+                    <p className="mt-1">{error}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.form variants={itemVariants} onSubmit={handleSubmit} className="space-y-6">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium flex items-center space-x-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span>Email Address</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={handleEmailChange}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="admin@example.com"
+                    className={`pl-10 h-12 transition-all duration-200 ${
+                      focusedField === 'email' 
+                        ? 'ring-2 ring-blue-500 border-blue-500' 
+                        : validationErrors.email 
+                        ? 'border-red-500 ring-1 ring-red-500' 
+                        : ''
+                    }`}
+                    required
+                    disabled={isLoading}
+                    autoComplete="email"
+                  />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  {email && !validationErrors.email && (
+                    <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                  )}
+                </div>
+                <AnimatePresence>
+                  {validationErrors.email && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      <span>{validationErrors.email}</span>
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-medium flex items-center space-x-2">
+                    <Lock className="h-4 w-4 text-gray-500" />
+                    <span>Password</span>
+                  </Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={handlePasswordChange}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="••••••••"
+                    className={`pl-10 pr-12 h-12 transition-all duration-200 ${
+                      focusedField === 'password' 
+                        ? 'ring-2 ring-blue-500 border-blue-500' 
+                        : validationErrors.password 
+                        ? 'border-red-500 ring-1 ring-red-500' 
+                        : ''
+                    }`}
+                    required
+                    disabled={isLoading}
+                    autoComplete="current-password"
+                  />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <AnimatePresence>
+                  {validationErrors.password && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      <span>{validationErrors.password}</span>
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || !isFormValid}
+              >
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <span>Sign In</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
+                )}
+              </Button>
+            </motion.form>
+          </CardContent>
+
+          <CardFooter className="border-t bg-gray-50/50 dark:bg-slate-800/50 rounded-b-lg">
+            <div className="w-full space-y-4">
+              <Separator />
+              
+              <div className="text-center space-y-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Need access? Contact your administrator
+                </p>
+                
+                {/* Demo credentials - in production, remove this */}
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <p className="text-xs text-amber-700 dark:text-amber-300 font-medium mb-1">
+                    Demo Credentials:
+                  </p>
+                  <div className="text-xs text-amber-600 dark:text-amber-400 space-y-1">
+                    <div className="flex items-center justify-center space-x-1">
+                      <span className="font-mono bg-amber-100 dark:bg-amber-900/30 px-1 rounded">admin@example.com</span>
+                      <span>/</span>
+                      <span className="font-mono bg-amber-100 dark:bg-amber-900/30 px-1 rounded">admin123</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <Link
+                  href="/"
+                  className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Back to Home</span>
                 </Link>
               </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={isLoading}
-              />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="text-center text-sm text-muted-foreground">
-          <div className="w-full">
-            <p>Need access? Contact your administrator</p>
-            <p className="mt-2 text-xs">
-              Default credentials: admin@example.com / admin123
-            </p>
-          </div>
-        </CardFooter>
-      </Card>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   )
 }
 
-// Loading fallback for Suspense
+// Enhanced loading component
 function LoginLoading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <p>Loading login page...</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 text-white animate-spin" />
+          </div>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400">Loading admin portal...</p>
+      </div>
     </div>
   )
 }

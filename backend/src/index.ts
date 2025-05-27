@@ -21,6 +21,8 @@ import healthRoutes from './routes/healthRoutes';
 import { cleanupDeadLetterQueue } from './queues/deadLetterQueue';
 import monitoringRoutes from './routes/monitoringRoutes';
 import commentRoutes from './routes/commentRoutes';
+import seoRoutes from './routes/seoRoutes';
+import scriptsRoutes from './routes/scripts';
 
 // Load environment variables
 dotenv.config();
@@ -139,6 +141,8 @@ domain.run(async () => {
     app.use('/api/monitoring', monitoringRoutes);
     app.use('/api/admin', adminRoutes);
     app.use('/api/comments', commentRoutes);
+    app.use('/api/seo', seoRoutes);
+    app.use('/api/scripts', scriptsRoutes);
     
     // Add a catch-all route for Next.js frontend - after all API routes
     app.get('*', (req, res) => {

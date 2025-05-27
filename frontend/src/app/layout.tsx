@@ -5,11 +5,12 @@ import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { AppProviders } from '@/components/providers/AppProviders'
+import { HeadScripts, BodyScripts, FooterScripts } from '@/components/analytics/DynamicScripts'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Web Tools',
+  title: 'ToolsCandy',
   description: 'A collection of useful web tools',
 }
 
@@ -20,7 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <HeadScripts />
+      </head>
       <body className={inter.className}>
+        <BodyScripts />
         <AuthProvider>
           <ThemeProvider
             attribute="class"
@@ -34,6 +39,7 @@ export default function RootLayout({
             <Toaster />
           </ThemeProvider>
         </AuthProvider>
+        <FooterScripts />
       </body>
     </html>
   )

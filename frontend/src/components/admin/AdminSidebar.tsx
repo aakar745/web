@@ -16,7 +16,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
-  MessageSquare
+  MessageSquare,
+  Search,
+  Code
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -95,6 +97,18 @@ export function AdminSidebar({ onToggle }: AdminSidebarProps) {
       color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
     },
     {
+      title: 'SEO',
+      href: '/dashboard/seo',
+      icon: <Search className="h-5 w-5" />,
+      color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+    },
+    {
+      title: 'Scripts',
+      href: '/dashboard/scripts',
+      icon: <Code className="h-5 w-5" />,
+      color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+    },
+    {
       title: 'Settings',
       href: '/settings',
       icon: <Settings className="h-5 w-5" />,
@@ -112,7 +126,7 @@ export function AdminSidebar({ onToggle }: AdminSidebarProps) {
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <div className="h-16 border-b flex items-center px-6 justify-between">
-        {!isCollapsed && <h1 className="font-bold text-xl">WebTools</h1>}
+        {!isCollapsed && <h1 className="font-bold text-xl">ToolsCandy</h1>}
         <Button 
           variant="ghost" 
           size="icon" 

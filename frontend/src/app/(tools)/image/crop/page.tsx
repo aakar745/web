@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { ToolHeader } from '@/components/tools/ToolHeader'
+import { useSeo } from '@/hooks/useSeo'
 import { Button } from '@/components/ui/button'
 import { Crop, Download, X, Trash2, MoveHorizontal, MoveVertical, ArrowDownSquare } from 'lucide-react'
 import ImageDropzone from '@/components/tools/ImageDropzone'
@@ -80,6 +81,9 @@ const RateLimitIndicator = ({ usage, limit, resetsIn, isLimitReached = false }: 
 };
 
 export default function CropTool() {
+  // Load SEO data for image crop tool
+  const { seoData, loading: seoLoading } = useSeo('/image/crop')
+  
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null)

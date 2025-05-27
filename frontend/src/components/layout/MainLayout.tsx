@@ -60,7 +60,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* Logo */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-2" onClick={closeMenu}>
-                <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Web Tools</span>
+                <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">ToolsCandy</span>
               </Link>
             </div>
 
@@ -311,9 +311,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className="container py-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="font-bold text-lg mb-4">About Web Tools</h3>
+              <h3 className="font-bold text-lg mb-4">About ToolsCandy</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Our platform provides powerful tools for image optimization and processing, helping developers and content creators build faster websites.
+                ToolsCandy provides powerful, free image processing tools that work right in your browser. Optimize, resize, convert, and crop images with complete privacy.
               </p>
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
@@ -332,7 +332,33 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
             
             <div>
-              <h3 className="font-bold text-lg mb-4">Quick Links</h3>
+              <h3 className="font-bold text-lg mb-4">Image Tools</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/image/compress" className="text-muted-foreground hover:text-primary transition-colors">
+                    Image Compression
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/image/resize" className="text-muted-foreground hover:text-primary transition-colors">
+                    Image Resize
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/image/convert" className="text-muted-foreground hover:text-primary transition-colors">
+                    Format Conversion
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/image/crop" className="text-muted-foreground hover:text-primary transition-colors">
+                    Image Crop
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-bold text-lg mb-4">Company</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
@@ -340,13 +366,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/image/compress" className="text-muted-foreground hover:text-primary transition-colors">
-                    Image Compression
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/image/convert" className="text-muted-foreground hover:text-primary transition-colors">
-                    Format Conversion
+                  <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                    About Us
                   </Link>
                 </li>
                 <li>
@@ -359,45 +380,34 @@ export function MainLayout({ children }: MainLayoutProps) {
                     Contact Us
                   </Link>
                 </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-bold text-lg mb-4">Blog Categories</h3>
-              <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/blog?category=Web%20Development" className="text-muted-foreground hover:text-primary transition-colors">
-                    Web Development
+                  <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                    Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog?category=Optimization" className="text-muted-foreground hover:text-primary transition-colors">
-                    Optimization
+                  <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                    Terms of Service
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog?category=Design" className="text-muted-foreground hover:text-primary transition-colors">
-                    Design
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog?category=Tutorials" className="text-muted-foreground hover:text-primary transition-colors">
-                    Tutorials
+                  <Link href="/disclaimer" className="text-muted-foreground hover:text-primary transition-colors">
+                    Disclaimer
                   </Link>
                 </li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg mb-4">Contact Us</h3>
+              <h3 className="font-bold text-lg mb-4">Support</h3>
               <ul className="space-y-3 text-sm">
                 <li className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
-                  <span>support@webtools.com</span>
+                  <span>hello@toolscandy.com</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <PhoneCall className="h-4 w-4" />
-                  <span>+1 (555) 123-4567</span>
+                  <Mail className="h-4 w-4" />
+                  <span>support@toolscandy.com</span>
                 </li>
               </ul>
               <form className="mt-4 space-y-3">
@@ -413,14 +423,20 @@ export function MainLayout({ children }: MainLayoutProps) {
           
           <div className="pt-6 border-t flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Web Tools. All rights reserved.
+              © {new Date().getFullYear()} ToolsCandy. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                About Us
+              </Link>
               <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
               <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
+              </Link>
+              <Link href="/disclaimer" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                Disclaimer
               </Link>
               <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Contact Us

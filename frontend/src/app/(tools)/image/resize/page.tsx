@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import { ToolHeader } from '@/components/tools/ToolHeader'
+import { useSeo } from '@/hooks/useSeo'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { 
@@ -98,6 +99,9 @@ const RateLimitIndicator = ({ usage, limit, resetsIn, isLimitReached = false }: 
 };
 
 export default function ResizeTool() {
+  // Load SEO data for image resize tool
+  const { seoData, loading: seoLoading } = useSeo('/image/resize')
+  
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null)

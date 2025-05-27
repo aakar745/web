@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { ToolHeader } from '@/components/tools/ToolHeader'
+import { useSeo } from '@/hooks/useSeo'
 import { Button } from '@/components/ui/button'
 import { 
   Repeat, Download, X, Trash2, FileType 
@@ -86,6 +87,9 @@ interface ConvertResponse {
 }
 
 export default function ConvertTool() {
+  // Load SEO data for image convert tool
+  const { seoData, loading: seoLoading } = useSeo('/image/convert')
+  
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null)

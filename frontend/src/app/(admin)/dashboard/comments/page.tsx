@@ -47,7 +47,7 @@ interface Comment {
   blog: {
     _id: string;
     title: string;
-  };
+  } | null;
   name: string;
   email: string;
   text: string;
@@ -547,12 +547,18 @@ function CommentsManagementPage() {
                         <p className="line-clamp-2">{comment.text}</p>
                       </TableCell>
                       <TableCell>
-                        <Link 
-                          href={`/dashboard/blogs/edit/${comment.blog._id}`}
-                          className="text-sm hover:underline truncate block"
-                        >
-                          {comment.blog.title}
-                        </Link>
+                        {comment.blog ? (
+                          <Link 
+                            href={`/dashboard/blogs/edit/${comment.blog._id}`}
+                            className="text-sm hover:underline truncate block"
+                          >
+                            {comment.blog.title}
+                          </Link>
+                        ) : (
+                          <span className="text-sm text-muted-foreground italic">
+                            Blog post deleted
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <p className="text-sm" title={new Date(comment.createdAt).toLocaleString()}>
@@ -598,11 +604,13 @@ function CommentsManagementPage() {
                               Delete
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <Link href={`/blog/${comment.blog._id}`} target="_blank">
-                                View On Blog
-                              </Link>
-                            </DropdownMenuItem>
+                            {comment.blog && (
+                              <DropdownMenuItem asChild>
+                                <Link href={`/blog/${comment.blog._id}`} target="_blank">
+                                  View On Blog
+                                </Link>
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

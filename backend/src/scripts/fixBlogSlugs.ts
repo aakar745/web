@@ -8,7 +8,7 @@ dotenv.config();
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/web-tools';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/web-tools';
     await mongoose.connect(mongoURI);
     console.log('MongoDB connected...');
   } catch (err) {
@@ -37,10 +37,10 @@ const fixSlugs = async () => {
       
       // Clean up the slug
       const cleanSlug = originalSlug
-        // Remove timestamp pattern (typically a hyphen followed by numbers)
-        .replace(/-+\d+$/, '')
-        // Remove random string pattern (typically a hyphen followed by alphanumerics)
-        .replace(/-+[a-z0-9]{5,7}$/, '')
+        // Remove timestamp pattern (typically a hyphen followed by 6+ digits)
+        .replace(/-+\d{6,}$/, '')
+        // Remove random hash-like patterns (hex strings that look like IDs)
+        .replace(/-+[a-f0-9]{8,}$/, '')
         // Remove any consecutive hyphens that might be left
         .replace(/-+/g, '-')
         // Remove trailing hyphens

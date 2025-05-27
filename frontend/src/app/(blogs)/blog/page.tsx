@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DynamicMeta } from '@/components/meta/DynamicMeta'
+import { useSeo } from '@/hooks/useSeo'
 import { 
   CalendarIcon, 
   Search, 
@@ -27,7 +28,7 @@ interface BlogPost {
   content: string;
   date: string;
   status: string;
-  author: { name: string; email: string } | string;
+  author: { name: string; email: string } | string | null;
   category: string;
   tags: string[];
   featuredImage?: string;
@@ -44,6 +45,9 @@ interface BlogPost {
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  
+  // Load SEO data for blog page
+  const { seoData, loading: seoLoading } = useSeo('/blog')
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [allCategories, setAllCategories] = useState<string[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
@@ -218,11 +222,11 @@ export default function BlogPage() {
   }
   
   // Format author name
-  const getAuthorName = (author: { name: string; email: string } | string): string => {
-    if (typeof author === 'string') {
+  const getAuthorName = (author: { name: string; email: string } | string | null): string => {
+    if (!author || typeof author === 'string') {
       return 'Anonymous'
     }
-    return author.name
+    return author.name || 'Anonymous'
   }
   
   // Filter posts by active category and tag
@@ -285,13 +289,16 @@ export default function BlogPage() {
   
   return (
     <>
-      <DynamicMeta 
-        title="Blog | Web Tools"
-        description="Tips, tutorials, and insights about web performance, image optimization, and modern web development."
-        keywords="web tools, optimization, web development, performance, images"
-        ogImage={filteredPosts.length > 0 ? filteredPosts[0].featuredImage : undefined}
-        canonicalUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/blog`}
-      />
+      {seoData && (
+        <DynamicMeta 
+          title={seoData.metaTitle}
+          description={seoData.metaDescription}
+          keywords={seoData.metaKeywords.join(', ')}
+          ogImage={seoData.ogImage || (filteredPosts.length > 0 ? filteredPosts[0].featuredImage : undefined)}
+          canonicalUrl={seoData.canonicalUrl}
+          ogType={seoData.ogType as 'website' | 'article'}
+        />
+      )}
       
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Web Tools Blog</h1>
@@ -450,9 +457,9 @@ export default function BlogPage() {
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-xs font-medium text-primary">
-                    {typeof post.author === 'string' ? 
+                    {!post.author || typeof post.author === 'string' ? 
                       'A' : 
-                      post.author.name.split(' ').map(n => n[0]).join('')}
+                      (post.author.name || 'A').split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
                 <div className="text-sm truncate max-w-[100px]">{getAuthorName(post.author)}</div>
