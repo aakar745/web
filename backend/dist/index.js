@@ -24,6 +24,8 @@ require("./workers/imageWorker"); // Register workers in the main process
 const healthRoutes_1 = __importDefault(require("./routes/healthRoutes"));
 const monitoringRoutes_1 = __importDefault(require("./routes/monitoringRoutes"));
 const commentRoutes_1 = __importDefault(require("./routes/commentRoutes"));
+const seoRoutes_1 = __importDefault(require("./routes/seoRoutes"));
+const scripts_1 = __importDefault(require("./routes/scripts"));
 // Load environment variables
 dotenv_1.default.config();
 // Create our express app early
@@ -119,6 +121,8 @@ domain.run(async () => {
         app.use('/api/monitoring', monitoringRoutes_1.default);
         app.use('/api/admin', adminRoutes_1.default);
         app.use('/api/comments', commentRoutes_1.default);
+        app.use('/api/seo', seoRoutes_1.default);
+        app.use('/api/scripts', scripts_1.default);
         // Add a catch-all route for Next.js frontend - after all API routes
         app.get('*', (req, res) => {
             // Skip API routes that weren't handled by the API routers
