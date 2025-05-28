@@ -308,7 +308,7 @@ exports.getLoadBalancerStatus = (0, asyncHandler_1.asyncHandler)(async (req, res
         // Get load balancer metrics
         const loadBalancerMetrics = (0, loadBalancer_1.getLoadBalancerMetrics)();
         // Check if system is under high load
-        const highLoad = (0, loadBalancer_1.isSystemUnderHighLoad)();
+        const highLoad = await (0, loadBalancer_1.isSystemUnderHighLoad)();
         res.status(200).json({
             status: 'success',
             data: {

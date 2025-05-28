@@ -40,11 +40,17 @@ const express_1 = __importDefault(require("express"));
 const adminController = __importStar(require("../controllers/adminController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-// Apply authentication to all routes
+// Public routes (no auth required for read-only settings)
+router.get('/settings/rate-limits', adminController.getRateLimitSettings);
+router.get('/settings/file-upload', adminController.getFileUploadSettings);
+// Apply authentication to all other routes
 router.use(authMiddleware_1.protect);
 // Restrict to admin role
 router.use((0, authMiddleware_1.restrictTo)('admin'));
 // Cleanup routes
 router.post('/cleanup-images', adminController.cleanupImages);
+// Settings routes (admin only)
+router.get('/settings', adminController.getSystemSettings);
+router.put('/settings', adminController.updateSystemSettings);
 exports.default = router;
 //# sourceMappingURL=adminRoutes.js.map

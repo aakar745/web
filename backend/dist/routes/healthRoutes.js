@@ -16,7 +16,7 @@ const router = express_1.default.Router();
 router.get('/', async (req, res) => {
     const redisStatus = await (0, imageQueue_1.isRedisActuallyAvailable)();
     const dbStatus = (0, database_1.isDatabaseConnected)();
-    const highLoad = (0, loadBalancer_1.isSystemUnderHighLoad)();
+    const highLoad = await (0, loadBalancer_1.isSystemUnderHighLoad)();
     res.json({
         status: highLoad ? 'degraded' : 'ok',
         timestamp: new Date().toISOString(),
@@ -36,7 +36,7 @@ router.get('/detailed', async (req, res) => {
         // Check Redis and database status
         const redisStatus = await (0, imageQueue_1.isRedisActuallyAvailable)();
         const dbStatus = (0, database_1.isDatabaseConnected)();
-        const highLoad = (0, loadBalancer_1.isSystemUnderHighLoad)();
+        const highLoad = await (0, loadBalancer_1.isSystemUnderHighLoad)();
         // Get system metrics
         const totalMemory = os_1.default.totalmem();
         const freeMemory = os_1.default.freemem();

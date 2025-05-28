@@ -9,7 +9,7 @@ const imageService_1 = require("../services/imageService");
 const imageQueue_1 = require("../queues/imageQueue");
 const asyncHandler_1 = require("../utils/asyncHandler");
 /**
- * Helper function to get job status
+ * Helper function to get job status with queue position
  */
 exports.getJobStatus = (0, asyncHandler_1.asyncHandler)(async (req, res, next) => {
     const { id } = req.params;
@@ -59,6 +59,25 @@ exports.getJobStatus = (0, asyncHandler_1.asyncHandler)(async (req, res, next) =
     const progress = job.progress();
     const result = job.returnvalue;
     const failReason = job.failedReason;
+    // Calculate queue position if job is waiting
+    let queuePosition = null;
+    let estimatedWaitTime = null;
+    if (state === 'waiting') {
+        try {
+            // Get all waiting jobs to calculate position
+            const waitingJobs = await queue.getWaiting();
+            const jobIndex = waitingJobs.findIndex(waitingJob => waitingJob.id === job.id);
+            if (jobIndex !== -1) {
+                queuePosition = jobIndex + 1; // 1-based position
+                // Estimate wait time (assuming 30 seconds per job on average)
+                const avgProcessingTime = 30; // seconds
+                estimatedWaitTime = Math.max(0, jobIndex * avgProcessingTime);
+            }
+        }
+        catch (error) {
+            console.error('Error calculating queue position:', error);
+        }
+    }
     res.status(200).json({
         status: 'success',
         data: {
@@ -66,7 +85,9 @@ exports.getJobStatus = (0, asyncHandler_1.asyncHandler)(async (req, res, next) =
             state,
             progress,
             result: state === 'completed' ? result : null,
-            error: state === 'failed' ? failReason : null
+            error: state === 'failed' ? failReason : null,
+            queuePosition,
+            estimatedWaitTime: estimatedWaitTime ? `${Math.ceil(estimatedWaitTime / 60)} minutes` : null
         }
     });
 });

@@ -14,6 +14,8 @@ const fs_1 = __importDefault(require("fs"));
 const archiver_1 = __importDefault(require("archiver"));
 const uuid_1 = require("uuid");
 const router = (0, express_1.Router)();
+// Create dynamic upload middleware instance
+const dynamicUpload = (0, upload_1.createDynamicUpload)();
 /**
  * @route GET /api/images/status/:id
  * @desc Get status for a job
@@ -23,27 +25,27 @@ router.get('/status/:id', imageController_1.getJobStatus);
  * @route POST /api/images/compress
  * @desc Compress an image
  */
-router.post('/compress', rateLimiter_1.imageProcessingLimiter, upload_1.upload.single('image'), imageController_1.compressImage);
+router.post('/compress', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.compressImage);
 /**
  * @route POST /api/images/resize
  * @desc Resize an image
  */
-router.post('/resize', rateLimiter_1.imageProcessingLimiter, upload_1.upload.single('image'), imageController_1.resizeImage);
+router.post('/resize', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.resizeImage);
 /**
  * @route POST /api/images/convert
  * @desc Convert image format
  */
-router.post('/convert', rateLimiter_1.imageProcessingLimiter, upload_1.upload.single('image'), imageController_1.convertImage);
+router.post('/convert', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.convertImage);
 /**
  * @route POST /api/images/crop
  * @desc Crop an image
  */
-router.post('/crop', rateLimiter_1.imageProcessingLimiter, upload_1.upload.single('image'), imageController_1.cropImage);
+router.post('/crop', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.cropImage);
 /**
  * @route POST /api/images/optimize-blog
  * @desc Optimize an image for blog usage
  */
-router.post('/optimize-blog', rateLimiter_1.imageProcessingLimiter, upload_1.upload.single('image'), imageController_1.optimizeBlogImage);
+router.post('/optimize-blog', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.optimizeBlogImage);
 /**
  * @route GET /api/images/download/:filename
  * @desc Download a processed image with proper headers for forcing download
