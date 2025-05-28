@@ -716,43 +716,43 @@ export default function CompressTool() {
   };
   
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-[2000px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
       <ToolHeader 
         title="Image Compression" 
         description="Compress JPG, PNG, SVG, and GIFs while saving space and maintaining quality."
-        icon={<ImageIcon className="h-6 w-6" />}
+        icon={<ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />}
       />
       
       {/* Server Status Messages */}
       {serverState === 'connecting' && (
-        <div className="mb-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
           <div className="flex items-center gap-2 text-blue-800 dark:text-blue-400">
-            <LoadingSpinner className="h-5 w-5" />
-            <h3 className="font-medium">Connecting to server...</h3>
+            <LoadingSpinner className="h-4 w-4 sm:h-5 sm:w-5" />
+            <h3 className="font-medium text-sm sm:text-base">Connecting to server...</h3>
           </div>
-          <p className="text-sm mt-1 text-blue-700 dark:text-blue-500">
+          <p className="text-xs sm:text-sm mt-1 text-blue-700 dark:text-blue-500">
             Establishing connection to the backend. Image processing will be available shortly.
           </p>
         </div>
       )}
       
       {serverState === 'circuit-open' && (
-        <div className="mb-8 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2 text-purple-800 dark:text-purple-400">
-              <Clock className="h-5 w-5" />
-              <h3 className="font-medium">Connection attempts paused</h3>
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+              <h3 className="font-medium text-sm sm:text-base">Connection attempts paused</h3>
             </div>
             <Button 
               variant="outline" 
               size="sm"
               onClick={retryConnection}
-              className="text-purple-800 dark:text-purple-400 border-purple-300 dark:border-purple-700"
+              className="w-full sm:w-auto text-purple-800 dark:text-purple-400 border-purple-300 dark:border-purple-700"
             >
-              <RefreshCw className="h-4 w-4 mr-2" /> Force Retry
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" /> Force Retry
             </Button>
           </div>
-          <p className="text-sm mt-1 text-purple-700 dark:text-purple-500">
+          <p className="text-xs sm:text-sm mt-1 text-purple-700 dark:text-purple-500">
             Connection attempts temporarily paused to prevent excessive requests. 
             {retryCountdown !== null && retryCountdown > 0 ? (
               <span> Automatically retrying in <strong>{retryCountdown}</strong> seconds.</span>
@@ -764,22 +764,22 @@ export default function CompressTool() {
       )}
       
       {serverState === 'unavailable' && (
-        <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2 text-red-800 dark:text-red-400">
-              <WifiOff className="h-5 w-5" />
-              <h3 className="font-medium">Server unavailable</h3>
+              <WifiOff className="h-4 w-4 sm:h-5 sm:w-5" />
+              <h3 className="font-medium text-sm sm:text-base">Server unavailable</h3>
             </div>
             <Button 
               variant="outline" 
               size="sm"
               onClick={retryConnection}
-              className="text-red-800 dark:text-red-400 border-red-300 dark:border-red-700"
+              className="w-full sm:w-auto text-red-800 dark:text-red-400 border-red-300 dark:border-red-700"
             >
-              <RefreshCw className="h-4 w-4 mr-2" /> Retry Connection
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" /> Retry Connection
             </Button>
           </div>
-          <p className="text-sm mt-1 text-red-700 dark:text-red-500">
+          <p className="text-xs sm:text-sm mt-1 text-red-700 dark:text-red-500">
             The backend server is not responding. Please make sure the server is running at {getApiUrl()}.
             {retryCountdown !== null && retryCountdown > 0 && (
               <span> Next attempt in <strong>{retryCountdown}</strong> seconds.</span>
@@ -789,22 +789,22 @@ export default function CompressTool() {
       )}
       
       {serverState === 'error' && (
-        <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
-              <AlertCircle className="h-5 w-5" />
-              <h3 className="font-medium">Server error</h3>
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              <h3 className="font-medium text-sm sm:text-base">Server error</h3>
             </div>
             <Button 
               variant="outline" 
               size="sm"
               onClick={retryConnection}
-              className="text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700"
+              className="w-full sm:w-auto text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700"
             >
-              <RefreshCw className="h-4 w-4 mr-2" /> Retry Connection
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" /> Retry Connection
             </Button>
           </div>
-          <p className="text-sm mt-1 text-yellow-700 dark:text-yellow-500">
+          <p className="text-xs sm:text-sm mt-1 text-yellow-700 dark:text-yellow-500">
             The server returned an error: {errorDetails || 'Unknown error'}
             {retryCountdown !== null && retryCountdown > 0 && (
               <span> Retrying in <strong>{retryCountdown}</strong> seconds.</span>
@@ -814,34 +814,34 @@ export default function CompressTool() {
       )}
       
       {serverState === 'connected' && !isConnected && (
-        <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
-              <Server className="h-5 w-5" />
-              <h3 className="font-medium">Redis unavailable</h3>
+              <Server className="h-4 w-4 sm:h-5 sm:w-5" />
+              <h3 className="font-medium text-sm sm:text-base">Redis unavailable</h3>
             </div>
             <Button 
               variant="outline" 
               size="sm"
               onClick={retryConnection}
-              className="text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700"
+              className="w-full sm:w-auto text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700"
             >
-              <RefreshCw className="h-4 w-4 mr-2" /> Retry Connection
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" /> Retry Connection
             </Button>
           </div>
-          <p className="text-sm mt-1 text-yellow-700 dark:text-yellow-500">
+          <p className="text-xs sm:text-sm mt-1 text-yellow-700 dark:text-yellow-500">
             Server is running in direct processing mode (Redis unavailable). 
             Image processing will work but may be slower with multiple users.
           </p>
         </div>
       )}
       
-      <div className="grid gap-8 mt-8">
+      <div className="grid gap-6 sm:gap-8 mt-6 sm:mt-8">
         {/* File selection area */}
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
           {/* Left side - Dropzone and file list */}
           <div className="flex-1">
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Rate Limit Indicator */}
               {rateLimitUsage.used > 0 && (
                 <RateLimitIndicator 
@@ -860,41 +860,42 @@ export default function CompressTool() {
               />
               
               {files.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">Selected Files ({files.length})</h3>
+                <div className="border rounded-lg p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <h3 className="font-medium text-sm sm:text-base">Selected Files ({files.length})</h3>
                     <Button 
                       variant="destructive" 
                       size="sm"
                       onClick={handleRemoveAllFiles}
+                      className="w-full sm:w-auto"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" /> Clear All
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" /> Clear All
                     </Button>
                   </div>
                   
-                  <div className="max-h-[250px] overflow-y-auto space-y-2">
+                  <div className="max-h-[200px] sm:max-h-[250px] lg:max-h-[300px] overflow-y-auto space-y-2">
                     {files.map((file, index) => (
                       <div 
                         key={index} 
-                        className={`flex items-center justify-between p-2 rounded ${
+                        className={`flex items-center justify-between p-2 sm:p-3 rounded ${
                           selectedFileIndex === index ? 'bg-accent' : 'hover:bg-accent/50'
                         } cursor-pointer`}
                         onClick={() => setSelectedFileIndex(index)}
                       >
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
+                        <div className="flex items-center min-w-0 flex-1">
+                          <div className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
                             <img 
                               src={previews[index]} 
                               alt={file.name} 
                               className="h-full w-full object-cover"
                             />
                           </div>
-                          <div className="overflow-hidden">
-                            <p className="text-sm font-medium truncate">{file.name}</p>
+                          <div className="overflow-hidden min-w-0 flex-1">
+                            <p className="text-xs sm:text-sm font-medium truncate">{file.name}</p>
                             <p className="text-xs text-muted-foreground">
                               {(file.size / 1024).toFixed(2)} KB
                               {results[index] && results[index] !== null && (
-                                <Badge className="ml-2 bg-green-600" variant="secondary">
+                                <Badge className="ml-1 sm:ml-2 bg-green-600 text-xs" variant="secondary">
                                   Compressed
                                 </Badge>
                               )}
@@ -902,13 +903,13 @@ export default function CompressTool() {
                           </div>
                         </div>
                         <button 
-                          className="p-1 hover:bg-background rounded"
+                          className="p-1 hover:bg-background rounded ml-2 flex-shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFile(index);
                           }}
                         >
-                          <X className="h-4 w-4 text-muted-foreground" />
+                          <X className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                         </button>
                       </div>
                     ))}
@@ -919,41 +920,41 @@ export default function CompressTool() {
           </div>
           
           {/* Right side - Preview and settings */}
-          <div className="flex-1">
-            <div className="border rounded-lg p-4 h-full flex flex-col">
-              <h3 className="font-medium mb-4">Image Preview</h3>
+          <div className="flex-1 lg:max-w-md xl:max-w-lg">
+            <div className="border rounded-lg p-3 sm:p-4 h-full flex flex-col">
+              <h3 className="font-medium mb-3 sm:mb-4 text-sm sm:text-base">Image Preview</h3>
               
               {selectedFileIndex !== null ? (
                 <div className="flex-grow flex flex-col">
-                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-4 overflow-hidden">
+                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-3 sm:mb-4 overflow-hidden min-h-[150px] sm:min-h-[200px] lg:min-h-[250px]">
                     <img 
                       src={previews[selectedFileIndex]} 
                       alt={files[selectedFileIndex].name}
-                      className="max-h-[300px] max-w-full object-contain"
+                      className="max-h-[150px] sm:max-h-[200px] lg:max-h-[250px] xl:max-h-[300px] max-w-full object-contain"
                     />
                   </div>
                   
-                  <div className="text-sm">
-                    <p><span className="font-medium">Name:</span> {files[selectedFileIndex].name}</p>
+                  <div className="text-xs sm:text-sm space-y-1">
+                    <p><span className="font-medium">Name:</span> <span className="break-all">{files[selectedFileIndex].name}</span></p>
                     <p><span className="font-medium">Size:</span> {(files[selectedFileIndex].size / 1024).toFixed(2)} KB</p>
                     <p><span className="font-medium">Type:</span> {files[selectedFileIndex].type}</p>
                     
                     {results[selectedFileIndex] && (
                       <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-green-600">Compressed Stats:</p>
-                        <p>
+                        <p className="font-medium text-green-600 text-xs sm:text-sm">Compressed Stats:</p>
+                        <p className="text-xs sm:text-sm">
                           Size: {(results[selectedFileIndex].compressedSize / 1024).toFixed(2)} KB 
-                          <span className="text-green-600 ml-2">
+                          <span className="text-green-600 ml-1 sm:ml-2">
                             ({results[selectedFileIndex].compressionRatio}% smaller)
                           </span>
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           Quality setting used: {results[selectedFileIndex].qualityUsed}%
                         </p>
                         <div className="mt-2">
                           <a 
                             href={`${getApiUrl().replace('/api', '')}${results[selectedFileIndex].downloadUrl}`}
-                            className="text-xs inline-flex items-center px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                            className="text-xs inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 bg-primary text-primary-foreground rounded hover:bg-primary/90"
                           >
                             <Download className="h-3 w-3 mr-1" /> Download
                           </a>
@@ -966,8 +967,8 @@ export default function CompressTool() {
                      !results[selectedFileIndex] && 
                      fileJobMapping[selectedFileIndex] && (
                       <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-yellow-600">Processing Image...</p>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
+                        <p className="font-medium text-yellow-600 text-xs sm:text-sm">Processing Image...</p>
+                        <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
                           <div
                             className="h-full bg-yellow-500 transition-all duration-300"
                             style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
@@ -994,13 +995,13 @@ export default function CompressTool() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg">
-                  <div>
-                    <ImageIcon className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg min-h-[150px] sm:min-h-[200px] lg:min-h-[250px]">
+                  <div className="px-4">
+                    <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 opacity-30" />
                     {files.length > 0 ? (
-                      <p>Select an image from the list to preview</p>
+                      <p className="text-xs sm:text-sm">Select an image from the list to preview</p>
                     ) : (
-                      <p>Upload images to get started</p>
+                      <p className="text-xs sm:text-sm">Upload images to get started</p>
                     )}
                   </div>
                 </div>
@@ -1010,26 +1011,30 @@ export default function CompressTool() {
         </div>
         
         {/* Compression settings and actions */}
-        <Card className="p-6">
-          <Tabs defaultValue="single" className="space-y-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Compression Settings</h3>
+        <Card className="p-4 sm:p-6">
+          <Tabs defaultValue="single" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-medium">Compression Settings</h3>
               
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 {processingMode === 'queued' && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Server className="h-3 w-3" /> Queue mode
                   </span>
                 )}
-                <TabsList>
-                  <TabsTrigger value="single" disabled={files.length === 0}>Single Image</TabsTrigger>
-                  <TabsTrigger value="batch" disabled={files.length < 2}>Batch Compress</TabsTrigger>
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="single" disabled={files.length === 0} className="flex-1 sm:flex-none text-xs sm:text-sm">
+                    Single Image
+                  </TabsTrigger>
+                  <TabsTrigger value="batch" disabled={files.length < 2} className="flex-1 sm:flex-none text-xs sm:text-sm">
+                    Batch Compress
+                  </TabsTrigger>
                 </TabsList>
               </div>
             </div>
             
             <div>
-              <h4 className="text-sm font-medium mb-2">Quality: {quality}%</h4>
+              <h4 className="text-xs sm:text-sm font-medium mb-2">Quality: {quality}%</h4>
               <Slider
                 value={[quality]}
                 onValueChange={(values: number[]) => setQuality(values[0])}
@@ -1044,7 +1049,7 @@ export default function CompressTool() {
               </div>
             </div>
             
-            <TabsContent value="single" className="space-y-4 mt-4">
+            <TabsContent value="single" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
               {/* Queue Status Indicator for Single Image */}
               {selectedFileIndex !== null && 
                !results[selectedFileIndex] && 
@@ -1060,11 +1065,11 @@ export default function CompressTool() {
               {/* Visual Progress Bar for Single Image */}
               {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted-foreground">Compressing image...</span>
                     <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
                   </div>
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary transition-all duration-300 ease-out"
                       style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
@@ -1074,39 +1079,39 @@ export default function CompressTool() {
               )}
               
               <Button 
-                className="w-full" 
+                className="w-full h-10 sm:h-12" 
                 size="lg" 
                 onClick={handleCompressSingle}
                 disabled={isLoading || selectedFileIndex === null || (selectedFileIndex !== null && results[selectedFileIndex])}
                 variant="default"
               >
                 {isLoading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
                 ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" /> Compress Selected Image
-                  </>
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <Download className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Compress Selected Image
+                  </span>
                 )}
               </Button>
               
               {/* Show message if already processed */}
               {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
-                <div className="text-center text-sm text-muted-foreground">
+                <div className="text-center text-xs sm:text-sm text-muted-foreground">
                   <p className="flex items-center justify-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                     Image already compressed and ready for download.
                   </p>
                 </div>
               )}
             </TabsContent>
             
-            <TabsContent value="batch" className="space-y-4 mt-4">
+            <TabsContent value="batch" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
               {/* Queue Status Indicator for Batch Processing */}
               {Object.keys(fileJobMapping).length > 0 && 
                Object.keys(queueStatus).length > 0 && (
@@ -1117,7 +1122,7 @@ export default function CompressTool() {
                     
                     return (
                       <div key={fileIndex} className="space-y-1">
-                        <p className="text-xs text-muted-foreground font-medium">
+                        <p className="text-xs text-muted-foreground font-medium truncate">
                           {files[parseInt(fileIndex)]?.name || `File ${parseInt(fileIndex) + 1}`}
                         </p>
                         <QueueStatusIndicator
@@ -1134,7 +1139,7 @@ export default function CompressTool() {
               {/* Visual Progress Bar for Batch Processing */}
               {processingFiles.size > 0 && (
                 <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted-foreground">
                       Compressing {processingFiles.size} image{processingFiles.size > 1 ? 's' : ''}...
                     </span>
@@ -1149,12 +1154,12 @@ export default function CompressTool() {
                     {Array.from(processingFiles).map(fileIndex => (
                       <div key={fileIndex} className="space-y-1">
                         <div className="flex justify-between text-xs">
-                          <span className="truncate text-muted-foreground">
+                          <span className="truncate text-muted-foreground pr-2">
                             {files[fileIndex]?.name || `File ${fileIndex + 1}`}
                           </span>
-                          <span className="font-medium">{visualProgress[fileIndex] || 0}%</span>
+                          <span className="font-medium flex-shrink-0">{visualProgress[fileIndex] || 0}%</span>
                         </div>
-                        <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-primary transition-all duration-300 ease-out"
                             style={{ width: `${visualProgress[fileIndex] || 0}%` }}
@@ -1167,31 +1172,31 @@ export default function CompressTool() {
               )}
               
               <Button 
-                className="w-full" 
+                className="w-full h-10 sm:h-12" 
                 size="lg" 
                 onClick={handleCompressAll}
                 disabled={isLoading || files.length === 0 || files.every((_, index) => results[index])}
               >
                 {isLoading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
                 ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" /> Compress All Images
-                  </>
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <Download className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Compress All Images
+                  </span>
                 )}
               </Button>
               
               {/* Show message if all files are already processed */}
               {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
-                <div className="text-center text-sm text-muted-foreground">
+                <div className="text-center text-xs sm:text-sm text-muted-foreground">
                   <p className="flex items-center justify-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                     All images already compressed and ready for download.
                   </p>
                 </div>
@@ -1199,23 +1204,23 @@ export default function CompressTool() {
               
               {results.filter(r => r).length > 1 && (
                 <Button 
-                  className="w-full" 
+                  className="w-full h-10 sm:h-12" 
                   variant="outline"
                   onClick={handleDownloadArchive}
                   disabled={isArchiveLoading}
                 >
                   {isArchiveLoading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <span className="flex items-center text-xs sm:text-sm">
+                      <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       Creating archive...
                     </span>
                   ) : (
-                    <>
-                      <Package className="mr-2 h-4 w-4" /> Download All as ZIP
-                    </>
+                    <span className="flex items-center text-xs sm:text-sm">
+                      <Package className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Download All as ZIP
+                    </span>
                   )}
                 </Button>
               )}
