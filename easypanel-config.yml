@@ -1,0 +1,72 @@
+# EasyPanel Configuration for High Concurrency
+# Copy these environment variables to your EasyPanel project settings
+
+# Backend Environment Variables
+BACKEND_ENV:
+  NODE_ENV: production
+  PORT: 5000
+  
+  # High Concurrency Settings
+  WORKER_CONCURRENCY: 25          # Increased for EasyPanel's container resources
+  MAX_LOAD_THRESHOLD: 0.9         # Higher threshold before degradation
+  MAX_MEMORY_USAGE_PERCENT: 90    # Higher memory usage allowed
+  DEGRADATION_COOLDOWN_MS: 15000  # Faster recovery from high load
+  
+  # File Upload Limits (increased)
+  MAX_FILE_SIZE: 52428800         # 50MB
+  MAX_FILES: 10
+  
+  # Rate Limiting (production-ready)
+  RATE_LIMIT_WINDOW_MS: 300000    # 5 minutes
+  RATE_LIMIT_MAX_REQUESTS: 50     # Per IP per window
+  BATCH_LIMIT_MAX: 15
+  
+  # Performance Optimization
+  NODE_OPTIONS: --max-old-space-size=4096
+  
+  # Database & Redis (configure with your EasyPanel service URLs)
+  MONGODB_URI: mongodb://your-mongo-service:27017/web-tools-prod
+  REDIS_HOST: your-redis-service
+  REDIS_PORT: 6379
+  
+  # Queue & Cleanup Settings
+  QUEUE_CLEANUP_INTERVAL: 3600000  # 1 hour
+  JOB_TIMEOUT: 180000             # 3 minutes
+  JOB_ATTEMPTS: 3
+
+# Frontend Environment Variables  
+FRONTEND_ENV:
+  NODE_ENV: production
+  NEXT_PUBLIC_API_URL: https://your-backend-domain.easypanel.host
+  NODE_OPTIONS: --max-old-space-size=2048
+
+# EasyPanel Scaling Configuration
+SCALING:
+  # Backend instances (you can scale these up in EasyPanel)
+  backend_min_replicas: 2
+  backend_max_replicas: 5
+  backend_cpu_limit: "1000m"      # 1 CPU core per instance
+  backend_memory_limit: "2Gi"     # 2GB RAM per instance
+  
+  # Auto-scaling triggers
+  backend_cpu_threshold: 70       # Scale up when CPU > 70%
+  backend_memory_threshold: 80    # Scale up when memory > 80%
+  
+  # Frontend instances
+  frontend_min_replicas: 1
+  frontend_max_replicas: 3
+  frontend_cpu_limit: "500m"
+  frontend_memory_limit: "1Gi"
+
+# Required Services in EasyPanel
+REQUIRED_SERVICES:
+  - name: Redis
+    type: redis
+    version: "7"
+    memory_limit: "512Mi"
+    
+  - name: MongoDB  
+    type: mongodb
+    version: "7"
+    memory_limit: "1Gi"
+    storage: "10Gi" 

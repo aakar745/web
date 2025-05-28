@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider'
 import { 
   ImageIcon, Download, X, Trash2, 
   Maximize2, Lock, Unlock, 
-  ArrowDownSquare, ArrowRightSquare, Package
+  ArrowDownSquare, ArrowRightSquare, Package, Plus, RotateCcw, RefreshCw, CheckCircle, Server
 } from 'lucide-react'
 import ImageDropzone from '@/components/tools/ImageDropzone'
 import { useToast } from '@/components/ui/use-toast'
@@ -28,6 +28,9 @@ import { processHeicFiles } from '@/lib/heicConverter'
 import { useRateLimit } from '@/lib/hooks/useRateLimit'
 import { getApiUrl } from '@/lib/apiClient'
 import { pollJobStatus } from '@/lib/api/statusApi'
+import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
+import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
+import { apiRequest } from '@/lib/apiClient'
 
 // Define response types for API calls
 interface ResizeResponse {
@@ -116,7 +119,22 @@ export default function ResizeTool() {
   const [results, setResults] = useState<any[]>([])
   const [jobIds, setJobIds] = useState<string[]>([])
   const [jobProgress, setJobProgress] = useState<Record<string, number>>({})
+  const [queueStatus, setQueueStatus] = useState<Record<string, {
+    position?: number | null;
+    waitTime?: string | null;
+    isProcessing?: boolean;
+  }>>({})
+  const [fileJobMapping, setFileJobMapping] = useState<Record<number, string>>({}) // Map file index to job ID
+  
+  // Add visual progress states
+  const [visualProgress, setVisualProgress] = useState<Record<number, number>>({}) // file index -> progress percentage
+  const [processingFiles, setProcessingFiles] = useState<Set<number>>(new Set()) // track which files are being processed
+  
+  // Add dropzone control state
+  const [shouldClearDropzone, setShouldClearDropzone] = useState(false)
+  
   const { toast } = useToast()
+  const { processingMode } = useProcessingMode()
   
   // Add rate limit tracking
   const { rateLimitInfo, makeRequest } = useRateLimit();
@@ -132,6 +150,58 @@ export default function ResizeTool() {
     resetsIn: null,
     isLimitReached: false
   });
+  
+  // Visual progress simulation function
+  const simulateProgress = (fileIndex: number, duration: number = 2000) => {
+    return new Promise<void>((resolve) => {
+      const startTime = Date.now();
+      const interval = 50; // Update every 50ms for smooth animation
+      
+      const updateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(100, (elapsed / duration) * 100);
+        
+        setVisualProgress(prev => ({
+          ...prev,
+          [fileIndex]: Math.round(progress)
+        }));
+        
+        if (progress >= 100) {
+          resolve();
+        } else {
+          setTimeout(updateProgress, interval);
+        }
+      };
+      
+      updateProgress();
+    });
+  };
+  
+  // Function to show results after progress completes
+  const showResultsAfterProgress = async (fileIndex: number, result: any) => {
+    // Wait for visual progress to complete
+    await simulateProgress(fileIndex);
+    
+    // Now show the actual result
+    setResults(prevResults => {
+      const newResults = [...prevResults];
+      newResults[fileIndex] = result;
+      return newResults;
+    });
+    
+    // Clean up progress state
+    setVisualProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[fileIndex];
+      return newProgress;
+    });
+    
+    setProcessingFiles(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(fileIndex);
+      return newSet;
+    });
+  };
   
   // Generate preview URLs when files change
   useEffect(() => {
@@ -186,44 +256,20 @@ export default function ResizeTool() {
     try {
       const processedFiles = await processHeicFiles(droppedFiles);
       
-      // Check if adding would exceed the maximum of 10 files
-      const maxFiles = 10;
-      if (files.length + processedFiles.length > maxFiles) {
-        // Only take what fits
-        const remainingSlots = maxFiles - files.length;
-        const filesToAdd = processedFiles.slice(0, remainingSlots);
-        
-        // Show a notification about files that weren't added
-        if (remainingSlots < processedFiles.length) {
-          toast({
-            title: "File limit exceeded",
-            description: `Only ${remainingSlots} file(s) were added. The maximum is ${maxFiles} files total.`,
-            variant: "destructive"
-          });
+      // ImageDropzone now handles file limits dynamically, so we just add all processed files
+      setFiles(prevFiles => {
+        const updatedFiles = [...prevFiles, ...processedFiles];
+        // Automatically select the first file if none is currently selected
+        if (selectedFileIndex === null && updatedFiles.length > 0) {
+          setTimeout(() => setSelectedFileIndex(0), 0);
         }
-        
-        setFiles(prevFiles => {
-          const updatedFiles = [...prevFiles, ...filesToAdd];
-          // Automatically select the first file if none is currently selected
-          if (selectedFileIndex === null && updatedFiles.length > 0) {
-            setTimeout(() => setSelectedFileIndex(0), 0);
-          }
-          return updatedFiles;
-        });
-      } else {
-        // All files fit within the limit
-        setFiles(prevFiles => {
-          const updatedFiles = [...prevFiles, ...processedFiles];
-          // Automatically select the first file if none is currently selected
-          if (selectedFileIndex === null && updatedFiles.length > 0) {
-            setTimeout(() => setSelectedFileIndex(0), 0);
-          }
-          return updatedFiles;
-        });
-      }
+        return updatedFiles;
+      });
       
-      // Reset results when new files are uploaded
+      // Reset results and progress states when new files are uploaded
       setResults([]);
+      setVisualProgress({});
+      setProcessingFiles(new Set());
     } catch (error) {
       toast({
         title: "Error processing HEIC images",
@@ -238,6 +284,36 @@ export default function ResizeTool() {
     // Also remove from results if it was already processed
     setResults(prevResults => prevResults.filter((_, i) => i !== index))
     
+    // Clean up progress states for this file
+    setVisualProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[index];
+      // Also need to adjust indices for remaining files
+      const adjustedProgress: Record<number, number> = {};
+      Object.entries(newProgress).forEach(([key, value]) => {
+        const oldIndex = parseInt(key);
+        if (oldIndex > index) {
+          adjustedProgress[oldIndex - 1] = value;
+        } else if (oldIndex < index) {
+          adjustedProgress[oldIndex] = value;
+        }
+      });
+      return adjustedProgress;
+    });
+    
+    setProcessingFiles(prev => {
+      const newSet = new Set<number>();
+      prev.forEach(fileIndex => {
+        if (fileIndex < index) {
+          newSet.add(fileIndex);
+        } else if (fileIndex > index) {
+          newSet.add(fileIndex - 1);
+        }
+        // Don't add the removed index
+      });
+      return newSet;
+    });
+    
     if (selectedFileIndex === index) {
       setSelectedFileIndex(null)
     } else if (selectedFileIndex !== null && selectedFileIndex > index) {
@@ -250,6 +326,17 @@ export default function ResizeTool() {
     setPreviews([])
     setResults([])
     setSelectedFileIndex(null)
+    // Clean up all progress states
+    setVisualProgress({});
+    setProcessingFiles(new Set());
+    setFileJobMapping({});
+    // Trigger dropzone clearing
+    setShouldClearDropzone(true);
+  }
+  
+  // Callback for when dropzone completes clearing
+  const handleDropzoneClearComplete = () => {
+    setShouldClearDropzone(false);
   }
   
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -301,6 +388,16 @@ export default function ResizeTool() {
       return
     }
     
+    // Check if file is already resized
+    if (results[selectedFileIndex]) {
+      toast({
+        title: "Image already resized",
+        description: "This image has already been resized. You can download it from the preview panel.",
+        variant: "default"
+      })
+      return
+    }
+    
     const file = files[selectedFileIndex]
     await resizeFiles([file], [selectedFileIndex])
   }
@@ -315,17 +412,46 @@ export default function ResizeTool() {
       return
     }
     
-    await resizeFiles(files, files.map((_, i) => i))
+    // Filter out already resized files
+    const unresizedFiles: File[] = []
+    const unresizedIndices: number[] = []
+    
+    files.forEach((file, index) => {
+      if (!results[index]) {
+        unresizedFiles.push(file)
+        unresizedIndices.push(index)
+      }
+    })
+    
+    if (unresizedFiles.length === 0) {
+      toast({
+        title: "All images already resized",
+        description: "All images have already been resized. You can download them using the ZIP download button.",
+        variant: "default"
+      })
+      return
+    }
+    
+    await resizeFiles(unresizedFiles, unresizedIndices)
   }
   
   const resizeFiles = async (filesToResize: File[], fileIndices: number[]) => {
     setIsLoading(true)
     const resizedResults: any[] = [...results]
     
+    // Mark files as being processed and start visual progress
+    setProcessingFiles(new Set(fileIndices))
+    
     try {
       for (let i = 0; i < filesToResize.length; i++) {
         const file = filesToResize[i]
         const index = fileIndices[i]
+        
+        // Start visual progress for this file
+        setVisualProgress(prev => ({
+          ...prev,
+          [index]: 0
+        }));
         
         const formData = new FormData()
         formData.append('image', file)
@@ -343,34 +469,84 @@ export default function ResizeTool() {
           
           // Check if this is a direct response or a job that needs polling
           if (result.status === 'success' && 'width' in result.data) {
-            // Direct processing - update results immediately
-            resizedResults[index] = {
+            // Direct processing - use visual progress
+            const resultData = result.data as {
+              width: number;
+              height: number;
+              mime: string;
+              filename: string;
+              originalFilename: string;
+              downloadUrl: string;
+            };
+            
+            const resultObj = {
               filename: file.name,
               originalWidth: originalDimensions.width,
               originalHeight: originalDimensions.height,
-              newWidth: result.data.width,
-              newHeight: result.data.height,
-              mime: result.data.mime,
-              resultFilename: result.data.filename,
-              downloadUrl: result.data.downloadUrl
-            }
+              newWidth: resultData.width,
+              newHeight: resultData.height,
+              mime: resultData.mime,
+              resultFilename: resultData.filename,
+              downloadUrl: resultData.downloadUrl
+            };
+            
+            // Start visual progress simulation for direct processing
+            showResultsAfterProgress(index, resultObj).then(() => {
+              // Show success notification after progress completes
+              toast({
+                title: "✅ Resize completed!",
+                description: `${file.name} resized to ${resultData.width}×${resultData.height} pixels`,
+              });
+            });
           } else if (result.status === 'processing' && 'jobId' in result.data) {
             // Background processing - need to poll for status
             const jobId = result.data.jobId;
             setJobIds(prev => [...prev, jobId]);
             
+            // Map this file index to the job ID
+            setFileJobMapping(prev => ({
+              ...prev,
+              [index]: jobId
+            }));
+            
             // Start polling this job
             pollJobStatus(jobId, 'resize', {
               intervalMs: 1000,
-              onProgress: (progress) => {
+              onProgress: (progress, queuePosition, estimatedWaitTime) => {
+                // Update visual progress for queued jobs (use actual progress)
+                setVisualProgress(prev => ({
+                  ...prev,
+                  [index]: progress
+                }));
+                
                 setJobProgress(prev => ({
                   ...prev,
                   [jobId]: progress
-                }))
+                }));
+                
+                // Update queue status
+                setQueueStatus(prev => ({
+                  ...prev,
+                  [jobId]: {
+                    position: queuePosition,
+                    waitTime: estimatedWaitTime,
+                    isProcessing: progress > 0
+                  }
+                }));
               },
-              onComplete: (jobResult) => {
-                // Update results when job completes
-                resizedResults[index] = {
+              onQueueStatus: (position, waitTime) => {
+                setQueueStatus(prev => ({
+                  ...prev,
+                  [jobId]: {
+                    position,
+                    waitTime,
+                    isProcessing: false
+                  }
+                }));
+              },
+              onComplete: async (jobResult) => {
+                // Prepare result object
+                const resultObj = {
                   filename: file.name,
                   originalWidth: originalDimensions.width,
                   originalHeight: originalDimensions.height,
@@ -379,14 +555,68 @@ export default function ResizeTool() {
                   mime: jobResult.mime,
                   resultFilename: jobResult.filename,
                   downloadUrl: jobResult.downloadUrl
-                }
-                setResults([...resizedResults])
+                };
+                
+                // Show progress completion and then result
+                setVisualProgress(prev => ({
+                  ...prev,
+                  [index]: 100
+                }));
+                
+                // Wait a moment for the 100% to be visible, then show result
+                setTimeout(() => {
+                  setResults(prevResults => {
+                    const newResults = [...prevResults];
+                    newResults[index] = resultObj;
+                    return newResults;
+                  });
+                  
+                  // Clean up progress state
+                  setVisualProgress(prev => {
+                    const newProgress = { ...prev };
+                    delete newProgress[index];
+                    return newProgress;
+                  });
+                  
+                  setProcessingFiles(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(index);
+                    return newSet;
+                  });
+                  
+                  // Show success notification
+                  toast({
+                    title: "✅ Resize completed!",
+                    description: `${file.name} resized to ${jobResult.width}×${jobResult.height} pixels`,
+                  });
+                }, 500);
                 
                 // Remove job from active jobs
                 setJobIds(prev => prev.filter(id => id !== jobId))
+                
+                // Clean up file job mapping
+                setFileJobMapping(prev => {
+                  const newMapping = { ...prev };
+                  delete newMapping[index];
+                  return newMapping;
+                });
               },
               onError: (error) => {
                 console.error(`Job ${jobId} failed:`, error)
+                
+                // Clean up progress state on error
+                setVisualProgress(prev => {
+                  const newProgress = { ...prev };
+                  delete newProgress[index];
+                  return newProgress;
+                });
+                
+                setProcessingFiles(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(index);
+                  return newSet;
+                });
+                
                 toast({
                   title: "Resize failed",
                   description: error,
@@ -402,6 +632,19 @@ export default function ResizeTool() {
           }
         } catch (error: any) {
           console.error(`Failed to resize file ${i+1}/${filesToResize.length}:`, error);
+          
+          // Clean up progress state on error
+          setVisualProgress(prev => {
+            const newProgress = { ...prev };
+            delete newProgress[index];
+            return newProgress;
+          });
+          
+          setProcessingFiles(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(index);
+            return newSet;
+          });
           
           // Special handling for rate limit errors
           if (error.status === 429) {
@@ -441,22 +684,19 @@ export default function ResizeTool() {
         }
       }
       
-      setResults(resizedResults)
+      // Update results for direct processing (this is handled by showResultsAfterProgress now)
+      // setResults(resizedResults)
       
       // Only show success toast if we're not waiting for background jobs
-      if (jobIds.length === 0) {
-        toast({
-          title: "Resize successful",
-          description: `Resized ${filesToResize.length} image(s)`,
-        })
-      } else {
-        toast({
-          title: "Resize in progress",
-          description: `Processing ${jobIds.length} image(s) in the background...`,
-        })
-      }
+      // (Individual success toasts are now shown after progress completes)
+      
     } catch (error) {
       console.error('Resize error:', error)
+      
+      // Clean up all progress states on major error
+      setVisualProgress({});
+      setProcessingFiles(new Set());
+      
       toast({
         title: "Resize failed",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -529,7 +769,7 @@ export default function ResizeTool() {
   const makeApiRequestWithRateLimitTracking = async <T,>(endpoint: string, options: any): Promise<T> => {
     try {
       // Make the actual API request
-      const result = await makeRequest<T>(endpoint, options);
+      const result = await apiRequest<T>(endpoint, options);
       
       // No direct access to headers from apiRequest
       // We'll update rate limit info on errors instead
@@ -576,7 +816,12 @@ export default function ResizeTool() {
           {/* Left side - Dropzone and file list */}
           <div className="flex-1">
             <div className="space-y-4">
-              <ImageDropzone onImageDrop={handleImageDrop} existingFiles={files.length} />
+              <ImageDropzone 
+                onImageDrop={handleImageDrop} 
+                existingFiles={files.length}
+                shouldClear={shouldClearDropzone}
+                onClearComplete={handleDropzoneClearComplete}
+              />
               
               {/* Rate Limit Indicator */}
               <RateLimitIndicator 
@@ -630,9 +875,9 @@ export default function ResizeTool() {
                                   Resized
                                 </Badge>
                               ) : (
-                                jobIds.includes(index.toString()) && (
+                                fileJobMapping[index] && (
                                   <Badge className="ml-2 bg-yellow-600" variant="secondary">
-                                    Processing {jobProgress[index.toString()] ? `${Math.round(jobProgress[index.toString()])}%` : ''}
+                                    Processing {jobProgress[fileJobMapping[index]] ? `${Math.round(jobProgress[fileJobMapping[index]])}%` : ''}
                                   </Badge>
                                 )
                               )}
@@ -693,20 +938,31 @@ export default function ResizeTool() {
                     {/* Show progress for background jobs */}
                     {selectedFileIndex !== null && 
                      !results[selectedFileIndex] && 
-                     jobIds.includes(selectedFileIndex.toString()) && (
+                     fileJobMapping[selectedFileIndex] && (
                       <div className="mt-2 pt-2 border-t">
                         <p className="font-medium text-yellow-600">Processing Image...</p>
                         <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
                           <div
                             className="h-full bg-yellow-500 transition-all duration-300"
-                            style={{ width: `${jobProgress[selectedFileIndex.toString()] || 0}%` }}
+                            style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
                           />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {jobProgress[selectedFileIndex.toString()] 
-                            ? `${Math.round(jobProgress[selectedFileIndex.toString()])}% complete` 
-                            : 'Starting process...'}
+                         {jobProgress[fileJobMapping[selectedFileIndex]] 
+                           ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete` 
+                           : 'Starting process...'}
                         </p>
+                        
+                        {/* Show queue status if available */}
+                        {fileJobMapping[selectedFileIndex] && queueStatus[fileJobMapping[selectedFileIndex]] && (
+                          <div className="mt-2">
+                            <QueueStatusIndicator
+                              queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
+                              estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
+                              isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -732,10 +988,18 @@ export default function ResizeTool() {
           <Tabs defaultValue="single" className="space-y-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Resize Settings</h3>
-              <TabsList>
-                <TabsTrigger value="single" disabled={files.length === 0}>Single Image</TabsTrigger>
-                <TabsTrigger value="batch" disabled={files.length < 2}>Batch Resize</TabsTrigger>
-              </TabsList>
+              
+              <div className="flex items-center gap-3">
+                {processingMode === 'queued' && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Server className="h-3 w-3" /> Queue mode
+                  </span>
+                )}
+                <TabsList>
+                  <TabsTrigger value="single" disabled={files.length === 0}>Single Image</TabsTrigger>
+                  <TabsTrigger value="batch" disabled={files.length < 2}>Batch Resize</TabsTrigger>
+                </TabsList>
+              </div>
             </div>
             
             <div className="grid gap-6">
@@ -882,17 +1146,34 @@ export default function ResizeTool() {
             </div>
             
             <TabsContent value="single" className="space-y-4 mt-4">
+              {/* Visual Progress Bar for Single Image */}
+              {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Resizing image...</span>
+                    <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300 ease-out"
+                      style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              
               <Button 
                 className="w-full" 
                 size="lg" 
                 onClick={handleResizeSingle}
-                disabled={isLoading || selectedFileIndex === null || !width || !height}
+                disabled={isLoading || selectedFileIndex === null || !width || !height || (selectedFileIndex !== null && results[selectedFileIndex])}
+                variant="default"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
@@ -902,20 +1183,65 @@ export default function ResizeTool() {
                   </>
                 )}
               </Button>
+              
+              {/* Show message if already processed */}
+              {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Image already resized and ready for download.
+                  </p>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="batch" className="space-y-4 mt-4">
+              {/* Visual Progress Bar for Batch Processing */}
+              {processingFiles.size > 0 && (
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Resizing {processingFiles.size} image{processingFiles.size > 1 ? 's' : ''}...
+                    </span>
+                    <span className="font-medium">
+                      {Object.keys(visualProgress).length > 0 
+                        ? `${Math.round(Object.values(visualProgress).reduce((a, b) => a + b, 0) / Object.values(visualProgress).length)}%`
+                        : '0%'
+                      }
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {Array.from(processingFiles).map(fileIndex => (
+                      <div key={fileIndex} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="truncate text-muted-foreground">
+                            {files[fileIndex]?.name || `File ${fileIndex + 1}`}
+                          </span>
+                          <span className="font-medium">{visualProgress[fileIndex] || 0}%</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary transition-all duration-300 ease-out"
+                            style={{ width: `${visualProgress[fileIndex] || 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Button 
                 className="w-full" 
                 size="lg" 
                 onClick={handleResizeAll}
-                disabled={isLoading || files.length === 0 || !width || !height}
+                disabled={isLoading || files.length === 0 || !width || !height || files.every((_, index) => results[index])}
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
@@ -925,6 +1251,16 @@ export default function ResizeTool() {
                   </>
                 )}
               </Button>
+              
+              {/* Show message if all files are already processed */}
+              {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    All images already resized and ready for download.
+                  </p>
+                </div>
+              )}
               
               {results.filter(r => r).length > 1 && (
                 <Button 
@@ -937,7 +1273,7 @@ export default function ResizeTool() {
                     <span className="flex items-center">
                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       Creating archive...
                     </span>

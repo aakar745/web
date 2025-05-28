@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ToolHeader } from '@/components/tools/ToolHeader'
 import { useSeo } from '@/hooks/useSeo'
 import { Button } from '@/components/ui/button'
-import { Crop, Download, X, Trash2, MoveHorizontal, MoveVertical, ArrowDownSquare } from 'lucide-react'
+import { Crop, Download, X, Trash2, MoveHorizontal, MoveVertical, ArrowDownSquare, RefreshCw, CheckCircle, Server } from 'lucide-react'
 import ImageDropzone from '@/components/tools/ImageDropzone'
 import { useToast } from '@/components/ui/use-toast'
 import { Card } from '@/components/ui/card'
@@ -17,6 +17,8 @@ import { processHeicFiles } from '@/lib/heicConverter'
 import { useRateLimit } from '@/lib/hooks/useRateLimit'
 import { getApiUrl } from '@/lib/apiClient'
 import { pollJobStatus } from '@/lib/api/statusApi'
+import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
+import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
 
 // Define response types for API calls
 interface CropResponse {
@@ -100,7 +102,22 @@ export default function CropTool() {
   const [results, setResults] = useState<any[]>([])
   const [jobIds, setJobIds] = useState<string[]>([])
   const [jobProgress, setJobProgress] = useState<Record<string, number>>({})
+  const [queueStatus, setQueueStatus] = useState<Record<string, {
+    position?: number | null;
+    waitTime?: string | null;
+    isProcessing?: boolean;
+  }>>({})
+  const [fileJobMapping, setFileJobMapping] = useState<Record<number, string>>({}) // Map file index to job ID
+  
+  // Add visual progress states
+  const [visualProgress, setVisualProgress] = useState<Record<number, number>>({}) // file index -> progress percentage
+  const [processingFiles, setProcessingFiles] = useState<Set<number>>(new Set()) // track which files are being processed
+  
+  // Add dropzone control state
+  const [shouldClearDropzone, setShouldClearDropzone] = useState(false)
+  
   const { toast } = useToast()
+  const { processingMode } = useProcessingMode()
   
   // Add rate limit tracking
   const { makeRequest } = useRateLimit();
@@ -200,44 +217,20 @@ export default function CropTool() {
     try {
       const processedFiles = await processHeicFiles(droppedFiles);
       
-      // Check if adding would exceed the maximum of 10 files
-      const maxFiles = 10;
-      if (files.length + processedFiles.length > maxFiles) {
-        // Only take what fits
-        const remainingSlots = maxFiles - files.length;
-        const filesToAdd = processedFiles.slice(0, remainingSlots);
-        
-        // Show a notification about files that weren't added
-        if (remainingSlots < processedFiles.length) {
-          toast({
-            title: "File limit exceeded",
-            description: `Only ${remainingSlots} file(s) were added. The maximum is ${maxFiles} files total.`,
-            variant: "destructive"
-          });
+      // ImageDropzone now handles file limits dynamically, so we just add all processed files
+      setFiles(prevFiles => {
+        const updatedFiles = [...prevFiles, ...processedFiles];
+        // Automatically select the first file if none is currently selected
+        if (selectedFileIndex === null && updatedFiles.length > 0) {
+          setTimeout(() => setSelectedFileIndex(0), 0);
         }
-        
-        setFiles(prevFiles => {
-          const updatedFiles = [...prevFiles, ...filesToAdd];
-          // Automatically select the first file if none is currently selected
-          if (selectedFileIndex === null && updatedFiles.length > 0) {
-            setTimeout(() => setSelectedFileIndex(0), 0);
-          }
-          return updatedFiles;
-        });
-      } else {
-        // All files fit within the limit
-        setFiles(prevFiles => {
-          const updatedFiles = [...prevFiles, ...processedFiles];
-          // Automatically select the first file if none is currently selected
-          if (selectedFileIndex === null && updatedFiles.length > 0) {
-            setTimeout(() => setSelectedFileIndex(0), 0);
-          }
-          return updatedFiles;
-        });
-      }
+        return updatedFiles;
+      });
       
-      // Reset results when new files are uploaded
+      // Reset results and progress states when new files are uploaded
       setResults([]);
+      setVisualProgress({});
+      setProcessingFiles(new Set());
     } catch (error) {
       toast({
         title: "Error processing HEIC images",
@@ -252,6 +245,36 @@ export default function CropTool() {
     // Also remove from results if it was already processed
     setResults(prevResults => prevResults.filter((_, i) => i !== index))
     
+    // Clean up progress states for this file
+    setVisualProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[index];
+      // Also need to adjust indices for remaining files
+      const adjustedProgress: Record<number, number> = {};
+      Object.entries(newProgress).forEach(([key, value]) => {
+        const oldIndex = parseInt(key);
+        if (oldIndex > index) {
+          adjustedProgress[oldIndex - 1] = value;
+        } else if (oldIndex < index) {
+          adjustedProgress[oldIndex] = value;
+        }
+      });
+      return adjustedProgress;
+    });
+    
+    setProcessingFiles(prev => {
+      const newSet = new Set<number>();
+      prev.forEach(fileIndex => {
+        if (fileIndex < index) {
+          newSet.add(fileIndex);
+        } else if (fileIndex > index) {
+          newSet.add(fileIndex - 1);
+        }
+        // Don't add the removed index
+      });
+      return newSet;
+    });
+    
     if (selectedFileIndex === index) {
       setSelectedFileIndex(null)
     } else if (selectedFileIndex !== null && selectedFileIndex > index) {
@@ -264,6 +287,17 @@ export default function CropTool() {
     setPreviews([])
     setResults([])
     setSelectedFileIndex(null)
+    // Clean up all progress states
+    setVisualProgress({});
+    setProcessingFiles(new Set());
+    setFileJobMapping({});
+    // Trigger dropzone clearing
+    setShouldClearDropzone(true);
+  }
+  
+  // Callback for when dropzone completes clearing
+  const handleDropzoneClearComplete = () => {
+    setShouldClearDropzone(false);
   }
   
   // Add this helper function for more reliable coordinate conversion
@@ -328,19 +362,53 @@ export default function CropTool() {
         const jobId = result.data.jobId;
         setJobIds(prev => [...prev, jobId]);
         
+        // Map this file index to the job ID
+        setFileJobMapping(prev => ({
+          ...prev,
+          [selectedFileIndex]: jobId
+        }));
+        
         // Start polling this job and return a promise that resolves when complete
         return new Promise((resolve, reject) => {
           pollJobStatus(jobId, 'crop', {
             intervalMs: 1000,
-            onProgress: (progress) => {
+            onProgress: (progress, queuePosition, estimatedWaitTime) => {
               setJobProgress(prev => ({
                 ...prev,
                 [jobId]: progress
+              }));
+              
+              // Update queue status
+              setQueueStatus(prev => ({
+                ...prev,
+                [jobId]: {
+                  position: queuePosition,
+                  waitTime: estimatedWaitTime,
+                  isProcessing: progress > 0
+                }
+              }));
+            },
+            onQueueStatus: (position, waitTime) => {
+              setQueueStatus(prev => ({
+                ...prev,
+                [jobId]: {
+                  position,
+                  waitTime,
+                  isProcessing: false
+                }
               }));
             },
             onComplete: (jobResult) => {
               // Remove job from active jobs
               setJobIds(prev => prev.filter(id => id !== jobId));
+              
+              // Clean up file job mapping
+              setFileJobMapping(prev => {
+                const newMapping = { ...prev };
+                delete newMapping[selectedFileIndex];
+                return newMapping;
+              });
+              
               resolve({
                 status: 'success',
                 data: jobResult
@@ -349,6 +417,14 @@ export default function CropTool() {
             onError: (error) => {
               console.error(`Job ${jobId} failed:`, error);
               setJobIds(prev => prev.filter(id => id !== jobId));
+              
+              // Clean up file job mapping
+              setFileJobMapping(prev => {
+                const newMapping = { ...prev };
+                delete newMapping[selectedFileIndex];
+                return newMapping;
+              });
+              
               reject(new Error(error));
             }
           }).catch(reject);
@@ -411,17 +487,34 @@ export default function CropTool() {
       return
     }
     
-    if (!completedCrop) {
+    // Check if file is already cropped
+    if (results[selectedFileIndex]) {
+      toast({
+        title: "Image already cropped",
+        description: "This image has already been cropped. You can download it from the preview panel.",
+        variant: "default"
+      })
+      return
+    }
+    
+    if (!completedCrop || completedCrop.width === 0 || completedCrop.height === 0) {
       toast({
         title: "No crop area selected",
-        description: "Please select an area to crop",
+        description: "Please select an area to crop by dragging on the image",
         variant: "destructive"
       })
       return
     }
     
     setIsLoading(true)
-    const croppedResults = [...results]
+    const croppedResults: any[] = [...results]
+    
+    // Mark file as being processed and start visual progress
+    setProcessingFiles(new Set([selectedFileIndex]))
+    setVisualProgress(prev => ({
+      ...prev,
+      [selectedFileIndex]: 0
+    }));
     
     try {
       const file = files[selectedFileIndex];
@@ -479,8 +572,8 @@ export default function CropTool() {
       try {
         const result = await attemptCrop(scaledCrop);
         
-        // Update or add result
-        croppedResults[selectedFileIndex] = {
+        // Prepare result object
+        const resultObj = {
           filename: file.name,
           originalWidth: originalDimensions.width,
           originalHeight: originalDimensions.height,
@@ -491,13 +584,29 @@ export default function CropTool() {
           downloadUrl: result.data.downloadUrl || `/api/images/download/${result.data.filename}?originalFilename=${encodeURIComponent(file.name)}`
         };
         
-        setResults(croppedResults);
-        toast({
-          title: "Crop successful",
-          description: `Cropped image to ${result.data.width} × ${result.data.height} pixels`,
+        // Use visual progress for direct processing
+        showResultsAfterProgress(selectedFileIndex, resultObj).then(() => {
+          // Show success notification after progress completes
+          toast({
+            title: "✅ Crop completed!",
+            description: `${file.name} cropped to ${result.data.width} × ${result.data.height} pixels`,
+          });
         });
       } catch (error: any) {
         console.error('Crop failed:', error);
+        
+        // Clean up progress state on error
+        setVisualProgress(prev => {
+          const newProgress = { ...prev };
+          delete newProgress[selectedFileIndex];
+          return newProgress;
+        });
+        
+        setProcessingFiles(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(selectedFileIndex);
+          return newSet;
+        });
         
         // Special handling for rate limit errors
         if (error.status === 429) {
@@ -517,6 +626,20 @@ export default function CropTool() {
       }
     } catch (error) {
       console.error('Crop error:', error);
+      
+      // Clean up progress state on major error
+      setVisualProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[selectedFileIndex];
+        return newProgress;
+      });
+      
+      setProcessingFiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedFileIndex);
+        return newSet;
+      });
+      
       toast({
         title: "Crop failed",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -526,6 +649,58 @@ export default function CropTool() {
       setIsLoading(false);
     }
   }
+  
+  // Visual progress simulation function
+  const simulateProgress = (fileIndex: number, duration: number = 2000) => {
+    return new Promise<void>((resolve) => {
+      const startTime = Date.now();
+      const interval = 50; // Update every 50ms for smooth animation
+      
+      const updateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(100, (elapsed / duration) * 100);
+        
+        setVisualProgress(prev => ({
+          ...prev,
+          [fileIndex]: Math.round(progress)
+        }));
+        
+        if (progress >= 100) {
+          resolve();
+        } else {
+          setTimeout(updateProgress, interval);
+        }
+      };
+      
+      updateProgress();
+    });
+  };
+  
+  // Function to show results after progress completes
+  const showResultsAfterProgress = async (fileIndex: number, result: any) => {
+    // Wait for visual progress to complete
+    await simulateProgress(fileIndex);
+    
+    // Now show the actual result
+    setResults(prevResults => {
+      const newResults = [...prevResults];
+      newResults[fileIndex] = result;
+      return newResults;
+    });
+    
+    // Clean up progress state
+    setVisualProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[fileIndex];
+      return newProgress;
+    });
+    
+    setProcessingFiles(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(fileIndex);
+      return newSet;
+    });
+  };
   
   return (
     <div className="max-w-5xl mx-auto">
@@ -541,7 +716,12 @@ export default function CropTool() {
           {/* Left side - Dropzone and file list */}
           <div className="flex-1">
             <div className="space-y-4">
-              <ImageDropzone onImageDrop={handleImageDrop} existingFiles={files.length} />
+              <ImageDropzone 
+                onImageDrop={handleImageDrop} 
+                existingFiles={files.length}
+                shouldClear={shouldClearDropzone}
+                onClearComplete={handleDropzoneClearComplete}
+              />
               
               {/* Rate Limit Indicator */}
               <RateLimitIndicator 
@@ -625,7 +805,14 @@ export default function CropTool() {
         {/* Crop Area */}
         {selectedFileIndex !== null && (
           <Card className="p-6">
-            <h3 className="text-lg font-medium mb-4">Crop Image</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">Crop Image</h3>
+              {processingMode === 'queued' && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Server className="h-3 w-3" /> Queue mode
+                </span>
+              )}
+            </div>
             
             <div className="flex flex-col lg:flex-row gap-6">
               {/* Image preview with crop */}
@@ -755,33 +942,61 @@ export default function CropTool() {
                   {/* Show progress for background jobs */}
                   {selectedFileIndex !== null &&
                     !results[selectedFileIndex] &&
-                    jobIds.includes(selectedFileIndex.toString()) && (
+                    fileJobMapping[selectedFileIndex] && (
                     <div className="border-t pt-4">
                       <p className="font-medium text-yellow-600 mb-2">Processing Image...</p>
                       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
                         <div
                           className="h-full bg-yellow-500 transition-all duration-300"
-                          style={{ width: `${jobProgress[selectedFileIndex.toString()] || 0}%` }}
+                          style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {jobProgress[selectedFileIndex.toString()]
-                           ? `${Math.round(jobProgress[selectedFileIndex.toString()])}% complete`
+                        {jobProgress[fileJobMapping[selectedFileIndex]]
+                           ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete`
                            : 'Starting process...'}
                       </p>
+                      
+                      {/* Show queue status if available */}
+                      {fileJobMapping[selectedFileIndex] && queueStatus[fileJobMapping[selectedFileIndex]] && (
+                        <div className="mt-2">
+                          <QueueStatusIndicator
+                            queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
+                            estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
+                            isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Visual Progress Bar */}
+                  {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Cropping image...</span>
+                        <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all duration-300 ease-out"
+                          style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
+                        />
+                      </div>
                     </div>
                   )}
                   
                   <Button 
                     className="w-full mt-4" 
                     onClick={handleCrop}
-                    disabled={isLoading || !completedCrop || !completedCrop.width || !completedCrop.height}
+                    disabled={isLoading || !completedCrop || !completedCrop.width || !completedCrop.height || (selectedFileIndex !== null && results[selectedFileIndex])}
+                    variant="default"
                   >
                     {isLoading ? (
                       <span className="flex items-center">
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Processing...
                       </span>
@@ -791,6 +1006,16 @@ export default function CropTool() {
                       </>
                     )}
                   </Button>
+                  
+                  {/* Show message if already processed */}
+                  {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
+                    <div className="text-center text-sm text-muted-foreground mt-2">
+                      <p className="flex items-center justify-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Image already cropped and ready for download.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

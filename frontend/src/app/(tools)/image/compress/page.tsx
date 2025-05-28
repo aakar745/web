@@ -5,7 +5,7 @@ import { ToolHeader } from '@/components/tools/ToolHeader'
 import { useSeo } from '@/hooks/useSeo'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
-import { ImageIcon, Download, X, Trash2, Plus, Package, Server, WifiOff, RefreshCw, AlertCircle, Clock } from 'lucide-react'
+import { ImageIcon, Download, X, Trash2, Plus, Package, Server, WifiOff, RefreshCw, AlertCircle, Clock, CheckCircle } from 'lucide-react'
 import ImageDropzone from '@/components/tools/ImageDropzone'
 import { useToast } from '@/components/ui/use-toast'
 import { Card } from '@/components/ui/card'
@@ -16,6 +16,8 @@ import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
 import { pollJobStatus } from '@/lib/api/statusApi'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { apiRequest, getApiUrl } from '@/lib/apiClient'
+import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
+import { RateLimitIndicator } from '@/components/ui/RateLimitIndicator'
 
 // Define types for API responses
 interface CompressResponse {
@@ -37,52 +39,6 @@ interface ArchiveResponse {
   }
 }
 
-// Add RateLimitIndicator component
-const RateLimitIndicator = ({ usage, limit, resetsIn, isLimitReached = false }: { 
-  usage: number; 
-  limit: number; 
-  resetsIn: number | null;
-  isLimitReached?: boolean;
-}) => {
-  // Calculate percentage used
-  const percentUsed = Math.min(100, Math.round((usage / limit) * 100));
-  
-  // Determine indicator color based on usage
-  let indicatorColor = "bg-green-500";
-  if (percentUsed > 70) indicatorColor = "bg-yellow-500";
-  if (percentUsed > 90 || isLimitReached) indicatorColor = "bg-red-500";
-  
-  // Only hide if no usage and not limit reached
-  if (usage === 0 && !isLimitReached) return null;
-  
-  return (
-    <div className={`mt-4 p-3 ${isLimitReached ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800'} border rounded-md`}>
-      <div className="flex justify-between items-center mb-1">
-        <h4 className={`text-sm font-medium ${isLimitReached ? 'text-red-700 dark:text-red-400' : ''}`}>
-          {isLimitReached ? 'Rate Limit Reached' : 'API Rate Limit'}
-        </h4>
-        <span className="text-xs">{usage} of {limit} requests used</span>
-      </div>
-      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
-        <div
-          className={`h-full ${indicatorColor} transition-all duration-300`}
-          style={{ width: `${percentUsed}%` }}
-        />
-      </div>
-      {resetsIn !== null && (
-        <p className={`mt-1 text-xs ${isLimitReached ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
-          Rate limit resets in {Math.ceil(resetsIn / 60)} minutes
-        </p>
-      )}
-      {isLimitReached && resetsIn === null && (
-        <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-          Please wait before making more requests
-        </p>
-      )}
-    </div>
-  );
-};
-
 export default function CompressTool() {
   // Load SEO data for image compression tool
   const { seoData, loading: seoLoading } = useSeo('/image/compress')
@@ -96,6 +52,21 @@ export default function CompressTool() {
   const [results, setResults] = useState<any[]>([])
   const [jobIds, setJobIds] = useState<string[]>([])
   const [jobProgress, setJobProgress] = useState<Record<string, number>>({})
+  const [queueStatus, setQueueStatus] = useState<Record<string, {
+    position?: number | null;
+    waitTime?: string | null;
+    isProcessing?: boolean;
+  }>>({})
+  const [fileJobMapping, setFileJobMapping] = useState<Record<number, string>>({}) // Map file index to job ID
+  
+  // Add visual progress states
+  const [visualProgress, setVisualProgress] = useState<Record<number, number>>({}) // file index -> progress percentage
+  const [processingFiles, setProcessingFiles] = useState<Set<number>>(new Set()) // track which files are being processed
+  const [pendingResults, setPendingResults] = useState<any[]>([]) // store results until progress reaches 100%
+  
+  // Add dropzone control state
+  const [shouldClearDropzone, setShouldClearDropzone] = useState(false)
+  
   const { toast } = useToast()
   const { processingMode, isConnected, isInitializing, serverState, errorDetails, nextRetryTime, retryConnection } = useProcessingMode()
   const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
@@ -136,6 +107,58 @@ export default function CompressTool() {
     return () => clearInterval(intervalId);
   }, [nextRetryTime]);
   
+  // Visual progress simulation function
+  const simulateProgress = (fileIndex: number, duration: number = 2000) => {
+    return new Promise<void>((resolve) => {
+      const startTime = Date.now();
+      const interval = 50; // Update every 50ms for smooth animation
+      
+      const updateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(100, (elapsed / duration) * 100);
+        
+        setVisualProgress(prev => ({
+          ...prev,
+          [fileIndex]: Math.round(progress)
+        }));
+        
+        if (progress >= 100) {
+          resolve();
+        } else {
+          setTimeout(updateProgress, interval);
+        }
+      };
+      
+      updateProgress();
+    });
+  };
+  
+  // Function to show results after progress completes
+  const showResultsAfterProgress = async (fileIndex: number, result: any) => {
+    // Wait for visual progress to complete
+    await simulateProgress(fileIndex);
+    
+    // Now show the actual result
+    setResults(prevResults => {
+      const newResults = [...prevResults];
+      newResults[fileIndex] = result;
+      return newResults;
+    });
+    
+    // Clean up progress state
+    setVisualProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[fileIndex];
+      return newProgress;
+    });
+    
+    setProcessingFiles(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(fileIndex);
+      return newSet;
+    });
+  };
+  
   // Generate preview URLs when files change
   useEffect(() => {
     // Revoke old object URLs to avoid memory leaks
@@ -156,44 +179,20 @@ export default function CompressTool() {
     try {
       const processedFiles = await processHeicFiles(droppedFiles);
       
-      // Check if adding would exceed the maximum of 10 files
-      const maxFiles = 10;
-      if (files.length + processedFiles.length > maxFiles) {
-        // Only take what fits
-        const remainingSlots = maxFiles - files.length;
-        const filesToAdd = processedFiles.slice(0, remainingSlots);
-        
-        // Show a notification about files that weren't added
-        if (remainingSlots < processedFiles.length) {
-          toast({
-            title: "File limit exceeded",
-            description: `Only ${remainingSlots} file(s) were added. The maximum is ${maxFiles} files total.`,
-            variant: "destructive"
-          });
+      // ImageDropzone now handles file limits dynamically, so we just add all processed files
+      setFiles(prevFiles => {
+        const updatedFiles = [...prevFiles, ...processedFiles];
+        // Automatically select the first file if none is currently selected
+        if (selectedFileIndex === null && updatedFiles.length > 0) {
+          setTimeout(() => setSelectedFileIndex(0), 0);
         }
-        
-        setFiles(prevFiles => {
-          const updatedFiles = [...prevFiles, ...filesToAdd];
-          // Automatically select the first file if none is currently selected
-          if (selectedFileIndex === null && updatedFiles.length > 0) {
-            setTimeout(() => setSelectedFileIndex(0), 0);
-          }
-          return updatedFiles;
-        });
-      } else {
-        // All files fit within the limit
-        setFiles(prevFiles => {
-          const updatedFiles = [...prevFiles, ...processedFiles];
-          // Automatically select the first file if none is currently selected
-          if (selectedFileIndex === null && updatedFiles.length > 0) {
-            setTimeout(() => setSelectedFileIndex(0), 0);
-          }
-          return updatedFiles;
-        });
-      }
+        return updatedFiles;
+      });
       
-      // Reset results when new files are uploaded
+      // Reset results and progress states when new files are uploaded
       setResults([]);
+      setVisualProgress({});
+      setProcessingFiles(new Set());
     } catch (error) {
       toast({
         title: "Error processing HEIC images",
@@ -208,6 +207,36 @@ export default function CompressTool() {
     // Also remove from results if it was already compressed
     setResults(prevResults => prevResults.filter((_, i) => i !== index))
     
+    // Clean up progress states for this file
+    setVisualProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[index];
+      // Also need to adjust indices for remaining files
+      const adjustedProgress: Record<number, number> = {};
+      Object.entries(newProgress).forEach(([key, value]) => {
+        const oldIndex = parseInt(key);
+        if (oldIndex > index) {
+          adjustedProgress[oldIndex - 1] = value;
+        } else if (oldIndex < index) {
+          adjustedProgress[oldIndex] = value;
+        }
+      });
+      return adjustedProgress;
+    });
+    
+    setProcessingFiles(prev => {
+      const newSet = new Set<number>();
+      prev.forEach(fileIndex => {
+        if (fileIndex < index) {
+          newSet.add(fileIndex);
+        } else if (fileIndex > index) {
+          newSet.add(fileIndex - 1);
+        }
+        // Don't add the removed index
+      });
+      return newSet;
+    });
+    
     if (selectedFileIndex === index) {
       setSelectedFileIndex(null)
     } else if (selectedFileIndex !== null && selectedFileIndex > index) {
@@ -220,6 +249,17 @@ export default function CompressTool() {
     setPreviews([])
     setResults([])
     setSelectedFileIndex(null)
+    // Clean up all progress states
+    setVisualProgress({});
+    setProcessingFiles(new Set());
+    setFileJobMapping({});
+    // Trigger dropzone clearing
+    setShouldClearDropzone(true);
+  }
+  
+  // Callback for when dropzone completes clearing
+  const handleDropzoneClearComplete = () => {
+    setShouldClearDropzone(false);
   }
   
   const handleCompressSingle = async () => {
@@ -228,6 +268,16 @@ export default function CompressTool() {
         title: "No file selected",
         description: "Please select an image to compress",
         variant: "destructive"
+      })
+      return
+    }
+    
+    // Check if file is already compressed
+    if (results[selectedFileIndex]) {
+      toast({
+        title: "Image already compressed",
+        description: "This image has already been compressed. You can download it from the preview panel.",
+        variant: "default"
       })
       return
     }
@@ -246,13 +296,36 @@ export default function CompressTool() {
       return
     }
     
-    await compressFiles(files, files.map((_, i) => i))
+    // Filter out already compressed files
+    const uncompressedFiles: File[] = []
+    const uncompressedIndices: number[] = []
+    
+    files.forEach((file, index) => {
+      if (!results[index]) {
+        uncompressedFiles.push(file)
+        uncompressedIndices.push(index)
+      }
+    })
+    
+    if (uncompressedFiles.length === 0) {
+      toast({
+        title: "All images already compressed",
+        description: "All images have already been compressed. You can download them using the ZIP download button.",
+        variant: "default"
+      })
+      return
+    }
+    
+    await compressFiles(uncompressedFiles, uncompressedIndices)
   }
   
   const compressFiles = async (filesToCompress: File[], fileIndices: number[]) => {
     setIsLoading(true)
     const compressedResults: any[] = [...results]
     const newJobIds: string[] = []
+    
+    // Mark files as being processed and start visual progress
+    setProcessingFiles(new Set(fileIndices))
     
     try {
       // Check if backend is connected
@@ -263,12 +336,20 @@ export default function CompressTool() {
           variant: "destructive"
         });
         setIsLoading(false);
+        // Clear processing state
+        setProcessingFiles(new Set())
         return;
       }
       
       for (let i = 0; i < filesToCompress.length; i++) {
         const file = filesToCompress[i]
         const index = fileIndices[i]
+        
+        // Start visual progress for this file
+        setVisualProgress(prev => ({
+          ...prev,
+          [index]: 0
+        }));
         
         const formData = new FormData()
         formData.append('image', file)
@@ -287,33 +368,120 @@ export default function CompressTool() {
             // Queued processing - store job ID for polling
             newJobIds.push(result.data.jobId)
             
+            // Map this file index to the job ID
+            setFileJobMapping(prev => ({
+              ...prev,
+              [index]: result.data.jobId as string
+            }));
+            
             // Start polling this job
             pollJobStatus(result.data.jobId, 'compress', {
               intervalMs: 1000,
-              onProgress: (progress) => {
+              onProgress: (progress, queuePosition, estimatedWaitTime) => {
+                // Update visual progress for queued jobs (use actual progress)
+                setVisualProgress(prev => ({
+                  ...prev,
+                  [index]: progress
+                }));
+                
                 setJobProgress(prev => ({
                   ...prev,
                   [result.data.jobId as string]: progress
                 }))
+                
+                // Update queue status
+                setQueueStatus(prev => ({
+                  ...prev,
+                  [result.data.jobId as string]: {
+                    position: queuePosition,
+                    waitTime: estimatedWaitTime,
+                    isProcessing: progress > 0
+                  }
+                }))
               },
-              onComplete: (jobResult) => {
-                // Update results when job completes
-                compressedResults[index] = {
+              onQueueStatus: (position, waitTime) => {
+                setQueueStatus(prev => ({
+                  ...prev,
+                  [result.data.jobId as string]: {
+                    position,
+                    waitTime,
+                    isProcessing: false
+                  }
+                }))
+              },
+              onComplete: async (jobResult) => {
+                // Prepare result object
+                const resultObj = {
                   filename: file.name,
                   originalSize: file.size,
                   compressedSize: jobResult.compressedSize,
                   compressionRatio: jobResult.compressionRatio,
+                  qualityUsed: quality,
                   originalFilename: jobResult.originalFilename,
                   resultFilename: jobResult.filename,
                   downloadUrl: jobResult.downloadUrl
-                }
-                setResults([...compressedResults])
+                };
+                
+                // Show progress completion and then result
+                setVisualProgress(prev => ({
+                  ...prev,
+                  [index]: 100
+                }));
+                
+                // Wait a moment for the 100% to be visible, then show result
+                setTimeout(() => {
+                  setResults(prevResults => {
+                    const newResults = [...prevResults];
+                    newResults[index] = resultObj;
+                    return newResults;
+                  });
+                  
+                  // Clean up progress state
+                  setVisualProgress(prev => {
+                    const newProgress = { ...prev };
+                    delete newProgress[index];
+                    return newProgress;
+                  });
+                  
+                  setProcessingFiles(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(index);
+                    return newSet;
+                  });
+                  
+                  // Show success notification
+                  toast({
+                    title: "✅ Compression completed!",
+                    description: `${file.name} compressed successfully (${jobResult.compressionRatio}% file size reduction)`,
+                  });
+                }, 500);
                 
                 // Remove job from active jobs
                 setJobIds(prev => prev.filter(id => id !== result.data.jobId))
+                
+                // Clean up file job mapping
+                setFileJobMapping(prev => {
+                  const newMapping = { ...prev };
+                  delete newMapping[index];
+                  return newMapping;
+                });
               },
               onError: (error) => {
                 console.error(`Job ${result.data.jobId} failed:`, error)
+                
+                // Clean up progress state on error
+                setVisualProgress(prev => {
+                  const newProgress = { ...prev };
+                  delete newProgress[index];
+                  return newProgress;
+                });
+                
+                setProcessingFiles(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(index);
+                  return newSet;
+                });
+                
                 toast({
                   title: "Compression failed",
                   description: error,
@@ -328,19 +496,42 @@ export default function CompressTool() {
             })
             
           } else {
-            // Direct processing - immediate result
-            compressedResults[index] = {
+            // Direct processing - immediate result, but use visual progress
+            const resultObj = {
               filename: file.name,
               originalSize: file.size,
               compressedSize: result.data.compressedSize,
               compressionRatio: result.data.compressionRatio,
+              qualityUsed: quality,
               originalFilename: result.data.originalFilename,
               resultFilename: result.data.filename,
               downloadUrl: result.data.downloadUrl
-            }
+            };
+            
+            // Start visual progress simulation for direct processing
+            showResultsAfterProgress(index, resultObj).then(() => {
+              // Show success notification after progress completes
+              toast({
+                title: "✅ Compression completed!",
+                description: `${file.name} compressed successfully (${result.data.compressionRatio}% file size reduction)`,
+              });
+            });
           }
         } catch (error: any) {
           console.error(`Failed to compress file ${i+1}/${filesToCompress.length}:`, error);
+          
+          // Clean up progress state on error
+          setVisualProgress(prev => {
+            const newProgress = { ...prev };
+            delete newProgress[index];
+            return newProgress;
+          });
+          
+          setProcessingFiles(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(index);
+            return newSet;
+          });
           
           // Special handling for rate limit errors
           if (error.status === 429) {
@@ -383,20 +574,19 @@ export default function CompressTool() {
       // Store new job IDs
       setJobIds(prev => [...prev, ...newJobIds])
       
-      // Update results for direct processing
-      setResults(compressedResults)
+      // Update results for direct processing (this is handled by showResultsAfterProgress now)
+      // setResults(compressedResults)
       
       // Only show success toast if at least one file was successfully compressed
-      if (compressedResults.some(result => result !== null)) {
-        toast({
-          title: "Compression started",
-          description: processingMode === 'queued' 
-            ? `${filesToCompress.length} image(s) queued for compression` 
-            : `Compressed ${filesToCompress.length} image(s)`,
-        });
-      }
+      // (Individual success toasts are now shown after progress completes)
+      
     } catch (error) {
       console.error('Compression error:', error)
+      
+      // Clean up all progress states on major error
+      setVisualProgress({});
+      setProcessingFiles(new Set());
+      
       toast({
         title: "Compression failed",
         description: error instanceof Error ? error.message : "An unexpected error occurred",
@@ -656,13 +846,18 @@ export default function CompressTool() {
               {rateLimitUsage.used > 0 && (
                 <RateLimitIndicator 
                   usage={rateLimitUsage.used} 
-                  limit={rateLimitUsage.limit} 
                   resetsIn={rateLimitUsage.resetsIn} 
                   isLimitReached={rateLimitUsage.isLimitReached}
+                  type="imageProcessing"
                 />
               )}
               
-              <ImageDropzone onImageDrop={handleImageDrop} existingFiles={files.length} />
+              <ImageDropzone 
+                onImageDrop={handleImageDrop} 
+                existingFiles={files.length}
+                shouldClear={shouldClearDropzone}
+                onClearComplete={handleDropzoneClearComplete}
+              />
               
               {files.length > 0 && (
                 <div className="border rounded-lg p-4">
@@ -752,6 +947,9 @@ export default function CompressTool() {
                             ({results[selectedFileIndex].compressionRatio}% smaller)
                           </span>
                         </p>
+                        <p className="text-sm text-muted-foreground">
+                          Quality setting used: {results[selectedFileIndex].qualityUsed}%
+                        </p>
                         <div className="mt-2">
                           <a 
                             href={`${getApiUrl().replace('/api', '')}${results[selectedFileIndex].downloadUrl}`}
@@ -763,19 +961,34 @@ export default function CompressTool() {
                       </div>
                     )}
                     
-                    {/* Show progress indicator for queued jobs */}
-                    {isLoading && processingMode === 'queued' && selectedFileIndex !== null && 
-                     !results[selectedFileIndex] && (
+                    {/* Show progress for background jobs */}
+                    {selectedFileIndex !== null && 
+                     !results[selectedFileIndex] && 
+                     fileJobMapping[selectedFileIndex] && (
                       <div className="mt-2 pt-2 border-t">
-                        <div className="flex items-center gap-2">
-                          <LoadingSpinner className="h-4 w-4" />
-                          <p className="text-sm text-muted-foreground">
-                            Processing in queue...
-                            {jobProgress[jobIds[selectedFileIndex]] && (
-                              <span className="ml-1">({jobProgress[jobIds[selectedFileIndex]]}%)</span>
-                            )}
-                          </p>
+                        <p className="font-medium text-yellow-600">Processing Image...</p>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
+                          <div
+                            className="h-full bg-yellow-500 transition-all duration-300"
+                            style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
+                          />
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {jobProgress[fileJobMapping[selectedFileIndex]] 
+                            ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete` 
+                            : 'Starting process...'}
+                        </p>
+                        
+                        {/* Show queue status if available */}
+                        {fileJobMapping[selectedFileIndex] && queueStatus[fileJobMapping[selectedFileIndex]] && (
+                          <div className="mt-2">
+                            <QueueStatusIndicator
+                              queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
+                              estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
+                              isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -832,17 +1045,46 @@ export default function CompressTool() {
             </div>
             
             <TabsContent value="single" className="space-y-4 mt-4">
+              {/* Queue Status Indicator for Single Image */}
+              {selectedFileIndex !== null && 
+               !results[selectedFileIndex] && 
+               fileJobMapping[selectedFileIndex] && 
+               queueStatus[fileJobMapping[selectedFileIndex]] && (
+                <QueueStatusIndicator
+                  queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
+                  estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
+                  isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
+                />
+              )}
+              
+              {/* Visual Progress Bar for Single Image */}
+              {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Compressing image...</span>
+                    <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300 ease-out"
+                      style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              
               <Button 
                 className="w-full" 
                 size="lg" 
                 onClick={handleCompressSingle}
-                disabled={isLoading || selectedFileIndex === null}
+                disabled={isLoading || selectedFileIndex === null || (selectedFileIndex !== null && results[selectedFileIndex])}
+                variant="default"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
@@ -852,20 +1094,89 @@ export default function CompressTool() {
                   </>
                 )}
               </Button>
+              
+              {/* Show message if already processed */}
+              {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Image already compressed and ready for download.
+                  </p>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="batch" className="space-y-4 mt-4">
+              {/* Queue Status Indicator for Batch Processing */}
+              {Object.keys(fileJobMapping).length > 0 && 
+               Object.keys(queueStatus).length > 0 && (
+                <div className="space-y-2">
+                  {Object.entries(fileJobMapping).map(([fileIndex, jobId]) => {
+                    const status = queueStatus[jobId];
+                    if (!status || results[parseInt(fileIndex)]) return null;
+                    
+                    return (
+                      <div key={fileIndex} className="space-y-1">
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {files[parseInt(fileIndex)]?.name || `File ${parseInt(fileIndex) + 1}`}
+                        </p>
+                        <QueueStatusIndicator
+                          queuePosition={status.position}
+                          estimatedWaitTime={status.waitTime}
+                          isProcessing={status.isProcessing}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Visual Progress Bar for Batch Processing */}
+              {processingFiles.size > 0 && (
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Compressing {processingFiles.size} image{processingFiles.size > 1 ? 's' : ''}...
+                    </span>
+                    <span className="font-medium">
+                      {Object.keys(visualProgress).length > 0 
+                        ? `${Math.round(Object.values(visualProgress).reduce((a, b) => a + b, 0) / Object.values(visualProgress).length)}%`
+                        : '0%'
+                      }
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {Array.from(processingFiles).map(fileIndex => (
+                      <div key={fileIndex} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="truncate text-muted-foreground">
+                            {files[fileIndex]?.name || `File ${fileIndex + 1}`}
+                          </span>
+                          <span className="font-medium">{visualProgress[fileIndex] || 0}%</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary transition-all duration-300 ease-out"
+                            style={{ width: `${visualProgress[fileIndex] || 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Button 
                 className="w-full" 
                 size="lg" 
                 onClick={handleCompressAll}
-                disabled={isLoading || files.length === 0}
+                disabled={isLoading || files.length === 0 || files.every((_, index) => results[index])}
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
@@ -875,6 +1186,16 @@ export default function CompressTool() {
                   </>
                 )}
               </Button>
+              
+              {/* Show message if all files are already processed */}
+              {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    All images already compressed and ready for download.
+                  </p>
+                </div>
+              )}
               
               {results.filter(r => r).length > 1 && (
                 <Button 

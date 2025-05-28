@@ -19,7 +19,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import Queue from 'bull';
 
 /**
- * Helper function to get job status
+ * Helper function to get job status with queue position
  */
 export const getJobStatus = asyncHandler(async (
   req: Request, 
@@ -80,6 +80,28 @@ export const getJobStatus = asyncHandler(async (
   const result = job.returnvalue;
   const failReason = job.failedReason;
   
+  // Calculate queue position if job is waiting
+  let queuePosition: number | null = null;
+  let estimatedWaitTime: number | null = null;
+  
+  if (state === 'waiting') {
+    try {
+      // Get all waiting jobs to calculate position
+      const waitingJobs = await queue.getWaiting();
+      const jobIndex = waitingJobs.findIndex(waitingJob => waitingJob.id === job.id);
+      
+      if (jobIndex !== -1) {
+        queuePosition = jobIndex + 1; // 1-based position
+        
+        // Estimate wait time (assuming 30 seconds per job on average)
+        const avgProcessingTime = 30; // seconds
+        estimatedWaitTime = Math.max(0, jobIndex * avgProcessingTime);
+      }
+    } catch (error) {
+      console.error('Error calculating queue position:', error);
+    }
+  }
+  
   res.status(200).json({
     status: 'success',
     data: {
@@ -87,7 +109,9 @@ export const getJobStatus = asyncHandler(async (
       state,
       progress,
       result: state === 'completed' ? result : null,
-      error: state === 'failed' ? failReason : null
+      error: state === 'failed' ? failReason : null,
+      queuePosition,
+      estimatedWaitTime: estimatedWaitTime ? `${Math.ceil(estimatedWaitTime / 60)} minutes` : null
     }
   });
 });

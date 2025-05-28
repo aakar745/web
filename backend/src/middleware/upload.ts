@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import sharp from 'sharp';
 import logger from '../utils/logger';
+import { getFileUploadSettings } from '../services/settingsService';
 
 /**
  * File naming convention:
@@ -18,9 +19,9 @@ import logger from '../utils/logger';
  * - Regular files in /uploads can be cleaned up periodically.
  */
 
-// Constants for image limits
+// Constants for image limits (fallback values)
 export const IMAGE_LIMITS = {
-  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  MAX_FILE_SIZE: 52428800, // 50MB default (will be overridden by settings)
   MAX_WIDTH: 8000, // 8K resolution width
   MAX_HEIGHT: 8000, // 8K resolution height
   MIN_WIDTH: 10,
@@ -104,6 +105,85 @@ export const upload = multer({
     fileSize: IMAGE_LIMITS.MAX_FILE_SIZE
   }
 });
+
+// Dynamic upload middleware factory that uses current database settings
+export const createDynamicUpload = () => {
+  return multer({
+    storage,
+    fileFilter: async (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+      try {
+        // Get current file upload settings
+        const settings = await getFileUploadSettings();
+        
+        // Check file type
+        if (!IMAGE_LIMITS.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+          return cb(new Error(`Invalid file type. Allowed types: ${IMAGE_LIMITS.ALLOWED_MIME_TYPES.join(', ')}`));
+        }
+        
+        // Attach settings to request for later use
+        (req as any).uploadSettings = settings;
+        
+        cb(null, true);
+      } catch (error) {
+        logger.error('Error getting upload settings:', error);
+        // Fall back to static file filter
+        if (IMAGE_LIMITS.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error(`Invalid file type. Allowed types: ${IMAGE_LIMITS.ALLOWED_MIME_TYPES.join(', ')}`));
+        }
+      }
+    },
+    limits: {
+      fileSize: IMAGE_LIMITS.MAX_FILE_SIZE // Will be checked dynamically in middleware
+    }
+  });
+};
+
+// Middleware to validate file size against dynamic settings
+export const validateDynamicFileSize = async (req: any, res: any, next: any) => {
+  try {
+    const settings = req.uploadSettings || await getFileUploadSettings();
+    const files = req.files as Express.Multer.File[] || (req.file ? [req.file] : []);
+    
+    // Check file count
+    if (files.length > settings.maxFiles) {
+      // Clean up uploaded files
+      files.forEach(file => {
+        if (file.path && fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+      
+      return res.status(400).json({
+        status: 'error',
+        message: `Too many files. Maximum allowed: ${settings.maxFiles}`
+      });
+    }
+    
+    // Check file sizes
+    for (const file of files) {
+      if (file.size > settings.maxFileSize) {
+        // Clean up uploaded files
+        files.forEach(f => {
+          if (f.path && fs.existsSync(f.path)) {
+            fs.unlinkSync(f.path);
+          }
+        });
+        
+        return res.status(400).json({
+          status: 'error',
+          message: `File size exceeds limit. Maximum allowed: ${Math.round(settings.maxFileSize / 1048576)}MB`
+        });
+      }
+    }
+    
+    next();
+  } catch (error) {
+    logger.error('Error validating dynamic file size:', error);
+    next(); // Continue with static validation
+  }
+};
 
 // Middleware to validate image dimensions after upload
 export const validateImageDimensions = async (req: any, res: any, next: any) => {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 // Import auth middleware if needed
 // import { requireAdminRole } from '../middleware/auth';
-import { upload } from '../middleware/upload';
+import { createDynamicUpload, validateDynamicFileSize } from '../middleware/upload';
 import { 
   compressImage, 
   resizeImage, 
@@ -18,6 +18,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 
+// Create dynamic upload middleware instance
+const dynamicUpload = createDynamicUpload();
+
 /**
  * @route GET /api/images/status/:id
  * @desc Get status for a job
@@ -28,31 +31,31 @@ router.get('/status/:id', getJobStatus);
  * @route POST /api/images/compress
  * @desc Compress an image
  */
-router.post('/compress', imageProcessingLimiter, upload.single('image'), compressImage);
+router.post('/compress', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, compressImage);
 
 /**
  * @route POST /api/images/resize
  * @desc Resize an image
  */
-router.post('/resize', imageProcessingLimiter, upload.single('image'), resizeImage);
+router.post('/resize', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, resizeImage);
 
 /**
  * @route POST /api/images/convert
  * @desc Convert image format
  */
-router.post('/convert', imageProcessingLimiter, upload.single('image'), convertImage);
+router.post('/convert', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, convertImage);
 
 /**
  * @route POST /api/images/crop
  * @desc Crop an image
  */
-router.post('/crop', imageProcessingLimiter, upload.single('image'), cropImage);
+router.post('/crop', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, cropImage);
 
 /**
  * @route POST /api/images/optimize-blog
  * @desc Optimize an image for blog usage
  */
-router.post('/optimize-blog', imageProcessingLimiter, upload.single('image'), optimizeBlogImage);
+router.post('/optimize-blog', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, optimizeBlogImage);
 
 /**
  * @route GET /api/images/download/:filename

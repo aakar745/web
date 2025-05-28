@@ -19,6 +19,8 @@ export interface JobStatus {
   progress: number;
   result: any | null;
   error: string | null;
+  queuePosition?: number | null;
+  estimatedWaitTime?: string | null;
 }
 
 export interface JobStatusResponse {
@@ -140,6 +142,38 @@ export async function getProcessingMode(): Promise<ProcessingMode> {
   }
 }
 
+/**
+ * Get current rate limit settings
+ */
+export async function getRateLimitSettings(): Promise<{
+  imageProcessing: { max: number; windowMs: number };
+  batchOperation: { max: number; windowMs: number };
+  api: { max: number; windowMs: number };
+}> {
+  try {
+    const response = await apiRequest<{
+      status: string;
+      data: {
+        imageProcessing: { max: number; windowMs: number };
+        batchOperation: { max: number; windowMs: number };
+        api: { max: number; windowMs: number };
+      };
+    }>('admin/settings/rate-limits', {
+      method: 'GET',
+      noRedirect: true,
+    });
+    
+    return response.data;
+  } catch (error) {
+    // Fallback to default values if unable to fetch
+    return {
+      imageProcessing: { max: 50, windowMs: 300000 }, // 50 requests per 5 minutes
+      batchOperation: { max: 15, windowMs: 600000 }, // 15 requests per 10 minutes
+      api: { max: 1000, windowMs: 900000 } // 1000 requests per 15 minutes
+    };
+  }
+}
+
 // Cache for job statuses to prevent excessive polling
 const jobStatusCache: Record<string, {
   status: JobStatus;
@@ -158,9 +192,10 @@ export async function pollJobStatus(
   options: {
     intervalMs?: number,
     maxAttempts?: number,
-    onProgress?: (progress: number) => void,
+    onProgress?: (progress: number, queuePosition?: number | null, estimatedWaitTime?: string | null) => void,
     onComplete?: (result: any) => void,
-    onError?: (error: string) => void
+    onError?: (error: string) => void,
+    onQueueStatus?: (position: number, waitTime: string) => void,
   } = {}
 ): Promise<any> {
   const {
@@ -168,7 +203,8 @@ export async function pollJobStatus(
     maxAttempts = 60, // 1 minute at 1s intervals
     onProgress,
     onComplete,
-    onError
+    onError,
+    onQueueStatus
   } = options;
   
   let attempts = 0;
@@ -219,7 +255,13 @@ export async function pollJobStatus(
         
         // Call progress callback
         if (onProgress && typeof jobStatus.progress === 'number') {
-          onProgress(jobStatus.progress);
+          onProgress(jobStatus.progress, jobStatus.queuePosition, jobStatus.estimatedWaitTime);
+        }
+        
+        // Call queue status callback for waiting jobs
+        if (onQueueStatus && jobStatus.state === 'waiting' && 
+            jobStatus.queuePosition && jobStatus.estimatedWaitTime) {
+          onQueueStatus(jobStatus.queuePosition, jobStatus.estimatedWaitTime);
         }
         
         // Check if job is complete or failed
@@ -256,4 +298,33 @@ export async function pollJobStatus(
     // Start polling
     checkStatus();
   });
+}
+
+/**
+ * Get current file upload settings
+ */
+export async function getFileUploadSettings(): Promise<{
+  maxFileSize: number;
+  maxFiles: number;
+}> {
+  try {
+    const response = await apiRequest<{
+      status: string;
+      data: {
+        maxFileSize: number;
+        maxFiles: number;
+      };
+    }>('admin/settings/file-upload', {
+      method: 'GET',
+      noRedirect: true,
+    });
+    
+    return response.data;
+  } catch (error) {
+    // Fallback to default values if unable to fetch
+    return {
+      maxFileSize: 52428800, // 50MB
+      maxFiles: 10
+    };
+  }
 } 

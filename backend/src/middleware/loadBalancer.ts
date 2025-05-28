@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import os from 'os';
 import logger from '../utils/logger';
+import { getLoadBalancerSettings } from '../services/settingsService';
 
 // Constants for load management
-const MAX_LOAD_THRESHOLD = process.env.MAX_LOAD_THRESHOLD ? parseFloat(process.env.MAX_LOAD_THRESHOLD) : 0.8;
-const MAX_MEMORY_USAGE_PERCENT = process.env.MAX_MEMORY_USAGE_PERCENT ? parseFloat(process.env.MAX_MEMORY_USAGE_PERCENT) : 85;
-const DEGRADATION_COOLDOWN_MS = process.env.DEGRADATION_COOLDOWN_MS ? parseInt(process.env.DEGRADATION_COOLDOWN_MS) : 30000;
+const MAX_LOAD_THRESHOLD = process.env.MAX_LOAD_THRESHOLD ? parseFloat(process.env.MAX_LOAD_THRESHOLD) : 0.9;
+const MAX_MEMORY_USAGE_PERCENT = process.env.MAX_MEMORY_USAGE_PERCENT ? parseFloat(process.env.MAX_MEMORY_USAGE_PERCENT) : 90;
+const DEGRADATION_COOLDOWN_MS = process.env.DEGRADATION_COOLDOWN_MS ? parseInt(process.env.DEGRADATION_COOLDOWN_MS) : 15000;
 // Add stability to high load detection
-const HIGH_LOAD_STABILITY_COUNT = 3; // Require multiple consecutive high load checks
+const HIGH_LOAD_STABILITY_COUNT = 2;
 
 // Track request metrics
 let activeRequests = 0;
@@ -19,11 +20,13 @@ let isInDegradationMode = false;
 let lastModeChangeTime = 0;
 let consecutiveHighLoadChecks = 0;
 let consecutiveNormalLoadChecks = 0;
+let lastEmergencyCleanup = 0;
 
 // Priority paths that should always be processed
 const PRIORITY_PATHS = [
   '/api/health',
-  '/api/health/detailed'
+  '/api/health/detailed',
+  '/api/images/status',
 ];
 
 // Paths to exclude from request counting (monitoring dashboard and health checks)
@@ -40,38 +43,64 @@ const EXCLUDED_PATHS = [
 const LOW_PRIORITY_PATHS = [
   '/api/images/compress',
   '/api/images/convert',
-  '/api/media/process'
+  '/api/images/resize',
+  '/api/images/crop',
+  '/api/media/process',
+  '/api/images/archive'
 ];
 
 /**
  * Check if the system is under high load
  */
-export function isSystemUnderHighLoad(): boolean {
-  // Check CPU load
-  const cpuLoad = os.loadavg()[0] / os.cpus().length; // Normalize by CPU count
-  
-  // Check memory usage
-  const totalMemory = os.totalmem();
-  const freeMemory = os.freemem();
-  const memoryUsagePercent = ((totalMemory - freeMemory) / totalMemory) * 100;
-  
-  // Check active requests
-  const requestPressure = activeRequests > 50;
-  
-  // High load if CPU or memory is above threshold
-  return (
-    cpuLoad > MAX_LOAD_THRESHOLD ||
-    memoryUsagePercent > MAX_MEMORY_USAGE_PERCENT ||
-    requestPressure
-  );
+export async function isSystemUnderHighLoad(): Promise<boolean> {
+  try {
+    // Get current settings from database
+    const { maxLoadThreshold, maxMemoryUsagePercent } = await getLoadBalancerSettings();
+    
+    // Check CPU load
+    const cpuLoad = os.loadavg()[0] / os.cpus().length; // Normalize by CPU count
+    
+    // Check memory usage
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+    const memoryUsagePercent = ((totalMemory - freeMemory) / totalMemory) * 100;
+    
+    // Check active requests - increased threshold for higher concurrency
+    const requestPressure = activeRequests > 200;
+    
+    // High load if CPU or memory is above threshold
+    return (
+      cpuLoad > maxLoadThreshold ||
+      memoryUsagePercent > maxMemoryUsagePercent ||
+      requestPressure
+    );
+  } catch (error) {
+    logger.error('Error getting load balancer settings, using fallback values:', error);
+    
+    // Fallback to environment variables if database is unavailable
+    const maxLoadThreshold = parseFloat(process.env.MAX_LOAD_THRESHOLD || '0.9');
+    const maxMemoryUsagePercent = parseInt(process.env.MAX_MEMORY_USAGE_PERCENT || '90');
+    
+    const cpuLoad = os.loadavg()[0] / os.cpus().length;
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+    const memoryUsagePercent = ((totalMemory - freeMemory) / totalMemory) * 100;
+    const requestPressure = activeRequests > 200;
+    
+    return (
+      cpuLoad > maxLoadThreshold ||
+      memoryUsagePercent > maxMemoryUsagePercent ||
+      requestPressure
+    );
+  }
 }
 
 /**
  * Update degradation mode based on system load with debounce logic
  */
-function updateDegradationMode() {
+async function updateDegradationMode() {
   const now = Date.now();
-  const highLoad = isSystemUnderHighLoad();
+  const highLoad = await isSystemUnderHighLoad();
   
   // Add stability - track consecutive high/normal load measurements
   if (highLoad) {
@@ -101,6 +130,13 @@ function updateDegradationMode() {
     lastDegradationTime = now;
     lastModeChangeTime = now;
     logger.warn('Entering degradation mode - system under high load');
+    
+    // Trigger emergency cleanup if we haven't done it recently
+    const CLEANUP_COOLDOWN = 5 * 60 * 1000; // 5 minutes
+    if (now - lastEmergencyCleanup > CLEANUP_COOLDOWN) {
+      lastEmergencyCleanup = now;
+      logger.warn('Triggering emergency file cleanup due to high load');
+    }
   }
 }
 
@@ -132,8 +168,10 @@ export const loadBalancer = (req: Request, res: Response, next: NextFunction) =>
     });
   }
   
-  // Update degradation mode based on current system load
-  updateDegradationMode();
+  // Update degradation mode based on current system load (non-blocking)
+  updateDegradationMode().catch(error => {
+    logger.error('Error updating degradation mode:', error);
+  });
   
   // Handle request based on current mode
   if (isInDegradationMode) {
@@ -146,7 +184,8 @@ export const loadBalancer = (req: Request, res: Response, next: NextFunction) =>
       return res.status(503).json({
         status: 'error',
         message: 'Service temporarily unavailable due to high load. Please try again later.',
-        retryAfter: Math.ceil(DEGRADATION_COOLDOWN_MS / 1000)
+        retryAfter: Math.ceil(DEGRADATION_COOLDOWN_MS / 1000),
+        queueStatus: 'Please wait and try again in a few minutes'
       });
     } else {
       // For regular requests, continue but with warning

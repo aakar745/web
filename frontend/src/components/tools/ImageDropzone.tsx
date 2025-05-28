@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { useDropzone, FileRejection } from 'react-dropzone'
 import { useToast } from '@/components/ui/use-toast'
+import { getFileUploadSettings } from '@/lib/api/statusApi'
 
 interface ImageDropzoneProps {
   onImageDrop: (files: File[]) => void
@@ -10,20 +11,61 @@ interface ImageDropzoneProps {
   maxSize?: number
   accept?: Record<string, string[]>
   existingFiles?: number
+  shouldClear?: boolean
+  onClearComplete?: () => void
+  showFileList?: boolean
 }
 
 export default function ImageDropzone({
   onImageDrop,
-  maxFiles = 10,
-  maxSize = 10485760, // 10MB
+  maxFiles: propMaxFiles,
+  maxSize: propMaxSize,
   accept = {
     'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.svg', '.heic', '.heif']
   },
-  existingFiles = 0
+  existingFiles = 0,
+  shouldClear = false,
+  onClearComplete,
+  showFileList = false
 }: ImageDropzoneProps) {
   const [files, setFiles] = useState<File[]>([])
   const [fileRejections, setFileRejections] = useState<FileRejection[]>([])
+  const [maxFiles, setMaxFiles] = useState(propMaxFiles || 10)
+  const [maxSize, setMaxSize] = useState(propMaxSize || 52428800) // 50MB default
   const { toast } = useToast()
+  
+  // Handle clearing from parent component
+  useEffect(() => {
+    if (shouldClear) {
+      setFiles([])
+      setFileRejections([])
+      if (onClearComplete) {
+        onClearComplete()
+      }
+    }
+  }, [shouldClear, onClearComplete])
+  
+  // Fetch dynamic file upload settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getFileUploadSettings();
+        
+        // Only update if no props were provided (to allow prop overrides)
+        if (!propMaxFiles) {
+          setMaxFiles(settings.maxFiles);
+        }
+        if (!propMaxSize) {
+          setMaxSize(settings.maxFileSize);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch file upload settings, using defaults:', error);
+        // Keep defaults
+      }
+    };
+
+    fetchSettings();
+  }, [propMaxFiles, propMaxSize]);
   
   const onDrop = useCallback((acceptedFiles: File[]) => {
     // Check if adding these files would exceed the total limit
@@ -44,8 +86,10 @@ export default function ImageDropzone({
         }]
       })) as FileRejection[];
       
-      // Only accept files that fit
-      setFiles(fittingFiles);
+      // Only update internal state if showFileList is true
+      if (showFileList) {
+        setFiles(fittingFiles);
+      }
       
       if (fittingFiles.length > 0) {
         onImageDrop(fittingFiles);
@@ -62,12 +106,14 @@ export default function ImageDropzone({
       }
     } else {
       // All files fit within the limit
-      setFiles(acceptedFiles);
+      if (showFileList) {
+        setFiles(acceptedFiles);
+      }
       onImageDrop(acceptedFiles);
       // Clear previous rejections when new files are successfully dropped
       setFileRejections([]);
     }
-  }, [onImageDrop, existingFiles, maxFiles, toast]);
+  }, [onImageDrop, existingFiles, maxFiles, toast, showFileList]);
   
   const onDropRejected = useCallback((rejections: FileRejection[]) => {
     // Store rejections for UI display
@@ -171,7 +217,8 @@ export default function ImageDropzone({
         </div>
       )}
       
-      {files.length > 0 && (
+      {/* Only show file list if explicitly requested */}
+      {showFileList && files.length > 0 && (
         <div className="mt-4">
           <p className="font-medium">{files.length} file(s) selected</p>
           <ul className="mt-2 text-sm text-left">
