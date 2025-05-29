@@ -22,11 +22,13 @@ const imageQueue_1 = require("./queues/imageQueue");
 const redis_1 = require("./config/redis");
 require("./workers/imageWorker"); // Register workers in the main process
 const healthRoutes_1 = __importDefault(require("./routes/healthRoutes"));
+const deadLetterQueue_1 = require("./queues/deadLetterQueue");
 const monitoringRoutes_1 = __importDefault(require("./routes/monitoringRoutes"));
 const commentRoutes_1 = __importDefault(require("./routes/commentRoutes"));
 const seoRoutes_1 = __importDefault(require("./routes/seoRoutes"));
 const scripts_1 = __importDefault(require("./routes/scripts"));
 const cacheControl_1 = require("./middleware/cacheControl");
+const cleanupScheduler_1 = require("./services/cleanupScheduler");
 // Load environment variables
 dotenv_1.default.config();
 // Create our express app early
@@ -63,8 +65,6 @@ domain.run(async () => {
         // Serve Next.js static files
         app.use('/_next', express_1.default.static(path_1.default.join(__dirname, '../public/static')));
         app.use('/static', express_1.default.static(path_1.default.join(__dirname, '../public/static')));
-        // Remove general API rate limiting - we only want to limit specific tools
-        // app.use('/api/', apiLimiter);
         // Apply load balancer middleware for graceful degradation
         app.use('/api/', loadBalancer_1.loadBalancer);
         // ===== CACHE CONTROL FIX =====
@@ -72,13 +72,16 @@ domain.run(async () => {
         app.use('/api/', cacheControl_1.noCacheAPI);
         // Add version headers for cache busting
         app.use('/api/', cacheControl_1.addVersionHeaders);
-        // Health checks moved to dedicated routes at /api/health
-        // See healthRoutes.ts for implementation
         // Connect to MongoDB in the background, but don't block server startup
         (0, database_1.connectDB)().catch(err => {
             console.error('MongoDB connection failed, but server will continue:', err);
             // We're not exiting the process anymore, allowing the server to run
             // even without MongoDB for stateless operations
+        });
+        // Initialize scheduler system after database connection attempt
+        (0, cleanupScheduler_1.initializeSchedulers)().catch(err => {
+            console.error('Scheduler initialization failed:', err);
+            // Don't exit - server can run without schedulers
         });
         // Upload endpoint for blog images
         app.post('/api/upload', 
@@ -182,49 +185,42 @@ domain.run(async () => {
                     if (redisStatus) {
                         (0, imageQueue_1.cleanOldJobs)().catch(err => console.error('Failed to clean old jobs:', err));
                     }
-                    // Set up periodic Redis status check to update processing mode
-                    let lastKnownRedisStatus = redisStatus;
-                    const redisCheckInterval = setInterval(async () => {
+                    // Try to clean up dead letter queue periodically
+                    setInterval(async () => {
                         try {
-                            const currentRedisStatus = await (0, redis_1.testRedisConnection)();
-                            // If Redis status changed, log the change
-                            if (currentRedisStatus !== lastKnownRedisStatus) {
-                                console.log(`🔄 Processing mode changed: ${currentRedisStatus ? 'Queued (Redis)' : 'Direct (Local)'}`);
-                                // If Redis became available, clean up old jobs
-                                if (currentRedisStatus) {
-                                    (0, imageQueue_1.cleanOldJobs)().catch(err => console.error('Failed to clean old jobs after Redis became available:', err));
-                                }
-                                // Update the last known status
-                                lastKnownRedisStatus = currentRedisStatus;
+                            if (await (0, redis_1.testRedisConnection)()) {
+                                await (0, deadLetterQueue_1.cleanupDeadLetterQueue)();
                             }
                         }
                         catch (err) {
-                            // Error already logged in testRedisConnection
+                            // Silent fail - don't spam logs
                         }
-                    }, 10000); // Check every 10 seconds
-                    // Make sure it doesn't prevent the Node.js process from exiting
-                    if (redisCheckInterval.unref) {
-                        redisCheckInterval.unref();
-                    }
+                    }, 10 * 60 * 1000); // Every 10 minutes
                 }
                 catch (err) {
-                    console.error('Error checking Redis status:', err);
-                    console.log('🔄 Processing mode: Direct (Local) - Redis check failed');
+                    console.error('Error during Redis status check:', err);
                 }
-            }, 2000);
+            }, 3000); // 3 second delay to allow Redis connection to stabilize
         });
-        // Handle graceful shutdown
-        process.on('SIGTERM', async () => {
-            console.log('SIGTERM signal received: closing HTTP server');
+        // Graceful shutdown handling
+        process.on('SIGTERM', () => {
+            console.log('SIGTERM received, shutting down gracefully');
             server.close(() => {
-                console.log('HTTP server closed');
+                console.log('Process terminated');
+                process.exit(0);
+            });
+        });
+        process.on('SIGINT', () => {
+            console.log('SIGINT received, shutting down gracefully');
+            server.close(() => {
+                console.log('Process terminated');
                 process.exit(0);
             });
         });
     }
     catch (error) {
         console.error('Error during server startup:', error);
-        // Keep the server running despite errors
+        process.exit(1);
     }
 });
 //# sourceMappingURL=index.js.map

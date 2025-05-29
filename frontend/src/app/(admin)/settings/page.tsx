@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { apiRequest } from '@/lib/apiClient';
-import { Trash2, CheckCircle, Timer, ClockIcon, RefreshCw, Settings, Save } from 'lucide-react';
+import { Trash2, CheckCircle, Timer, ClockIcon, RefreshCw, Settings, Save, Database, HardDrive, MemoryStick } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
@@ -68,13 +68,40 @@ interface SystemSettings {
   jobRetryAttempts: number;
 }
 
+interface SystemStatus {
+  logs: { 
+    size: string; 
+    lines: number; 
+    errorSize: string; 
+  };
+  memory: { 
+    used: number; 
+    total: number; 
+    percentage: number; 
+  };
+  database: { 
+    collections: number; 
+    totalSize: string; 
+    documents: number; 
+  };
+  cache: { 
+    connected: boolean; 
+    keys: number; 
+    memory: string; 
+  };
+  disk: { 
+    used: string; 
+    available: string; 
+    percentage: number; 
+  };
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   
   // Cleanup states
   const [isLoading, setIsLoading] = useState(false);
-  const [setupAutoCleanup, setSetupAutoCleanup] = useState(true);
   const [results, setResults] = useState<ApiResponse['data'] | null>(null);
   
   // System settings states
@@ -82,6 +109,27 @@ export default function SettingsPage() {
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  
+  // Scheduler states for each cleanup type
+  const [schedulerStates, setSchedulerStates] = useState({
+    images: false,
+    logs: false,
+    cache: false, 
+    database: false,
+    memory: false
+  });
+  
+  // Detailed scheduler information
+  const [schedulerInfo, setSchedulerInfo] = useState<{
+    [key: string]: { 
+      active: boolean; 
+      nextRun?: string; 
+      schedule?: string 
+    }
+  }>({});
+  
+  // System status information
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   
   // Load system settings on component mount
   useEffect(() => {
@@ -106,6 +154,69 @@ export default function SettingsPage() {
     
     loadSettings();
   }, [toast]);
+  
+  // Load scheduler status on component mount
+  useEffect(() => {
+    const loadSchedulerStatus = async () => {
+      try {
+        const response = await apiRequest<{ 
+          status: string; 
+          data: { 
+            schedulers: { 
+              [key: string]: { 
+                active: boolean; 
+                nextRun?: string; 
+                schedule?: string 
+              } 
+            } 
+          } 
+        }>('admin/scheduler-status', {
+          requireAuth: true
+        });
+        
+        // Update scheduler states based on API response
+        const { schedulers } = response.data;
+        setSchedulerStates({
+          images: schedulers.images?.active || false,
+          logs: schedulers.logs?.active || false,
+          cache: schedulers.cache?.active || false,
+          database: schedulers.database?.active || false,
+          memory: schedulers.memory?.active || false
+        });
+        
+        // Store detailed scheduler information
+        setSchedulerInfo(schedulers);
+      } catch (error) {
+        console.error('Failed to load scheduler status:', error);
+        // Don't show toast error for this as it's not critical
+      }
+    };
+    
+    loadSchedulerStatus();
+  }, []);
+  
+  // Load system status on component mount
+  useEffect(() => {
+    const loadSystemStatus = async () => {
+      try {
+        const response = await apiRequest<{ 
+          status: string; 
+          data: { 
+            systemStatus: SystemStatus 
+          } 
+        }>('admin/system-status', {
+          requireAuth: true
+        });
+        
+        setSystemStatus(response.data.systemStatus);
+      } catch (error) {
+        console.error('Failed to load system status:', error);
+        // Don't show toast error for this as it's not critical
+      }
+    };
+    
+    loadSystemStatus();
+  }, []);
   
   // Function to save system settings
   const saveSettings = async () => {
@@ -151,24 +262,154 @@ export default function SettingsPage() {
   const handleCleanup = async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest<ApiResponse>('admin/cleanup-images', {
+      const response = await apiRequest<any>('admin/cleanup-system', {
         method: 'POST',
-        body: { setupAutoCleanup },
+        body: { type: 'images' },
         requireAuth: true
       });
       
-      setResults(response.data);
+      // Refresh system status after cleanup
+      await refreshSystemStatus();
       
       toast({
-        title: 'Cleanup completed successfully',
-        description: `Deleted ${response.data.cleanup.totalDeleted} files, recovered ${response.data.cleanup.totalSizeRecovered} of space.`,
+        title: 'Image cleanup completed successfully',
+        description: `Deleted ${response.data.totalDeleted || 0} files, recovered ${response.data.sizeRecovered || '0 MB'} of space.`,
         variant: 'default'
       });
     } catch (error) {
       console.error('Cleanup failed:', error);
       
       toast({
-        title: 'Cleanup failed',
+        title: 'Image cleanup failed',
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Function to refresh system status
+  const refreshSystemStatus = async () => {
+    try {
+      const response = await apiRequest<{ 
+        status: string; 
+        data: { 
+          systemStatus: SystemStatus 
+        } 
+      }>('admin/system-status', {
+        requireAuth: true
+      });
+      
+      setSystemStatus(response.data.systemStatus);
+    } catch (error) {
+      console.error('Failed to refresh system status:', error);
+    }
+  };
+  
+  // Function to handle system cleanup (logs, cache, database, memory)
+  const handleSystemCleanup = async (type: 'images' | 'logs' | 'cache' | 'database' | 'memory') => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest<any>(`admin/cleanup-system`, {
+        method: 'POST',
+        body: { type },
+        requireAuth: true
+      });
+      
+      // Refresh system status after cleanup
+      await refreshSystemStatus();
+      
+      toast({
+        title: `${type.charAt(0).toUpperCase() + type.slice(1)} cleanup completed`,
+        description: `Successfully cleaned ${type} - ${response.data.totalDeleted || 0} items processed`,
+        variant: 'default'
+      });
+    } catch (error) {
+      console.error(`${type} cleanup failed:`, error);
+      
+      toast({
+        title: `${type.charAt(0).toUpperCase() + type.slice(1)} cleanup failed`,
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Function to handle scheduler setup for individual cleanup types
+  const handleSchedulerSetup = async (type: 'images' | 'logs' | 'cache' | 'database' | 'memory', enabled: boolean) => {
+    setIsLoading(true);
+    try {
+      // Default schedule times for each type
+      const scheduleMap = {
+        images: { hour: 3, minute: 0 },
+        logs: { hour: 2, minute: 0 },
+        cache: { hour: 1, minute: 0 },
+        database: { hour: 4, minute: 0 },
+        memory: { hour: 6, minute: 0 }
+      };
+      
+      const schedule = scheduleMap[type];
+      
+      const response = await apiRequest<any>(`admin/setup-scheduler`, {
+        method: 'POST',
+        body: { 
+          type, 
+          enabled,
+          hour: schedule.hour,
+          minute: schedule.minute 
+        },
+        requireAuth: true
+      });
+      
+      // Update local state
+      setSchedulerStates(prev => ({
+        ...prev,
+        [type]: enabled
+      }));
+      
+      // Refresh scheduler status to get updated next run times
+      try {
+        const statusResponse = await apiRequest<{ 
+          status: string; 
+          data: { 
+            schedulers: { 
+              [key: string]: { 
+                active: boolean; 
+                nextRun?: string; 
+                schedule?: string 
+              } 
+            } 
+          } 
+        }>('admin/scheduler-status', {
+          requireAuth: true
+        });
+        
+        const { schedulers } = statusResponse.data;
+        setSchedulerStates({
+          images: schedulers.images?.active || false,
+          logs: schedulers.logs?.active || false,
+          cache: schedulers.cache?.active || false,
+          database: schedulers.database?.active || false,
+          memory: schedulers.memory?.active || false
+        });
+        setSchedulerInfo(schedulers);
+      } catch (statusError) {
+        console.error('Failed to refresh scheduler status:', statusError);
+      }
+      
+      toast({
+        title: enabled ? 'Scheduler activated' : 'Scheduler deactivated',
+        description: `${type.charAt(0).toUpperCase() + type.slice(1)} cleanup ${enabled ? `scheduled daily at ${schedule.hour}:${schedule.minute.toString().padStart(2, '0')}` : 'scheduling disabled'}`,
+        variant: 'default'
+      });
+    } catch (error) {
+      console.error(`${type} scheduler setup failed:`, error);
+      
+      toast({
+        title: 'Scheduler setup failed',
         description: error instanceof Error ? error.message : 'An unknown error occurred',
         variant: 'destructive'
       });
@@ -198,6 +439,26 @@ export default function SettingsPage() {
         
         {/* Maintenance Tab */}
         <TabsContent value="maintenance" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">System Status</h2>
+              <p className="text-sm text-muted-foreground">Real-time system information and maintenance</p>
+            </div>
+            <Button 
+              onClick={refreshSystemStatus} 
+              variant="outline" 
+              size="sm"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              <span className="ml-2">Refresh</span>
+            </Button>
+          </div>
+          
           <Card>
             <CardHeader>
               <CardTitle>System Maintenance</CardTitle>
@@ -207,7 +468,14 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Image Cleanup</h3>
+                <h3 className="text-lg font-medium flex items-center">
+                  Image Cleanup
+                  {schedulerStates.images && (
+                    <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Scheduled
+                    </span>
+                  )}
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   Clean up temporary and processed images to free up disk space.
                   This will remove processed images, conversion results, and archives that are older than 7 days.
@@ -261,17 +529,29 @@ export default function SettingsPage() {
                   </Alert>
                 )}
                 
+                {schedulerInfo.images && schedulerInfo.images.active && (
+                  <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-600">
+                      <ClockIcon className="h-4 w-4 inline mr-1" />
+                      Next cleanup: {schedulerInfo.images.nextRun ? 
+                        new Date(schedulerInfo.images.nextRun).toLocaleString() : 
+                        schedulerInfo.images.schedule || 'Unknown'}
+                    </p>
+                  </div>
+                )}
+                
                 <div className="flex items-center space-x-2 mt-4">
                   <Checkbox 
-                    id="autoCleanup" 
-                    checked={setupAutoCleanup}
-                    onCheckedChange={() => setSetupAutoCleanup(!setupAutoCleanup)}
+                    id="imagesScheduler" 
+                    checked={schedulerStates.images}
+                    onCheckedChange={(checked) => handleSchedulerSetup('images', !!checked)}
+                    disabled={isLoading}
                   />
                   <label
-                    htmlFor="autoCleanup"
+                    htmlFor="imagesScheduler"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    Set up automatic daily cleanup (3:00 AM)
+                    Schedule automatic cleanup (3:00 AM daily)
                   </label>
                 </div>
               </div>
@@ -296,6 +576,309 @@ export default function SettingsPage() {
               </Button>
             </CardFooter>
           </Card>
+          
+          {/* Additional System Cleanup Options */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Log Files Cleanup */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <HardDrive className="mr-2 h-5 w-5" />
+                  Log Files Cleanup
+                  {schedulerStates.logs && (
+                    <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Scheduled
+                    </span>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Clean up system log files to free up disk space. Large log files will be truncated and old logs will be removed.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Current logs: <strong>{systemStatus?.logs.size || 'Loading...'}</strong> ({systemStatus?.logs.lines || 0} lines)
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Error log: <strong>{systemStatus?.logs.errorSize || 'Loading...'}</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Retention: 7 days for log files
+                  </p>
+                  {schedulerInfo.logs && schedulerInfo.logs.active && (
+                    <p className="text-sm text-green-600">
+                      <ClockIcon className="h-3 w-3 inline mr-1" />
+                      Next cleanup: {schedulerInfo.logs.nextRun ? 
+                        new Date(schedulerInfo.logs.nextRun).toLocaleString() : 
+                        schedulerInfo.logs.schedule || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox 
+                    id="logsScheduler" 
+                    checked={schedulerStates.logs}
+                    onCheckedChange={(checked) => handleSchedulerSetup('logs', !!checked)}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="logsScheduler"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Schedule automatic cleanup (2:00 AM daily)
+                  </label>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={() => handleSystemCleanup('logs')} 
+                  disabled={isLoading}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> 
+                      Cleaning...
+                    </>
+                  ) : (
+                    <>
+                      <HardDrive className="mr-2 h-4 w-4" /> 
+                      Clean Logs
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {/* Cache/Redis Cleanup */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Database className="mr-2 h-5 w-5" />
+                  Cache Cleanup
+                  {schedulerStates.cache && (
+                    <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Scheduled
+                    </span>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Clear expired Redis cache keys and optimize memory usage. Rate limiting and circuit breaker data will be cleaned.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Redis status: <strong className={systemStatus?.cache.connected ? 'text-green-600' : 'text-red-600'}>
+                      {systemStatus?.cache.connected ? 'Connected' : 'Disconnected'}
+                    </strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Cache memory: <strong>{systemStatus?.cache.memory || 'Loading...'}</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Keys: <strong>{systemStatus?.cache.keys || 0}</strong>
+                  </p>
+                  {schedulerInfo.cache && schedulerInfo.cache.active && (
+                    <p className="text-sm text-green-600">
+                      <ClockIcon className="h-3 w-3 inline mr-1" />
+                      Next cleanup: {schedulerInfo.cache.nextRun ? 
+                        new Date(schedulerInfo.cache.nextRun).toLocaleString() : 
+                        schedulerInfo.cache.schedule || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox 
+                    id="cacheScheduler" 
+                    checked={schedulerStates.cache}
+                    onCheckedChange={(checked) => handleSchedulerSetup('cache', !!checked)}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="cacheScheduler"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Schedule automatic cleanup (1:00 AM daily)
+                  </label>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={() => handleSystemCleanup('cache')} 
+                  disabled={isLoading}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> 
+                      Cleaning...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="mr-2 h-4 w-4" /> 
+                      Clean Cache
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {/* Database Cleanup */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Database className="mr-2 h-5 w-5" />
+                  Database Cleanup
+                  {schedulerStates.database && (
+                    <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Scheduled
+                    </span>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Remove expired sessions, old analytics data, and orphaned records. Optimizes database performance.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Collections: <strong>{systemStatus?.database.collections || 0}</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Total documents: <strong>{systemStatus?.database.documents || 0}</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Database size: <strong>{systemStatus?.database.totalSize || 'Loading...'}</strong>
+                  </p>
+                  {schedulerInfo.database && schedulerInfo.database.active && (
+                    <p className="text-sm text-green-600">
+                      <ClockIcon className="h-3 w-3 inline mr-1" />
+                      Next cleanup: {schedulerInfo.database.nextRun ? 
+                        new Date(schedulerInfo.database.nextRun).toLocaleString() : 
+                        schedulerInfo.database.schedule || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox 
+                    id="databaseScheduler" 
+                    checked={schedulerStates.database}
+                    onCheckedChange={(checked) => handleSchedulerSetup('database', !!checked)}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="databaseScheduler"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Schedule automatic cleanup (4:00 AM daily)
+                  </label>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={() => handleSystemCleanup('database')} 
+                  disabled={isLoading}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> 
+                      Cleaning...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="mr-2 h-4 w-4" /> 
+                      Clean Database
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {/* Memory Optimization */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MemoryStick className="mr-2 h-5 w-5" />
+                  Memory Optimization
+                  {schedulerStates.memory && (
+                    <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Scheduled
+                    </span>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Force garbage collection and clear cached modules to free up Node.js memory usage.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Memory used: <strong>{systemStatus?.memory.used || 0} MB</strong> ({systemStatus?.memory.percentage || 0}%)
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Total memory: <strong>{systemStatus?.memory.total || 0} MB</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Disk usage: <strong>{systemStatus?.disk.used || 'Loading...'}</strong>
+                  </p>
+                  {schedulerInfo.memory && schedulerInfo.memory.active && (
+                    <p className="text-sm text-green-600">
+                      <ClockIcon className="h-3 w-3 inline mr-1" />
+                      Next cleanup: {schedulerInfo.memory.nextRun ? 
+                        new Date(schedulerInfo.memory.nextRun).toLocaleString() : 
+                        schedulerInfo.memory.schedule || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox 
+                    id="memoryScheduler" 
+                    checked={schedulerStates.memory}
+                    onCheckedChange={(checked) => handleSchedulerSetup('memory', !!checked)}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="memoryScheduler"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Schedule automatic cleanup (6:00 AM daily)
+                  </label>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={() => handleSystemCleanup('memory')} 
+                  disabled={isLoading}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> 
+                      Optimizing...
+                    </>
+                  ) : (
+                    <>
+                      <MemoryStick className="mr-2 h-4 w-4" /> 
+                      Optimize Memory
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+          </div>
         </TabsContent>
         
         {/* Configuration Tab */}

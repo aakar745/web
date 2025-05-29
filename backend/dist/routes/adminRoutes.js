@@ -49,6 +49,10 @@ router.use(authMiddleware_1.protect);
 router.use((0, authMiddleware_1.restrictTo)('admin'));
 // Cleanup routes
 router.post('/cleanup-images', adminController.cleanupImages);
+router.post('/cleanup-system', adminController.cleanupSystem);
+router.post('/setup-scheduler', adminController.setupScheduler);
+router.get('/scheduler-status', adminController.getSchedulerStatus);
+router.get('/system-status', adminController.getSystemStatus);
 // Settings routes (admin only)
 router.get('/settings', adminController.getSystemSettings);
 router.put('/settings', adminController.updateSystemSettings);

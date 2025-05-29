@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npx tsc",
-    "start": "node dist/index.js",
+    "start": "node --expose-gc dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "worker": "node worker.js",
     "dev:worker": "nodemon --exec \"node worker.js\"",
@@ -17,7 +17,18 @@
     "indexes:build": "npx tsc src/scripts/createIndexes.ts --outDir dist/scripts --moduleResolution node --esModuleInterop",
     "indexes:create-prod": "npm run build && node dist/scripts/createIndexes.js create",
     "indexes:analyze-prod": "npm run build && node dist/scripts/createIndexes.js analyze",
-    "db:check-sharding-prod": "npm run build && node dist/scripts/checkSharding.js"
+    "db:check-sharding-prod": "npm run build && node dist/scripts/checkSharding.js",
+    "system:cleanup-logs": "npx ts-node -e \"require('./src/controllers/adminController').cleanupSystem({body:{type:'logs'}}, {status:()=>({json:console.log}), json:console.log})\"",
+    "system:cleanup-cache": "echo 'Cache cleanup available via admin panel'",
+    "system:cleanup-database": "echo 'Database cleanup available via admin panel'",
+    "system:optimize-memory": "node --expose-gc -e \"global.gc && global.gc(); console.log('Memory optimized')\"",
+    "system:test-scheduler": "npx ts-node -e \"require('./src/services/cleanupScheduler').setupCleanupScheduler().then(r => console.log(r))\"",
+    "system:schedule-logs": "npx ts-node -e \"require('./src/services/cleanupScheduler').setupCleanupScheduler('logs', 2, 0).then(r => console.log(r))\"",
+    "system:schedule-cache": "npx ts-node -e \"require('./src/services/cleanupScheduler').setupCleanupScheduler('cache', 1, 0).then(r => console.log(r))\"",
+    "system:schedule-database": "npx ts-node -e \"require('./src/services/cleanupScheduler').setupCleanupScheduler('database', 4, 0).then(r => console.log(r))\"",
+    "system:schedule-memory": "npx ts-node -e \"require('./src/services/cleanupScheduler').setupCleanupScheduler('memory', 6, 0).then(r => console.log(r))\"",
+    "system:schedule-all": "npx ts-node -e \"const s = require('./src/services/cleanupScheduler'); Promise.all([s.setupCleanupScheduler('images',3,0), s.setupCleanupScheduler('logs',2,0), s.setupCleanupScheduler('cache',1,0), s.setupCleanupScheduler('database',4,0), s.setupCleanupScheduler('memory',6,0)]).then(r => r.forEach(console.log))\"",
+    "system:scheduler-status": "npx ts-node -e \"require('./src/services/cleanupScheduler').getSchedulerStatus().then ? require('./src/services/cleanupScheduler').getSchedulerStatus().then(console.log) : console.log(require('./src/services/cleanupScheduler').getSchedulerStatus())\""
   },
   "dependencies": {
     "@types/archiver": "^6.0.3",

@@ -24,6 +24,7 @@ import commentRoutes from './routes/commentRoutes';
 import seoRoutes from './routes/seoRoutes';
 import scriptsRoutes from './routes/scripts';
 import { noCacheAPI, shortCacheAPI, healthCacheAPI, addVersionHeaders } from './middleware/cacheControl';
+import { initializeSchedulers } from './services/cleanupScheduler';
 
 // Load environment variables
 dotenv.config();
@@ -71,9 +72,6 @@ domain.run(async () => {
     app.use('/_next', express.static(path.join(__dirname, '../public/static')));
     app.use('/static', express.static(path.join(__dirname, '../public/static')));
     
-    // Remove general API rate limiting - we only want to limit specific tools
-    // app.use('/api/', apiLimiter);
-    
     // Apply load balancer middleware for graceful degradation
     app.use('/api/', loadBalancer);
     
@@ -84,14 +82,17 @@ domain.run(async () => {
     // Add version headers for cache busting
     app.use('/api/', addVersionHeaders);
     
-    // Health checks moved to dedicated routes at /api/health
-    // See healthRoutes.ts for implementation
-    
     // Connect to MongoDB in the background, but don't block server startup
     connectDB().catch(err => {
       console.error('MongoDB connection failed, but server will continue:', err);
       // We're not exiting the process anymore, allowing the server to run
       // even without MongoDB for stateless operations
+    });
+    
+    // Initialize scheduler system after database connection attempt
+    initializeSchedulers().catch(err => {
+      console.error('Scheduler initialization failed:', err);
+      // Don't exit - server can run without schedulers
     });
     
     // Upload endpoint for blog images
@@ -211,51 +212,42 @@ domain.run(async () => {
             cleanOldJobs().catch(err => console.error('Failed to clean old jobs:', err));
           }
           
-          // Set up periodic Redis status check to update processing mode
-          let lastKnownRedisStatus = redisStatus;
-          const redisCheckInterval = setInterval(async () => {
+          // Try to clean up dead letter queue periodically
+          setInterval(async () => {
             try {
-              const currentRedisStatus = await testRedisConnection();
-              
-              // If Redis status changed, log the change
-              if (currentRedisStatus !== lastKnownRedisStatus) {
-                console.log(`🔄 Processing mode changed: ${currentRedisStatus ? 'Queued (Redis)' : 'Direct (Local)'}`);
-                
-                // If Redis became available, clean up old jobs
-                if (currentRedisStatus) {
-                  cleanOldJobs().catch(err => console.error('Failed to clean old jobs after Redis became available:', err));
-                }
-                
-                // Update the last known status
-                lastKnownRedisStatus = currentRedisStatus;
+              if (await testRedisConnection()) {
+                await cleanupDeadLetterQueue();
               }
             } catch (err) {
-              // Error already logged in testRedisConnection
+              // Silent fail - don't spam logs
             }
-          }, 10000); // Check every 10 seconds
+          }, 10 * 60 * 1000); // Every 10 minutes
           
-          // Make sure it doesn't prevent the Node.js process from exiting
-          if (redisCheckInterval.unref) {
-            redisCheckInterval.unref();
-          }
         } catch (err) {
-          console.error('Error checking Redis status:', err);
-          console.log('🔄 Processing mode: Direct (Local) - Redis check failed');
+          console.error('Error during Redis status check:', err);
         }
-      }, 2000);
+      }, 3000); // 3 second delay to allow Redis connection to stabilize
     });
     
-    // Handle graceful shutdown
-    process.on('SIGTERM', async () => {
-      console.log('SIGTERM signal received: closing HTTP server');
+    // Graceful shutdown handling
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
       server.close(() => {
-        console.log('HTTP server closed');
+        console.log('Process terminated');
+        process.exit(0);
+      });
+    });
+    
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
         process.exit(0);
       });
     });
     
   } catch (error) {
     console.error('Error during server startup:', error);
-    // Keep the server running despite errors
+    process.exit(1);
   }
 }); 
