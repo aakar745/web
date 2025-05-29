@@ -242,7 +242,7 @@ BlogSchema.pre('save', async function(this: any, next) {
 // ===== DATABASE OPTIMIZATION: INDEXES =====
 
 // 1. Single Field Indexes for Common Queries
-BlogSchema.index({ slug: 1 }, { unique: true }); // Already exists, but ensuring it's documented
+// Note: slug index is already defined as unique in schema, so we don't need to duplicate it here
 BlogSchema.index({ status: 1 }); // For filtering published/draft posts
 BlogSchema.index({ date: -1 }); // For chronological sorting (newest first)
 BlogSchema.index({ views: -1 }); // For popular posts sorting

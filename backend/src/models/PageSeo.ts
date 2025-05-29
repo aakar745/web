@@ -83,7 +83,7 @@ const PageSeoSchema = new mongoose.Schema<IPageSeo>(
 );
 
 // Create index for faster queries
-PageSeoSchema.index({ pagePath: 1 });
+// Note: pagePath index is already defined as unique in schema, so we don't need to duplicate it here
 PageSeoSchema.index({ pageType: 1 });
 PageSeoSchema.index({ isActive: 1 });
 
