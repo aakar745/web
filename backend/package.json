@@ -9,11 +9,15 @@
     "worker": "node worker.js",
     "dev:worker": "nodemon --exec \"node worker.js\"",
     "start:all": "concurrently \"npm run dev\" \"npm run dev:worker\"",
-    "indexes": "ts-node src/scripts/createIndexes.ts",
-    "indexes:create": "ts-node src/scripts/createIndexes.ts create",
-    "indexes:analyze": "ts-node src/scripts/createIndexes.ts analyze",
-    "indexes:cleanup": "ts-node src/scripts/createIndexes.ts cleanup",
-    "db:check-sharding": "ts-node src/scripts/checkSharding.ts"
+    "indexes": "npx ts-node src/scripts/createIndexes.ts",
+    "indexes:create": "npx ts-node src/scripts/createIndexes.ts create",
+    "indexes:analyze": "npx ts-node src/scripts/createIndexes.ts analyze",
+    "indexes:cleanup": "npx ts-node src/scripts/createIndexes.ts cleanup",
+    "db:check-sharding": "npx ts-node src/scripts/checkSharding.ts",
+    "indexes:build": "npx tsc src/scripts/createIndexes.ts --outDir dist/scripts --moduleResolution node --esModuleInterop",
+    "indexes:create-prod": "npm run build && node dist/scripts/createIndexes.js create",
+    "indexes:analyze-prod": "npm run build && node dist/scripts/createIndexes.js analyze",
+    "db:check-sharding-prod": "npm run build && node dist/scripts/checkSharding.js"
   },
   "dependencies": {
     "@types/archiver": "^6.0.3",
