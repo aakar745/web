@@ -187,7 +187,58 @@ BlogSchema.pre('save', async function (next) {
     }
     next();
 });
-// Check if the model already exists to prevent recompilation error
-const Blog = mongoose_1.default.models.Blog || mongoose_1.default.model('Blog', BlogSchema);
+// ===== DATABASE OPTIMIZATION: INDEXES =====
+// 1. Single Field Indexes for Common Queries
+BlogSchema.index({ slug: 1 }, { unique: true }); // Already exists, but ensuring it's documented
+BlogSchema.index({ status: 1 }); // For filtering published/draft posts
+BlogSchema.index({ date: -1 }); // For chronological sorting (newest first)
+BlogSchema.index({ views: -1 }); // For popular posts sorting
+BlogSchema.index({ likes: -1 }); // For most liked posts
+BlogSchema.index({ createdAt: -1 }); // For admin dashboard sorting
+BlogSchema.index({ category: 1 }); // For category filtering
+BlogSchema.index({ author: 1 }); // For author's posts
+BlogSchema.index({ scheduledPublishDate: 1 }); // For scheduled publishing
+// 2. Compound Indexes for Complex Queries
+BlogSchema.index({ status: 1, date: -1 }); // Published posts by date
+BlogSchema.index({ status: 1, category: 1, date: -1 }); // Category + published + date
+BlogSchema.index({ status: 1, views: -1 }); // Popular published posts
+BlogSchema.index({ author: 1, status: 1, date: -1 }); // Author's posts by status and date
+BlogSchema.index({ category: 1, status: 1, date: -1 }); // Category posts (published, by date)
+// 3. Text Search Index for Full-Text Search
+BlogSchema.index({
+    title: 'text',
+    excerpt: 'text',
+    content: 'text',
+    tags: 'text',
+    metaKeywords: 'text'
+}, {
+    weights: {
+        title: 10, // Title matches are most important
+        excerpt: 5, // Excerpt matches are quite important
+        tags: 3, // Tag matches are moderately important
+        content: 1, // Content matches are least important
+        metaKeywords: 2 // SEO keywords have moderate importance
+    },
+    name: 'blog_text_search'
+});
+// 4. Sparse Indexes for Optional Fields
+BlogSchema.index({ featuredImage: 1 }, { sparse: true }); // Only index posts with images
+BlogSchema.index({ canonicalUrl: 1 }, { sparse: true }); // Only index posts with canonical URLs
+// 5. Partial Indexes for Conditional Data
+BlogSchema.index({ scheduledPublishDate: 1 }, {
+    partialFilterExpression: {
+        status: 'scheduled',
+        scheduledPublishDate: { $exists: true }
+    },
+    name: 'scheduled_posts_index'
+});
+// 6. Analytics Optimization - TTL Index for visitor tracking
+BlogSchema.index({ visitorIPs: 1 }, { sparse: true }); // For visitor tracking
+BlogSchema.index({ likedByIPs: 1 }, { sparse: true }); // For like tracking
+// 7. Array Field Indexes
+BlogSchema.index({ tags: 1 }); // For tag-based filtering
+BlogSchema.index({ metaKeywords: 1 }, { sparse: true }); // For SEO keyword searches
+// ===== END DATABASE OPTIMIZATION =====
+const Blog = mongoose_1.default.model('Blog', BlogSchema);
 exports.default = Blog;
 //# sourceMappingURL=Blog.js.map

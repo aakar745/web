@@ -26,6 +26,7 @@ const monitoringRoutes_1 = __importDefault(require("./routes/monitoringRoutes"))
 const commentRoutes_1 = __importDefault(require("./routes/commentRoutes"));
 const seoRoutes_1 = __importDefault(require("./routes/seoRoutes"));
 const scripts_1 = __importDefault(require("./routes/scripts"));
+const cacheControl_1 = require("./middleware/cacheControl");
 // Load environment variables
 dotenv_1.default.config();
 // Create our express app early
@@ -66,6 +67,11 @@ domain.run(async () => {
         // app.use('/api/', apiLimiter);
         // Apply load balancer middleware for graceful degradation
         app.use('/api/', loadBalancer_1.loadBalancer);
+        // ===== CACHE CONTROL FIX =====
+        // Prevent browser caching of API responses to avoid stale data issues
+        app.use('/api/', cacheControl_1.noCacheAPI);
+        // Add version headers for cache busting
+        app.use('/api/', cacheControl_1.addVersionHeaders);
         // Health checks moved to dedicated routes at /api/health
         // See healthRoutes.ts for implementation
         // Connect to MongoDB in the background, but don't block server startup
@@ -112,12 +118,12 @@ domain.run(async () => {
                 }
             });
         });
-        // Mount routes
+        // Mount routes with appropriate cache control
         app.use('/api/auth', authRoutes_1.default);
         app.use('/api/blogs', blogRoutes_1.default);
         app.use('/api/images', imageRoutes_1.default);
         app.use('/api/media', mediaRoutes_1.default);
-        app.use('/api/health', healthRoutes_1.default);
+        app.use('/api/health', cacheControl_1.healthCacheAPI, healthRoutes_1.default); // Health checks can cache briefly
         app.use('/api/monitoring', monitoringRoutes_1.default);
         app.use('/api/admin', adminRoutes_1.default);
         app.use('/api/comments', commentRoutes_1.default);
