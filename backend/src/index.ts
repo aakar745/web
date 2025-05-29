@@ -23,6 +23,7 @@ import monitoringRoutes from './routes/monitoringRoutes';
 import commentRoutes from './routes/commentRoutes';
 import seoRoutes from './routes/seoRoutes';
 import scriptsRoutes from './routes/scripts';
+import { noCacheAPI, shortCacheAPI, healthCacheAPI, addVersionHeaders } from './middleware/cacheControl';
 
 // Load environment variables
 dotenv.config();
@@ -75,6 +76,13 @@ domain.run(async () => {
     
     // Apply load balancer middleware for graceful degradation
     app.use('/api/', loadBalancer);
+    
+    // ===== CACHE CONTROL FIX =====
+    // Prevent browser caching of API responses to avoid stale data issues
+    app.use('/api/', noCacheAPI);
+    
+    // Add version headers for cache busting
+    app.use('/api/', addVersionHeaders);
     
     // Health checks moved to dedicated routes at /api/health
     // See healthRoutes.ts for implementation
@@ -132,12 +140,12 @@ domain.run(async () => {
         });
       });
     
-    // Mount routes
+    // Mount routes with appropriate cache control
     app.use('/api/auth', authRoutes);
     app.use('/api/blogs', blogRoutes);
     app.use('/api/images', imageRoutes);
     app.use('/api/media', mediaRoutes);
-    app.use('/api/health', healthRoutes);
+    app.use('/api/health', healthCacheAPI, healthRoutes); // Health checks can cache briefly
     app.use('/api/monitoring', monitoringRoutes);
     app.use('/api/admin', adminRoutes);
     app.use('/api/comments', commentRoutes);
