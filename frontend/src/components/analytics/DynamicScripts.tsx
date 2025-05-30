@@ -36,6 +36,63 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
   const [error, setError] = useState<string | null>(null)
   const pathname = usePathname()
 
+  // Improved script content extraction function
+  const extractScriptContent = (content: string): string => {
+    try {
+      // If content doesn't contain script tags, return as-is
+      if (!content.includes('<script')) {
+        return content.trim()
+      }
+
+      // Create a temporary DOM element to properly parse HTML
+      if (typeof window !== 'undefined') {
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = content
+        
+        // Find all script tags and extract their text content
+        const scriptTags = tempDiv.querySelectorAll('script')
+        let extractedScript = ''
+        
+        scriptTags.forEach(script => {
+          // Get the text content of each script tag
+          const scriptText = script.textContent || script.innerHTML || ''
+          if (scriptText.trim()) {
+            extractedScript += scriptText.trim() + '\n'
+          }
+        })
+        
+        return extractedScript.trim()
+      }
+      
+      // Fallback for server-side: use regex with better pattern matching
+      const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
+      let extractedContent = ''
+      let match
+      
+      while ((match = scriptRegex.exec(content)) !== null) {
+        const scriptContent = match[1]
+        if (scriptContent && scriptContent.trim()) {
+          extractedContent += scriptContent.trim() + '\n'
+        }
+      }
+      
+      // Remove HTML comments and clean up
+      return extractedContent
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .trim()
+        
+    } catch (error) {
+      console.error('Error extracting script content:', error)
+      // Fallback to simple text extraction if parsing fails
+      return content
+        .replace(/<script[^>]*>/gi, '')
+        .replace(/<\/script>/gi, '')
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/<[^>]*>/g, '') // Remove any remaining HTML tags
+        .trim()
+    }
+  }
+
   // Script load handlers
   const handleScriptLoad = useCallback((scriptId: string, platform: string) => {
     scriptLoadStatus.set(scriptId, 'loaded')
@@ -147,61 +204,44 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         // Mark script as loading
         scriptLoadStatus.set(scriptId, 'loading')
 
-        // Check if content contains script tags
-        if (script.content.includes('<script')) {
-          // Extract JavaScript content from HTML script tags
-          const scriptContent = script.content
-            .replace(/<script[^>]*>/gi, '')
-            .replace(/<\/script>/gi, '')
-            .replace(/<!--/g, '')
-            .replace(/-->/g, '')
-            .trim()
-
-          // Detect the platform for better logging
-          const isGTMScript = script.content.match(/GTM-[A-Z0-9]+/) && script.platform === 'Google Tag Manager'
-          const isFacebookPixel = script.content.includes('fbq') || script.platform === 'Facebook Pixel'
-          const isGoogleAnalytics = script.content.includes('gtag') || script.platform === 'Google Analytics'
-          
-          // Log the script being loaded
-          if (isGTMScript) {
-            const gtmId = script.content.match(/GTM-[A-Z0-9]+/)?.[0]
-            console.log(`🏷️  Loading GTM script in ${placement}:`, gtmId)
-          } else if (isFacebookPixel) {
-            console.log(`📘 Loading Facebook Pixel script in ${placement}`)
-          } else if (isGoogleAnalytics) {
-            console.log(`📊 Loading Google Analytics script in ${placement}`)
-          } else {
-            console.log(`📜 Loading ${script.platform} script in ${placement}`)
-          }
-
-          // Use Next.js Script component with extracted content
-          return (
-            <Script
-              key={scriptId}
-              id={`script-${script._id}`}
-              strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
-              onLoad={() => handleScriptLoad(scriptId, script.platform)}
-              onError={() => handleScriptError(scriptId, script.platform)}
-            >
-              {scriptContent}
-            </Script>
-          )
-        } else {
-          // Pure JavaScript - use Next.js Script component
-          console.log(`⚡ Loading pure JS ${script.platform} script in ${placement}`)
-          
-          return (
-            <Script
-              key={scriptId}
-              id={`dynamic-script-${script._id}`}
-              strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
-              onLoad={() => handleScriptLoad(scriptId, script.platform)}
-              onError={() => handleScriptError(scriptId, script.platform)}
-            >
-              {script.content}
-            </Script>
-          )
+        // Extract and clean script content
+        const cleanScriptContent = extractScriptContent(script.content)
+        
+        // Validate that we have actual JavaScript content
+        if (!cleanScriptContent || cleanScriptContent.trim().length === 0) {
+          console.warn(`⚠️ Empty script content for ${script.platform}:`, scriptId)
+          return null
         }
+
+        // Detect the platform for better logging
+        const isGTMScript = script.content.match(/GTM-[A-Z0-9]+/) && script.platform === 'Google Tag Manager'
+        const isFacebookPixel = script.content.includes('fbq') || script.platform === 'Facebook Pixel'
+        const isGoogleAnalytics = script.content.includes('gtag') || script.platform === 'Google Analytics'
+        
+        // Log the script being loaded
+        if (isGTMScript) {
+          const gtmId = script.content.match(/GTM-[A-Z0-9]+/)?.[0]
+          console.log(`🏷️  Loading GTM script in ${placement}:`, gtmId)
+        } else if (isFacebookPixel) {
+          console.log(`📘 Loading Facebook Pixel script in ${placement}`)
+        } else if (isGoogleAnalytics) {
+          console.log(`📊 Loading Google Analytics script in ${placement}`)
+        } else {
+          console.log(`📜 Loading ${script.platform} script in ${placement}`)
+        }
+
+        // Use Next.js Script component with cleaned content
+        return (
+          <Script
+            key={scriptId}
+            id={`script-${script._id}`}
+            strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
+            onLoad={() => handleScriptLoad(scriptId, script.platform)}
+            onError={() => handleScriptError(scriptId, script.platform)}
+          >
+            {cleanScriptContent}
+          </Script>
+        )
       })}
     </>
   )
@@ -218,4 +258,4 @@ export function BodyScripts() {
 
 export function FooterScripts() {
   return <DynamicScripts placement="footer" />
-} 
+}

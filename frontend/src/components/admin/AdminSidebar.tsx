@@ -85,12 +85,6 @@ export function AdminSidebar({ onToggle }: AdminSidebarProps) {
       color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
     },
     {
-      title: 'Image Tools',
-      href: '/dashboard/image-tools',
-      icon: <ImageIcon className="h-5 w-5" />,
-      color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
-    },
-    {
       title: 'Monitoring',
       href: '/dashboard/monitoring',
       icon: <Activity className="h-5 w-5" />,
