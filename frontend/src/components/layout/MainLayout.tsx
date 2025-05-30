@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { 
   Twitter, 
@@ -9,12 +10,16 @@ import {
   Linkedin, 
   Instagram, 
   Mail,
-  PhoneCall,
   Menu,
   X,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  Zap,
+  Maximize,
+  RefreshCw,
+  Crop,
+  ImageIcon
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -59,66 +64,179 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-2" onClick={closeMenu}>
-                <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">ToolsCandy</span>
+              <Link href="/" className="flex items-center space-x-2 group" onClick={closeMenu}>
+                {/* Candy Logo Icon */}
+                <motion.div 
+                  className="relative"
+                  whileHover={{ 
+                    rotate: [0, -10, 10, -5, 5, 0],
+                    scale: 1.05
+                  }}
+                  transition={{ 
+                    duration: 0.6,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-violet-500 shadow-lg flex items-center justify-center relative overflow-hidden">
+                    {/* Candy Shine Effect */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent rounded-full"
+                      animate={{ 
+                        rotate: [0, 360] 
+                      }}
+                      transition={{ 
+                        duration: 8, 
+                        repeat: Infinity, 
+                        ease: "linear" 
+                      }}
+                    />
+                    {/* Lollipop Icon */}
+                    <span className="text-white text-sm sm:text-base font-bold relative z-10">🍭</span>
+                  </div>
+                  
+                  {/* Sparkle Effects */}
+                  <motion.div
+                    className="absolute -top-1 -right-1 text-yellow-400"
+                    animate={{ 
+                      scale: [0, 1, 0],
+                      rotate: [0, 180, 360]
+                    }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity, 
+                      delay: 0 
+                    }}
+                  >
+                    ✨
+                  </motion.div>
+                  <motion.div
+                    className="absolute -bottom-1 -left-1 text-pink-400 text-xs"
+                    animate={{ 
+                      scale: [0, 1, 0],
+                      rotate: [0, -180, -360]
+                    }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity, 
+                      delay: 1 
+                    }}
+                  >
+                    ✨
+                  </motion.div>
+                </motion.div>
+                
+                {/* Brand Text */}
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1">
+                  <motion.span 
+                    className="font-bold text-lg sm:text-xl bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent group-hover:from-pink-500 group-hover:via-purple-500 group-hover:to-violet-500 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    Tools
+                  </motion.span>
+                  <motion.span 
+                    className="font-bold text-lg sm:text-xl bg-gradient-to-r from-orange-500 via-pink-500 to-rose-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:via-pink-400 group-hover:to-rose-400 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    Candy
+                  </motion.span>
+                </div>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-1 lg:space-x-3">
               <div className="relative group">
-                <button 
+                <motion.button 
                   onClick={toggleToolsDropdown}
-                  className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-100 dark:border-purple-800/50 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/50 dark:hover:to-pink-900/50 transition-all duration-300 shadow-sm hover:shadow-md"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <span>Image Tools</span>
-                  <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-200 ${isToolsDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
+                  <ImageIcon className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+                  <span className="bg-gradient-to-r from-purple-700 to-pink-600 dark:from-purple-300 dark:to-pink-300 bg-clip-text text-transparent font-semibold">Image Tools</span>
+                  <ChevronDown className={`ml-2 h-4 w-4 text-purple-600 dark:text-purple-400 transition-transform duration-300 ${isToolsDropdownOpen ? 'rotate-180' : ''}`} />
+                </motion.button>
                 
-                <div className={`absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-popover border border-border overflow-hidden transition-all duration-200 ease-in-out origin-top-left ${isToolsDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-                  <div className="py-1">
+                <motion.div 
+                  className={`absolute left-0 mt-3 w-64 rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden backdrop-blur-xl ${isToolsDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                  initial={false}
+                  animate={isToolsDropdownOpen ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: -10 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <div className="p-2">
+                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-3 py-2 mb-1">
+                      Choose Your Tool
+                    </div>
+                    
                     <Link
                       href="/image/compress"
-                      className={`block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${isActiveLink('/image/compress') ? 'bg-accent/50 text-primary' : ''}`}
+                      className={`group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActiveLink('/image/compress') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
                       onClick={() => {
                         setIsToolsDropdownOpen(false)
                         closeMenu()
                       }}
                     >
-                      Compress
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white mr-3 group-hover:scale-110 transition-transform duration-200">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">Compress</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Reduce file size</div>
+                      </div>
                     </Link>
+                    
                     <Link
                       href="/image/resize"
-                      className={`block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${isActiveLink('/image/resize') ? 'bg-accent/50 text-primary' : ''}`}
+                      className={`group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActiveLink('/image/resize') ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
                       onClick={() => {
                         setIsToolsDropdownOpen(false)
                         closeMenu()
                       }}
                     >
-                      Resize
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white mr-3 group-hover:scale-110 transition-transform duration-200">
+                        <Maximize className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">Resize</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Change dimensions</div>
+                      </div>
                     </Link>
+                    
                     <Link
                       href="/image/convert"
-                      className={`block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${isActiveLink('/image/convert') ? 'bg-accent/50 text-primary' : ''}`}
+                      className={`group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActiveLink('/image/convert') ? 'bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/50 dark:to-violet-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
                       onClick={() => {
                         setIsToolsDropdownOpen(false)
                         closeMenu()
                       }}
                     >
-                      Convert
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white mr-3 group-hover:scale-110 transition-transform duration-200">
+                        <RefreshCw className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">Convert</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Change format</div>
+                      </div>
                     </Link>
+                    
                     <Link
                       href="/image/crop"
-                      className={`block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${isActiveLink('/image/crop') ? 'bg-accent/50 text-primary' : ''}`}
+                      className={`group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActiveLink('/image/crop') ? 'bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/50 dark:to-red-950/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
                       onClick={() => {
                         setIsToolsDropdownOpen(false)
                         closeMenu()
                       }}
                     >
-                      Crop
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white mr-3 group-hover:scale-110 transition-transform duration-200">
+                        <Crop className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">Crop</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Trim & cut</div>
+                      </div>
                     </Link>
                   </div>
-                </div>
+                </motion.div>
               </div>
               
               <Link
@@ -191,44 +309,82 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
           <div className="px-2 pt-2 pb-3 space-y-1 border-t">
             <div className="space-y-1 px-3">
-              <button
+              <motion.button
                 onClick={toggleToolsDropdown}
-                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-100 dark:border-purple-800/50 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/50 dark:hover:to-pink-900/50 transition-all duration-300"
+                whileTap={{ scale: 0.98 }}
               >
-                <span>Image Tools</span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isToolsDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
+                <div className="flex items-center">
+                  <ImageIcon className="w-4 h-4 mr-3 text-purple-600 dark:text-purple-400" />
+                  <span className="bg-gradient-to-r from-purple-700 to-pink-600 dark:from-purple-300 dark:to-pink-300 bg-clip-text text-transparent font-semibold">Image Tools</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-purple-600 dark:text-purple-400 transition-transform duration-300 ${isToolsDropdownOpen ? 'rotate-180' : ''}`} />
+              </motion.button>
               
-              <div className={`pl-4 ${isToolsDropdownOpen ? 'block' : 'hidden'}`}>
-                <Link
-                  href="/image/compress"
-                  className={`block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground ${isActiveLink('/image/compress') ? 'bg-accent/50 text-primary' : ''}`}
-                  onClick={closeMenu}
-                >
-                  Compress
-                </Link>
-                <Link
-                  href="/image/resize"
-                  className={`block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground ${isActiveLink('/image/resize') ? 'bg-accent/50 text-primary' : ''}`}
-                  onClick={closeMenu}
-                >
-                  Resize
-                </Link>
-                <Link
-                  href="/image/convert"
-                  className={`block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground ${isActiveLink('/image/convert') ? 'bg-accent/50 text-primary' : ''}`}
-                  onClick={closeMenu}
-                >
-                  Convert
-                </Link>
-                <Link
-                  href="/image/crop"
-                  className={`block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground ${isActiveLink('/image/crop') ? 'bg-accent/50 text-primary' : ''}`}
-                  onClick={closeMenu}
-                >
-                  Crop
-                </Link>
-              </div>
+              <motion.div 
+                className={`overflow-hidden ${isToolsDropdownOpen ? 'max-h-96' : 'max-h-0'}`}
+                initial={false}
+                animate={isToolsDropdownOpen ? { maxHeight: 384 } : { maxHeight: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <div className="pt-2 pb-1 space-y-1">
+                  <Link
+                    href="/image/compress"
+                    className={`group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ml-2 mr-1 ${isActiveLink('/image/compress') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
+                    onClick={closeMenu}
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white mr-3 group-active:scale-95 transition-transform duration-150">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Compress</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Reduce file size</div>
+                    </div>
+                  </Link>
+                  
+                  <Link
+                    href="/image/resize"
+                    className={`group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ml-2 mr-1 ${isActiveLink('/image/resize') ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
+                    onClick={closeMenu}
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white mr-3 group-active:scale-95 transition-transform duration-150">
+                      <Maximize className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Resize</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Change dimensions</div>
+                    </div>
+                  </Link>
+                  
+                  <Link
+                    href="/image/convert"
+                    className={`group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ml-2 mr-1 ${isActiveLink('/image/convert') ? 'bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/50 dark:to-violet-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
+                    onClick={closeMenu}
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white mr-3 group-active:scale-95 transition-transform duration-150">
+                      <RefreshCw className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Convert</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Change format</div>
+                    </div>
+                  </Link>
+                  
+                  <Link
+                    href="/image/crop"
+                    className={`group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ml-2 mr-1 ${isActiveLink('/image/crop') ? 'bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/50 dark:to-red-950/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
+                    onClick={closeMenu}
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white mr-3 group-active:scale-95 transition-transform duration-150">
+                      <Crop className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Crop</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Trim & cut</div>
+                    </div>
+                  </Link>
+                </div>
+              </motion.div>
             </div>
             
             <Link
@@ -311,7 +467,83 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className="container py-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="font-bold text-lg mb-4">About ToolsCandy</h3>
+              <div className="flex items-center space-x-2 group mb-4">
+                {/* Candy Logo Icon - Footer Version */}
+                <motion.div 
+                  className="relative"
+                  whileHover={{ 
+                    rotate: [0, -10, 10, -5, 5, 0],
+                    scale: 1.05
+                  }}
+                  transition={{ 
+                    duration: 0.6,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-violet-500 shadow-lg flex items-center justify-center relative overflow-hidden">
+                    {/* Candy Shine Effect */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent rounded-full"
+                      animate={{ 
+                        rotate: [0, 360] 
+                      }}
+                      transition={{ 
+                        duration: 8, 
+                        repeat: Infinity, 
+                        ease: "linear" 
+                      }}
+                    />
+                    {/* Lollipop Icon */}
+                    <span className="text-white text-xs font-bold relative z-10">🍭</span>
+                  </div>
+                  
+                  {/* Sparkle Effects */}
+                  <motion.div
+                    className="absolute -top-0.5 -right-0.5 text-yellow-400 text-xs"
+                    animate={{ 
+                      scale: [0, 1, 0],
+                      rotate: [0, 180, 360]
+                    }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity, 
+                      delay: 0 
+                    }}
+                  >
+                    ✨
+                  </motion.div>
+                  <motion.div
+                    className="absolute -bottom-0.5 -left-0.5 text-pink-400 text-xs"
+                    animate={{ 
+                      scale: [0, 1, 0],
+                      rotate: [0, -180, -360]
+                    }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity, 
+                      delay: 1 
+                    }}
+                  >
+                    ✨
+                  </motion.div>
+                </motion.div>
+                
+                {/* Brand Text */}
+                <div className="flex items-baseline space-x-1">
+                  <motion.span 
+                    className="font-bold text-base bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent group-hover:from-pink-500 group-hover:via-purple-500 group-hover:to-violet-500 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    Tools
+                  </motion.span>
+                  <motion.span 
+                    className="font-bold text-base bg-gradient-to-r from-orange-500 via-pink-500 to-rose-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:via-pink-400 group-hover:to-rose-400 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    Candy
+                  </motion.span>
+                </div>
+              </div>
               <p className="text-sm text-muted-foreground mb-4">
                 ToolsCandy provides powerful, free image processing tools that work right in your browser. Optimize, resize, convert, and crop images with complete privacy.
               </p>
@@ -422,9 +654,56 @@ export function MainLayout({ children }: MainLayoutProps) {
           </div>
           
           <div className="pt-6 border-t flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ToolsCandy. All rights reserved.
-            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>© {new Date().getFullYear()}</span>
+              
+              {/* Small Footer Logo */}
+              <div className="flex items-center space-x-1 group">
+                <motion.div 
+                  className="relative"
+                  whileHover={{ 
+                    rotate: [0, -5, 5, 0],
+                    scale: 1.05
+                  }}
+                  transition={{ 
+                    duration: 0.4,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-violet-500 shadow-sm flex items-center justify-center relative overflow-hidden">
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent rounded-full"
+                      animate={{ 
+                        rotate: [0, 360] 
+                      }}
+                      transition={{ 
+                        duration: 8, 
+                        repeat: Infinity, 
+                        ease: "linear" 
+                      }}
+                    />
+                    <span className="text-white text-xs relative z-10">🍭</span>
+                  </div>
+                </motion.div>
+                
+                <div className="flex items-baseline">
+                  <motion.span 
+                    className="text-xs font-medium bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    Tools
+                  </motion.span>
+                  <motion.span 
+                    className="text-xs font-medium bg-gradient-to-r from-orange-500 via-pink-500 to-rose-500 bg-clip-text text-transparent"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    Candy
+                  </motion.span>
+                </div>
+              </div>
+              
+              <span>. All rights reserved.</span>
+            </div>
             <div className="flex items-center gap-6">
               <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 About Us
