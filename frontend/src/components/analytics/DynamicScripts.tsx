@@ -149,12 +149,8 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
 
         // Check if content contains script tags
         if (script.content.includes('<script')) {
-          // For ALL HTML script tags (GTM, Facebook Pixel, GA, etc.) - use Script component for better loading
-          const scriptContent = script.content
-            .replace(/<script[^>]*>/gi, '')
-            .replace(/<\/script>/gi, '')
-            .trim()
-
+          // For HTML script tags, we need to render them directly as HTML
+          
           // Detect the platform for better logging
           const isGTMScript = script.content.match(/GTM-[A-Z0-9]+/) && script.platform === 'Google Tag Manager'
           const isFacebookPixel = script.content.includes('fbq') || script.platform === 'Facebook Pixel'
@@ -172,15 +168,16 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
             console.log(`📜 Loading ${script.platform} script in ${placement}`)
           }
 
-          // Use Next.js Script component for ALL HTML script tags for consistent loading
+          // Mark as loaded after a brief delay (scripts with HTML tags execute immediately)
+          setTimeout(() => {
+            handleScriptLoad(scriptId, script.platform)
+          }, 100)
+
+          // For HTML script tags, render directly as HTML
           return (
-            <Script
+            <div
               key={scriptId}
-              id={`script-${script._id}`}
-              strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
-              onLoad={() => handleScriptLoad(scriptId, script.platform)}
-              onError={() => handleScriptError(scriptId, script.platform)}
-              dangerouslySetInnerHTML={{ __html: scriptContent }}
+              dangerouslySetInnerHTML={{ __html: script.content }}
             />
           )
         } else {
