@@ -85,6 +85,7 @@ export default function ScriptsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingScript, setEditingScript] = useState<Script | null>(null)
   const [expandedScripts, setExpandedScripts] = useState<Set<string>>(new Set())
+  const [testResults, setTestResults] = useState<{[key: string]: any}>({})
   
   // Form state
   const [formData, setFormData] = useState({
@@ -124,6 +125,73 @@ export default function ScriptsPage() {
   useEffect(() => {
     fetchScripts()
   }, [])
+
+  // Test script system functionality
+  const testScriptSystem = async () => {
+    try {
+      const testPath = '/'
+      const results: {[key: string]: any} = {}
+      
+      // Test each placement
+      for (const placement of ['head', 'body', 'footer']) {
+        console.log(`Testing ${placement} scripts...`)
+        
+        const response = await apiRequest<{status: string; data: Script[]}>(
+          `/scripts/public?pathname=${encodeURIComponent(testPath)}&placement=${placement}`,
+          {
+            requireAuth: false,
+            noRedirect: true
+          }
+        )
+        
+        results[placement] = {
+          success: response.status === 'success',
+          count: response.data?.length || 0,
+          scripts: response.data?.map(s => ({
+            platform: s.platform,
+            priority: s.priority,
+            hasGTM: s.content.includes('GTM-'),
+            hasFacebookPixel: s.content.includes('fbq') || s.platform === 'Facebook Pixel',
+            hasGoogleAnalytics: s.content.includes('gtag') || s.platform === 'Google Analytics',
+            hasScript: s.content.includes('<script'),
+            isActive: s.isActive
+          })) || []
+        }
+      }
+      
+      setTestResults(results)
+      
+      // Count total tracking scripts
+      const totalScripts = Object.values(results).reduce((sum: number, r: any) => sum + r.count, 0)
+      const trackingPlatforms = new Set()
+      
+      Object.values(results).forEach((r: any) => {
+        r.scripts.forEach((s: any) => {
+          if (s.hasGTM) trackingPlatforms.add('GTM')
+          if (s.hasFacebookPixel) trackingPlatforms.add('Facebook Pixel')  
+          if (s.hasGoogleAnalytics) trackingPlatforms.add('Google Analytics')
+          if (!s.hasGTM && !s.hasFacebookPixel && !s.hasGoogleAnalytics) trackingPlatforms.add(s.platform)
+        })
+      })
+      
+      toast({
+        title: 'Test Complete',
+        description: `Found ${totalScripts} scripts across ${trackingPlatforms.size} platforms. Check console for details.`,
+        variant: 'default'
+      })
+      
+      console.log('📊 Script System Test Results:', results)
+      console.log('🎯 Detected Platforms:', Array.from(trackingPlatforms))
+      
+    } catch (error) {
+      console.error('Test failed:', error)
+      toast({
+        title: 'Test Failed',
+        description: 'Could not test script system',
+        variant: 'destructive'
+      })
+    }
+  }
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -275,157 +343,168 @@ export default function ScriptsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Scripts Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Dynamic Scripts</h1>
           <p className="text-muted-foreground mt-2">
-            Manage tracking scripts and analytics for your website. Scripts are automatically excluded from admin pages.
+            Manage analytics scripts, tracking codes, and custom JavaScript for your website.
           </p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Script
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingScript ? 'Edit Script' : 'Add New Script'}</DialogTitle>
-              <DialogDescription>
-                {editingScript ? 'Update the script configuration' : 'Add a new tracking script or analytics code'}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={testScriptSystem}
+            disabled={loading}
+          >
+            <Monitor className="h-4 w-4 mr-2" />
+            Test System
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Script
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editingScript ? 'Edit Script' : 'Add New Script'}</DialogTitle>
+                <DialogDescription>
+                  {editingScript ? 'Update the script configuration' : 'Add a new tracking script or analytics code'}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Script Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="e.g., Google Analytics"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="platform">Platform</Label>
+                    <Select value={formData.platform} onValueChange={(value) => setFormData({...formData, platform: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLATFORMS.map(platform => (
+                          <SelectItem key={platform} value={platform}>{platform}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="name">Script Name *</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g., Google Analytics"
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    placeholder="Brief description of what this script does"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="content">Script Content *</Label>
+                  <Textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) => setFormData({...formData, content: e.target.value})}
+                    placeholder="Paste your script here (HTML with <script> tags or pure JavaScript)"
+                    className="min-h-[120px] font-mono text-sm"
                     required
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="platform">Platform</Label>
-                  <Select value={formData.platform} onValueChange={(value) => setFormData({...formData, platform: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PLATFORMS.map(platform => (
-                        <SelectItem key={platform} value={platform}>{platform}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Brief description of what this script does"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">Script Content *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  placeholder="Paste your script here (HTML with <script> tags or pure JavaScript)"
-                  className="min-h-[120px] font-mono text-sm"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="placement">Placement *</Label>
-                  <Select value={formData.placement} onValueChange={(value: any) => setFormData({...formData, placement: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PLACEMENTS.map(placement => (
-                        <SelectItem key={placement.value} value={placement.value}>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              {getPlacementIcon(placement.value)}
-                              {placement.label}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="placement">Placement *</Label>
+                    <Select value={formData.placement} onValueChange={(value: any) => setFormData({...formData, placement: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLACEMENTS.map(placement => (
+                          <SelectItem key={placement.value} value={placement.value}>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                {getPlacementIcon(placement.value)}
+                                {placement.label}
+                              </div>
+                              <div className="text-xs text-muted-foreground">{placement.description}</div>
                             </div>
-                            <div className="text-xs text-muted-foreground">{placement.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Priority (1-1000)</Label>
+                    <Input
+                      id="priority"
+                      type="number"
+                      min="1"
+                      max="1000"
+                      value={formData.priority}
+                      onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value) || 100})}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="priority">Priority (1-1000)</Label>
+                  <Label htmlFor="targetPages">Target Pages (optional)</Label>
                   <Input
-                    id="priority"
-                    type="number"
-                    min="1"
-                    max="1000"
-                    value={formData.priority}
-                    onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value) || 100})}
+                    id="targetPages"
+                    value={formData.targetPages}
+                    onChange={(e) => setFormData({...formData, targetPages: e.target.value})}
+                    placeholder="/, /blog, /tools (comma-separated, leave empty for all public pages)"
                   />
+                  <p className="text-xs text-muted-foreground">Specific pages to target. Leave empty to target all public pages.</p>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="targetPages">Target Pages (optional)</Label>
-                <Input
-                  id="targetPages"
-                  value={formData.targetPages}
-                  onChange={(e) => setFormData({...formData, targetPages: e.target.value})}
-                  placeholder="/, /blog, /tools (comma-separated, leave empty for all public pages)"
-                />
-                <p className="text-xs text-muted-foreground">Specific pages to target. Leave empty to target all public pages.</p>
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="excludePages">Exclude Pages</Label>
+                  <Input
+                    id="excludePages"
+                    value={formData.excludePages}
+                    onChange={(e) => setFormData({...formData, excludePages: e.target.value})}
+                    placeholder="/admin, /api"
+                  />
+                  <p className="text-xs text-muted-foreground">Pages to exclude (admin and API pages are always excluded)</p>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="excludePages">Exclude Pages</Label>
-                <Input
-                  id="excludePages"
-                  value={formData.excludePages}
-                  onChange={(e) => setFormData({...formData, excludePages: e.target.value})}
-                  placeholder="/admin, /api"
-                />
-                <p className="text-xs text-muted-foreground">Pages to exclude (admin and API pages are always excluded)</p>
-              </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isActive"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
+                  />
+                  <Label htmlFor="isActive">Enable script</Label>
+                </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
-                />
-                <Label htmlFor="isActive">Enable script</Label>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Saving...' : editingScript ? 'Update Script' : 'Add Script'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? 'Saving...' : editingScript ? 'Update Script' : 'Add Script'}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Scripts List */}
