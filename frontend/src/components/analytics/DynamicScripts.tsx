@@ -149,8 +149,14 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
 
         // Check if content contains script tags
         if (script.content.includes('<script')) {
-          // For HTML script tags, we need to render them directly as HTML
-          
+          // Extract JavaScript content from HTML script tags
+          const scriptContent = script.content
+            .replace(/<script[^>]*>/gi, '')
+            .replace(/<\/script>/gi, '')
+            .replace(/<!--/g, '')
+            .replace(/-->/g, '')
+            .trim()
+
           // Detect the platform for better logging
           const isGTMScript = script.content.match(/GTM-[A-Z0-9]+/) && script.platform === 'Google Tag Manager'
           const isFacebookPixel = script.content.includes('fbq') || script.platform === 'Facebook Pixel'
@@ -168,17 +174,17 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
             console.log(`📜 Loading ${script.platform} script in ${placement}`)
           }
 
-          // Mark as loaded after a brief delay (scripts with HTML tags execute immediately)
-          setTimeout(() => {
-            handleScriptLoad(scriptId, script.platform)
-          }, 100)
-
-          // For HTML script tags, render directly as HTML
+          // Use Next.js Script component with extracted content
           return (
-            <div
+            <Script
               key={scriptId}
-              dangerouslySetInnerHTML={{ __html: script.content }}
-            />
+              id={`script-${script._id}`}
+              strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
+              onLoad={() => handleScriptLoad(scriptId, script.platform)}
+              onError={() => handleScriptError(scriptId, script.platform)}
+            >
+              {scriptContent}
+            </Script>
           )
         } else {
           // Pure JavaScript - use Next.js Script component
