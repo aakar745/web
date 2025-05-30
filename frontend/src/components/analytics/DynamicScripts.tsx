@@ -44,52 +44,83 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         return content.trim()
       }
 
-      // Create a temporary DOM element to properly parse HTML
-      if (typeof window !== 'undefined') {
-        const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = content
+      // For production SSR robustness, prioritize server-side regex parsing
+      // This ensures consistent behavior between development and production
+      const extractWithRegex = (): string => {
+        const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
+        let extractedContent = ''
+        let match
         
-        // Find all script tags and extract their text content
-        const scriptTags = tempDiv.querySelectorAll('script')
-        let extractedScript = ''
-        
-        scriptTags.forEach(script => {
-          // Get the text content of each script tag
-          const scriptText = script.textContent || script.innerHTML || ''
-          if (scriptText.trim()) {
-            extractedScript += scriptText.trim() + '\n'
+        while ((match = scriptRegex.exec(content)) !== null) {
+          const scriptContent = match[1]
+          if (scriptContent && scriptContent.trim()) {
+            extractedContent += scriptContent.trim() + '\n'
           }
-        })
+        }
         
-        return extractedScript.trim()
+        // Comprehensive cleanup for production
+        return extractedContent
+          .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+          .replace(/<[^>]*>/g, '')         // Remove any remaining HTML tags
+          .replace(/&lt;/g, '<')           // Decode HTML entities
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .trim()
       }
-      
-      // Fallback for server-side: use regex with better pattern matching
-      const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
-      let extractedContent = ''
-      let match
-      
-      while ((match = scriptRegex.exec(content)) !== null) {
-        const scriptContent = match[1]
-        if (scriptContent && scriptContent.trim()) {
-          extractedContent += scriptContent.trim() + '\n'
+
+      // Try regex first (more reliable in production)
+      const regexResult = extractWithRegex()
+      if (regexResult && regexResult.length > 0) {
+        return regexResult
+      }
+
+      // Client-side DOM parsing as fallback (development)
+      if (typeof window !== 'undefined') {
+        try {
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = content
+          
+          // Find all script tags and extract their text content
+          const scriptTags = tempDiv.querySelectorAll('script')
+          let extractedScript = ''
+          
+          scriptTags.forEach(script => {
+            // Get the text content of each script tag
+            const scriptText = script.textContent || script.innerHTML || ''
+            if (scriptText.trim()) {
+              extractedScript += scriptText.trim() + '\n'
+            }
+          })
+          
+          return extractedScript.trim()
+        } catch (domError) {
+          console.warn('DOM parsing failed, using regex fallback:', domError)
+          return regexResult
         }
       }
       
-      // Remove HTML comments and clean up
-      return extractedContent
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .trim()
+      return regexResult
         
     } catch (error) {
       console.error('Error extracting script content:', error)
-      // Fallback to simple text extraction if parsing fails
-      return content
-        .replace(/<script[^>]*>/gi, '')
-        .replace(/<\/script>/gi, '')
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .replace(/<[^>]*>/g, '') // Remove any remaining HTML tags
-        .trim()
+      console.error('Problematic content:', content.substring(0, 200) + '...')
+      
+      // Ultimate fallback with aggressive HTML removal
+      try {
+        return content
+          .replace(/<script[^>]*>/gi, '')
+          .replace(/<\/script>/gi, '')
+          .replace(/<!--[\s\S]*?-->/g, '')
+          .replace(/<[^>]*>/g, '') // Remove ALL HTML tags
+          .replace(/&[a-zA-Z0-9#]+;/g, ' ') // Remove HTML entities
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim()
+      } catch (finalError) {
+        console.error('Even fallback extraction failed:', finalError)
+        return '' // Return empty string to prevent script execution
+      }
     }
   }
 
@@ -207,9 +238,24 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         // Extract and clean script content
         const cleanScriptContent = extractScriptContent(script.content)
         
+        // Production debugging - log problematic content
+        if (process.env.NODE_ENV === 'production' && script.content.includes('<')) {
+          console.log(`🔍 [PROD DEBUG] Processing ${script.platform} script:`)
+          console.log('Original content preview:', script.content.substring(0, 150) + '...')
+          console.log('Cleaned content preview:', cleanScriptContent.substring(0, 150) + '...')
+          console.log('Contains HTML tags:', /<[^>]*>/.test(cleanScriptContent))
+        }
+        
         // Validate that we have actual JavaScript content
         if (!cleanScriptContent || cleanScriptContent.trim().length === 0) {
           console.warn(`⚠️ Empty script content for ${script.platform}:`, scriptId)
+          return null
+        }
+
+        // Additional validation for production - check for remaining HTML
+        if (cleanScriptContent.includes('<') && !cleanScriptContent.includes('<!--')) {
+          console.error(`🚨 [PROD] Potential HTML in script content for ${script.platform}:`, cleanScriptContent.substring(0, 100))
+          // Skip this script to prevent errors
           return null
         }
 
