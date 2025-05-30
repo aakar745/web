@@ -84,7 +84,7 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         setError(null)
         
         // Security check - never load scripts on admin pages
-        if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
+        if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard') || pathname.startsWith('/api')) {
           setScripts([])
           setLoading(false)
           return

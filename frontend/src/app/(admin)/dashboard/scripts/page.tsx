@@ -96,7 +96,7 @@ export default function ScriptsPage() {
     platform: 'Custom',
     priority: 100,
     targetPages: '',
-    excludePages: '/admin,/api',
+    excludePages: '/admin,/dashboard,/api',
     isActive: true
   })
 
@@ -243,7 +243,7 @@ export default function ScriptsPage() {
       platform: 'Custom',
       priority: 100,
       targetPages: '',
-      excludePages: '/admin,/api',
+      excludePages: '/admin,/dashboard,/api',
       isActive: true
     })
     setEditingScript(null)
@@ -512,7 +512,7 @@ export default function ScriptsPage() {
         <CardHeader>
           <CardTitle>Active Scripts ({scripts.length})</CardTitle>
           <CardDescription>
-            All scripts are automatically excluded from admin pages for security.
+            All scripts are automatically excluded from admin pages (/admin/*, /dashboard/*) for security.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -646,7 +646,7 @@ export default function ScriptsPage() {
             <div>
               <h4 className="font-medium text-amber-800 dark:text-amber-200">Security Notice</h4>
               <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                Scripts are automatically excluded from all admin pages (/admin/*) and API endpoints (/api/*) for security. 
+                Scripts are automatically excluded from all admin pages (/admin/*, /dashboard/*) and API endpoints (/api/*) for security. 
                 Only public pages will load the configured scripts.
               </p>
             </div>

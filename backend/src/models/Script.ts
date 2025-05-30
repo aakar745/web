@@ -78,7 +78,7 @@ const ScriptSchema = new mongoose.Schema({
   },
   excludePages: {
     type: [String],
-    default: ['/admin'] // Always exclude admin by default
+    default: ['/admin', '/dashboard'] // Always exclude admin by default
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -103,6 +103,9 @@ ScriptSchema.virtual('safeContent').get(function(this: IScript) {
 ScriptSchema.pre('save', function(this: IScript, next) {
   if (!this.excludePages.includes('/admin')) {
     this.excludePages.push('/admin');
+  }
+  if (!this.excludePages.includes('/dashboard')) {
+    this.excludePages.push('/dashboard');
   }
   if (!this.excludePages.includes('/api')) {
     this.excludePages.push('/api');

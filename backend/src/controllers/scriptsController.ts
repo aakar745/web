@@ -35,7 +35,7 @@ export async function getScriptsForPage(req: Request, res: Response) {
     }
 
     // Security check - never return scripts for admin pages
-    if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard') || pathname.startsWith('/api')) {
       return res.json({
         status: 'success',
         data: []
@@ -113,7 +113,7 @@ export async function createScript(req: Request, res: Response) {
       platform: platform || 'Custom',
       priority: priority || 100,
       targetPages: targetPages || [],
-      excludePages: excludePages || ['/admin', '/api'],
+      excludePages: excludePages || ['/admin', '/dashboard', '/api'],
       isActive: isActive !== undefined ? isActive : true,
       createdBy: req.user?.id
     });
