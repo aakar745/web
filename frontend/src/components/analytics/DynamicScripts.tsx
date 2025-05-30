@@ -238,6 +238,12 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         // Extract and clean script content
         const cleanScriptContent = extractScriptContent(script.content)
         
+        // CRITICAL FIX: Skip noscript content - it's not JavaScript!
+        if (script.content.includes('<noscript>') || script.content.includes('noscript')) {
+          console.log(`⚠️ Skipping noscript content for ${script.platform} in ${placement}`)
+          return null
+        }
+        
         // Production debugging - log problematic content
         if (process.env.NODE_ENV === 'production' && script.content.includes('<')) {
           console.log(`🔍 [PROD DEBUG] Processing ${script.platform} script:`)
