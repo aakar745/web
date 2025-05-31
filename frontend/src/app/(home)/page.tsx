@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useSeo } from '@/hooks/useSeo'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 import { 
   ArrowRight, 
   Image, 
@@ -110,6 +111,12 @@ export default function Home() {
       return 'A'
     }
     return author.name.split(' ').map(n => n[0]).join('')
+  }
+
+  // Helper function to get proxied featured image URL
+  const getProxiedFeaturedImage = (imageUrl: string): string => {
+    if (!imageUrl) return imageUrl
+    return getProxiedImageUrl(imageUrl) || imageUrl
   }
 
   return (
@@ -459,7 +466,7 @@ export default function Home() {
                     <div className="h-40 sm:h-48 overflow-hidden bg-muted/50">
                       {post.featuredImage ? (
                         <img 
-                          src={post.featuredImage} 
+                          src={getProxiedFeaturedImage(post.featuredImage)} 
                           alt={post.title}
                           className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
                           loading="lazy"
