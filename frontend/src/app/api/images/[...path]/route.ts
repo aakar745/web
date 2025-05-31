@@ -7,11 +7,14 @@ function getBackendUrl() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // Await the params since they're now wrapped in a Promise in Next.js 15
+    const resolvedParams = await params
+    
     // Construct the backend image URL
-    const imagePath = params.path.join('/')
+    const imagePath = resolvedParams.path.join('/')
     const backendUrl = getBackendUrl().replace('/api', '')
     const imageUrl = `${backendUrl}/api/media/file/${imagePath}`
     
@@ -22,58 +25,51 @@ export async function GET(
       headers: {
         'User-Agent': 'NextJS-Image-Proxy/1.0',
       },
-      // Add timeout for better performance
-      signal: AbortSignal.timeout(10000), // 10 second timeout
+      // Add timeout for safety (10 seconds)
+      signal: AbortSignal.timeout(10000),
     })
     
     if (!response.ok) {
-      console.error(`[Image Proxy] Backend error: ${response.status} ${response.statusText}`)
-      
-      // Return 404 for missing images
-      if (response.status === 404) {
-        return new NextResponse('Image not found', { status: 404 })
-      }
-      
-      // Return 500 for other errors
-      return new NextResponse('Image proxy error', { status: 500 })
+      console.error(`[Image Proxy] Backend returned ${response.status} for ${imageUrl}`)
+      return new NextResponse('Image not found', { status: 404 })
     }
     
-    // Get the image data and content type
+    // Get the image data
     const imageBuffer = await response.arrayBuffer()
+    
+    // Get content type from backend response
     const contentType = response.headers.get('content-type') || 'image/jpeg'
     
-    // Create response with proper headers
+    // Return the proxied image
     return new NextResponse(imageBuffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year
-        'Content-Length': imageBuffer.byteLength.toString(),
-        // Security headers
-        'X-Content-Type-Options': 'nosniff',
-        'Content-Security-Policy': "default-src 'none'",
+        'X-Proxied-From': 'Backend-API', // Debug header
       },
     })
-    
   } catch (error) {
-    console.error('[Image Proxy] Error:', error)
+    console.error(`[Image Proxy] Error:`, error)
     
-    // Handle timeout or network errors
-    if (error instanceof Error && error.name === 'AbortError') {
-      return new NextResponse('Image proxy timeout', { status: 504 })
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      return new NextResponse('Request timeout', { status: 504 })
     }
     
-    return new NextResponse('Image proxy error', { status: 500 })
+    return new NextResponse('Internal server error', { status: 500 })
   }
 }
 
 // Also handle HEAD requests for efficiency
 export async function HEAD(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const imagePath = params.path.join('/')
+    // Await the params since they're now wrapped in a Promise in Next.js 15
+    const resolvedParams = await params
+    
+    const imagePath = resolvedParams.path.join('/')
     const backendUrl = getBackendUrl().replace('/api', '')
     const imageUrl = `${backendUrl}/api/media/file/${imagePath}`
     
