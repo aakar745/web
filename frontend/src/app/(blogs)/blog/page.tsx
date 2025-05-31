@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { apiRequest } from '@/lib/apiClient'
 import { toast } from '@/components/ui/use-toast'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 
 // Define blog post interface
 interface BlogPost {
@@ -262,6 +263,12 @@ export default function BlogPage() {
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
   
+  // Helper function to get proxied featured image URL
+  const getProxiedFeaturedImage = (imageUrl: string): string => {
+    if (!imageUrl) return imageUrl
+    return getProxiedImageUrl(imageUrl) || imageUrl
+  }
+  
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -361,7 +368,7 @@ export default function BlogPage() {
             <div className="h-[350px] rounded-xl overflow-hidden bg-muted">
               {filteredPosts[0].featuredImage ? (
                 <img 
-                  src={filteredPosts[0].featuredImage}
+                  src={getProxiedFeaturedImage(filteredPosts[0].featuredImage)}
                   alt={filteredPosts[0].title}
                   className="w-full h-full object-cover"
                   loading="eager"
@@ -419,7 +426,7 @@ export default function BlogPage() {
             <div className="h-48 overflow-hidden bg-muted/50">
               {post.featuredImage ? (
                 <img 
-                  src={post.featuredImage}
+                  src={getProxiedFeaturedImage(post.featuredImage)}
                   alt={post.title}
                   className="w-full h-full object-cover transition-transform hover:scale-105 duration-300 ease-in-out"
                   loading="lazy"

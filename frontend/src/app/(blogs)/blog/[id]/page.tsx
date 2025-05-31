@@ -39,6 +39,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 
 // Define blog post interface
 interface BlogPost {
@@ -742,6 +743,32 @@ export default function BlogPostPage() {
     }
   };
   
+  // Function to process blog content and replace backend URLs with proxied ones
+  const processContentImages = (htmlContent: string): string => {
+    if (!htmlContent) return htmlContent
+    
+    // Replace backend image URLs in the HTML content with proxied URLs
+    return htmlContent.replace(
+      /src="([^"]*\/api\/media\/file\/[^"]*)"/g,
+      (match, url) => {
+        const proxiedUrl = getProxiedImageUrl(url)
+        return `src="${proxiedUrl || url}"`
+      }
+    ).replace(
+      /src='([^']*\/api\/media\/file\/[^']*)'/g,
+      (match, url) => {
+        const proxiedUrl = getProxiedImageUrl(url)
+        return `src='${proxiedUrl || url}'`
+      }
+    )
+  }
+
+  // Helper function to get proxied featured image URL
+  const getProxiedFeaturedImage = (imageUrl: string): string => {
+    if (!imageUrl) return imageUrl
+    return getProxiedImageUrl(imageUrl) || imageUrl
+  }
+  
   // Show loading state
   if (loading) {
     return (
@@ -887,7 +914,7 @@ export default function BlogPostPage() {
           <div className="aspect-[16/9] w-full transform transition-transform duration-700 hover:scale-105 bg-muted/50">
             {post.featuredImage ? (
               <img 
-                src={post.featuredImage} 
+                src={getProxiedFeaturedImage(post.featuredImage)} 
                 alt={post.title}
                 className="w-full h-full object-cover"
                 loading="eager"
@@ -1059,7 +1086,7 @@ export default function BlogPostPage() {
         {/* Main article */}
         <article ref={articleRef} className="lg:col-span-8 prose prose-lg dark:prose-invert max-w-none">
           <div 
-            dangerouslySetInnerHTML={{ __html: post.content }} 
+            dangerouslySetInnerHTML={{ __html: processContentImages(post.content) }} 
             className="prose-img:rounded-xl prose-img:shadow-md prose-img:mx-auto prose-headings:scroll-mt-20 prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-p:leading-relaxed prose-headings:leading-tight prose-pre:bg-muted/50 prose-pre:backdrop-blur-sm prose-code:text-sm prose-code:bg-muted/80 prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-l-primary/50 prose-blockquote:bg-muted/30 prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:italic"
           />
           
@@ -1482,7 +1509,7 @@ export default function BlogPostPage() {
                 <div className="h-48 overflow-hidden bg-muted/50">
                   {post.featuredImage ? (
                     <img 
-                      src={post.featuredImage} 
+                      src={getProxiedFeaturedImage(post.featuredImage)} 
                       alt={post.title}
                       className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
                       loading="lazy"

@@ -371,7 +371,7 @@ function LoginForm() {
                 </p>
                 
                 {/* Demo credentials - in production, remove this */}
-                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                {/* <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
                   <p className="text-xs text-amber-700 dark:text-amber-300 font-medium mb-1">
                     Demo Credentials:
                   </p>
@@ -382,7 +382,7 @@ function LoginForm() {
                       <span className="font-mono bg-amber-100 dark:bg-amber-900/30 px-1 rounded">admin123</span>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               <div className="flex items-center justify-center">

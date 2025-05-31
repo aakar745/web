@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 
 interface MetaProps {
   title: string;
@@ -45,73 +46,79 @@ export const DynamicMeta = ({
       console.error('Error updating title element:', error);
     }
     
+    // Helper function to update meta tags safely
+    const updateMetaTag = (property: string, content: string, attributeName = 'name') => {
+      if (!content) return;
+      
+      try {
+        let selector = attributeName === 'property' 
+          ? `meta[property="${property}"]`
+          : `meta[name="${property}"]`;
+        
+        let metaTag = document.head.querySelector(selector);
+        
+        if (metaTag) {
+          metaTag.setAttribute('content', content);
+        } else {
+          metaTag = document.createElement('meta');
+          metaTag.setAttribute(attributeName, property);
+          metaTag.setAttribute('content', content);
+          document.head.appendChild(metaTag);
+        }
+      } catch (error) {
+        console.error(`Error updating meta tag ${property}:`, error);
+      }
+    };
+    
     // Update meta tags
     updateMetaTag('description', description);
     if (keywords) updateMetaTag('keywords', keywords);
     
-    // Update Open Graph and Twitter tags
-    updateMetaTag('og:title', title);
-    updateMetaTag('og:description', description);
-    if (ogImage) updateMetaTag('og:image', ogImage);
-    updateMetaTag('og:type', ogType);
+    // Update canonical URL
+    if (canonicalUrl) {
+      try {
+        let linkTag = document.head.querySelector('link[rel="canonical"]');
+        if (linkTag) {
+          linkTag.setAttribute('href', canonicalUrl);
+        } else {
+          linkTag = document.createElement('link');
+          linkTag.setAttribute('rel', 'canonical');
+          linkTag.setAttribute('href', canonicalUrl);
+          document.head.appendChild(linkTag);
+        }
+      } catch (error) {
+        console.error('Error updating canonical URL:', error);
+      }
+    }
     
+    // Update Open Graph and Twitter tags with proxied image URLs
+    updateMetaTag('og:title', title, 'property');
+    updateMetaTag('og:description', description, 'property');
+    updateMetaTag('og:type', ogType, 'property');
+    
+    // Convert backend image URL to proxied URL for Open Graph
+    if (ogImage) {
+      const proxiedImageUrl = getProxiedImageUrl(ogImage);
+      if (proxiedImageUrl) {
+        updateMetaTag('og:image', proxiedImageUrl, 'property');
+        console.log(`[DynamicMeta] Using proxied og:image: ${proxiedImageUrl}`);
+      }
+    }
+    
+    // Update Twitter Card tags with proxied image URLs
     updateMetaTag('twitter:card', 'summary_large_image');
     updateMetaTag('twitter:title', title);
     updateMetaTag('twitter:description', description);
-    if (ogImage) updateMetaTag('twitter:image', ogImage);
     
-    // Handle canonical URL
-    if (canonicalUrl) {
-      let canonicalElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-      
-      if (canonicalElement) {
-        canonicalElement.href = canonicalUrl;
-      } else {
-        canonicalElement = document.createElement('link');
-        canonicalElement.rel = 'canonical';
-        canonicalElement.href = canonicalUrl;
-        document.head.appendChild(canonicalElement);
+    // Convert backend image URL to proxied URL for Twitter
+    if (ogImage) {
+      const proxiedImageUrl = getProxiedImageUrl(ogImage);
+      if (proxiedImageUrl) {
+        updateMetaTag('twitter:image', proxiedImageUrl);
+        console.log(`[DynamicMeta] Using proxied twitter:image: ${proxiedImageUrl}`);
       }
     }
-    
-    // No clean-up function needed since we're not adding anything temporary
   }, [title, description, keywords, ogImage, ogType, canonicalUrl]);
-  
-  const updateMetaTag = (name: string, content: string) => {
-    try {
-      // First, look for an existing tag
-      let meta = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
-      
-      // For Open Graph tags, they use property instead of name
-      if (!meta && name.startsWith('og:')) {
-        meta = document.querySelector(`meta[property="${name}"]`) as HTMLMetaElement;
-      }
-      
-      // For Twitter tags, they use name
-      if (!meta && name.startsWith('twitter:')) {
-        meta = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
-      }
-      
-      if (meta) {
-        // Update existing tag
-        meta.content = content;
-      } else {
-        // Create a new meta tag
-        meta = document.createElement('meta');
-        
-        if (name.startsWith('og:')) {
-          meta.setAttribute('property', name);
-        } else {
-          meta.setAttribute('name', name);
-        }
-        
-        meta.content = content;
-        document.head.appendChild(meta);
-      }
-    } catch (error) {
-      console.error(`Error updating meta tag ${name}:`, error);
-    }
-  };
   
   return null; // This component doesn't render anything
 }; 

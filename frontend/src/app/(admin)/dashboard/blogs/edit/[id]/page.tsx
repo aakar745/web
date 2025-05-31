@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { X, Plus } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 
 // Define available categories
 const DEFAULT_CATEGORIES = [
@@ -247,6 +248,8 @@ function EditBlogPage() {
   };
   
   const handleImageChange = (url: string) => {
+    // For featured images in blog posts, we can use the original URL since they're stored in the database
+    // but for display purposes, the ImageUploader component will show the proxied version
     setFormData((prev) => ({ ...prev, featuredImage: url }));
   };
   
@@ -263,11 +266,17 @@ function EditBlogPage() {
   }, []);
   
   const handleMediaSelect = (media: any) => {
+    // For featured images selected from media library, use original URL for storage
+    // Display will be handled by the ImageUploader component using proxied URLs
     setFormData(prev => ({ ...prev, featuredImage: media.url }))
+    console.log(`[Blog Editor] Selected featured image: ${media.url}`)
   }
   
   const handleOgImageSelect = (media: any) => {
-    setFormData(prev => ({ ...prev, ogImage: media.url }))
+    // For OG images (used in public meta tags), use the proxied URL to hide backend
+    const proxiedUrl = getProxiedImageUrl(media.url)
+    setFormData(prev => ({ ...prev, ogImage: proxiedUrl || media.url }))
+    console.log(`[Blog Editor] Selected OG image (proxied): ${proxiedUrl || media.url}`)
   }
   
   const handleSubmit = async (e: React.FormEvent) => {

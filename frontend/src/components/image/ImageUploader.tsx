@@ -9,6 +9,7 @@ import { Upload, X, Image as ImageIcon, Loader2, Settings2 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { MediaLibrary } from '@/components/media/MediaLibrary'
 import { getApiUrl } from '@/lib/apiClient'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 import { 
   Select,
   SelectContent,
@@ -160,6 +161,12 @@ export function ImageUploader({
     onChange(e.target.value)
   }
   
+  // Helper function to get display URL (proxied for backend images)
+  const getDisplayUrl = (url: string) => {
+    if (!url) return url
+    return getProxiedImageUrl(url) || url
+  }
+  
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
@@ -177,7 +184,7 @@ export function ImageUploader({
           <div className="aspect-video relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageUrl} 
+              src={getDisplayUrl(imageUrl)} 
               alt="Uploaded image"
               className="w-full h-full object-cover" 
             />

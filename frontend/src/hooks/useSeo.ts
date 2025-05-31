@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiRequest } from '@/lib/apiClient'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 
 interface SeoData {
   metaTitle: string
@@ -16,23 +17,24 @@ export function useSeo(pagePath: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Fetch SEO data for the page
   useEffect(() => {
     const fetchSeoData = async () => {
       try {
         setLoading(true)
         setError(null)
-
+        
         // Encode the page path for URL safety
         const encodedPath = encodeURIComponent(pagePath)
-        
         const response = await apiRequest<{ status: string; data: SeoData }>(`/seo/page/${encodedPath}`)
         
         if (response.data) {
           setSeoData(response.data)
         }
-      } catch (error: any) {
-        console.error('Error fetching SEO data:', error)
-        setError('Failed to load SEO data')
+      } catch (err) {
+        console.error('Error fetching SEO data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch SEO data')
+        setSeoData(null)
       } finally {
         setLoading(false)
       }
@@ -43,72 +45,75 @@ export function useSeo(pagePath: string) {
     }
   }, [pagePath])
 
-  // Apply SEO data to the document head
+  // Apply SEO data to the document head when data changes
   useEffect(() => {
     if (seoData && typeof window !== 'undefined') {
-      // Update title
-      if (seoData.metaTitle) {
-        document.title = seoData.metaTitle
-      }
+      // Update document title
+      document.title = seoData.metaTitle
 
       // Helper function to update or create meta tags
-      const updateMetaTag = (name: string, content: string, property?: string) => {
+      const updateMetaTag = (property: string, content: string, attributeName = 'name') => {
         if (!content) return
-
-        const selector = property ? `meta[property="${property}"]` : `meta[name="${name}"]`
-        let element = document.querySelector(selector) as HTMLMetaElement
         
-        if (element) {
-          element.content = content
+        let selector = attributeName === 'property' 
+          ? `meta[property="${property}"]`
+          : `meta[name="${property}"]`
+        
+        let metaTag = document.head.querySelector(selector)
+        
+        if (metaTag) {
+          metaTag.setAttribute('content', content)
         } else {
-          element = document.createElement('meta')
-          if (property) {
-            element.setAttribute('property', property)
-          } else {
-            element.setAttribute('name', name)
-          }
-          element.content = content
-          document.head.appendChild(element)
+          metaTag = document.createElement('meta')
+          metaTag.setAttribute(attributeName, property)
+          metaTag.setAttribute('content', content)
+          document.head.appendChild(metaTag)
         }
       }
 
-      // Update meta description
+      // Update basic meta tags
       updateMetaTag('description', seoData.metaDescription)
-
-      // Update keywords
-      if (seoData.metaKeywords && seoData.metaKeywords.length > 0) {
-        updateMetaTag('keywords', seoData.metaKeywords.join(', '))
-      }
+      updateMetaTag('keywords', seoData.metaKeywords.join(', '))
 
       // Update canonical URL
       if (seoData.canonicalUrl) {
-        let canonicalElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
-        if (canonicalElement) {
-          canonicalElement.href = seoData.canonicalUrl
+        let linkTag = document.head.querySelector('link[rel="canonical"]')
+        if (linkTag) {
+          linkTag.setAttribute('href', seoData.canonicalUrl)
         } else {
-          canonicalElement = document.createElement('link')
-          canonicalElement.rel = 'canonical'
-          canonicalElement.href = seoData.canonicalUrl
-          document.head.appendChild(canonicalElement)
+          linkTag = document.createElement('link')
+          linkTag.setAttribute('rel', 'canonical')
+          linkTag.setAttribute('href', seoData.canonicalUrl)
+          document.head.appendChild(linkTag)
         }
       }
 
-      // Update Open Graph tags
-      updateMetaTag('', seoData.metaTitle, 'og:title')
-      updateMetaTag('', seoData.metaDescription, 'og:description')
-      updateMetaTag('', seoData.ogType || 'website', 'og:type')
+      // Update Open Graph tags with proxied image URL
+      updateMetaTag('og:title', seoData.metaTitle, 'property')
+      updateMetaTag('og:description', seoData.metaDescription, 'property')
+      updateMetaTag('og:type', seoData.ogType, 'property')
       
+      // Convert backend image URL to proxied URL for public meta tags
       if (seoData.ogImage) {
-        updateMetaTag('', seoData.ogImage, 'og:image')
+        const proxiedImageUrl = getProxiedImageUrl(seoData.ogImage)
+        if (proxiedImageUrl) {
+          updateMetaTag('og:image', proxiedImageUrl, 'property')
+          console.log(`[SEO] Using proxied og:image: ${proxiedImageUrl}`)
+        }
       }
 
-      // Update Twitter Card tags
+      // Update Twitter Card tags with proxied image URL
       updateMetaTag('twitter:card', seoData.twitterCard || 'summary_large_image')
       updateMetaTag('twitter:title', seoData.metaTitle)
       updateMetaTag('twitter:description', seoData.metaDescription)
       
+      // Convert backend image URL to proxied URL for Twitter meta tags
       if (seoData.ogImage) {
-        updateMetaTag('twitter:image', seoData.ogImage)
+        const proxiedImageUrl = getProxiedImageUrl(seoData.ogImage)
+        if (proxiedImageUrl) {
+          updateMetaTag('twitter:image', proxiedImageUrl)
+          console.log(`[SEO] Using proxied twitter:image: ${proxiedImageUrl}`)
+        }
       }
     }
   }, [seoData])

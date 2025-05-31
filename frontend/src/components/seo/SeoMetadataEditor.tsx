@@ -15,6 +15,7 @@ import {
   TooltipContent,
   TooltipTrigger 
 } from '@/components/ui/tooltip'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 
 interface SeoMetadata {
   metaTitle?: string
@@ -414,7 +415,13 @@ export function SeoMetadataEditor({
           <Label htmlFor="ogImage">Social Media Image</Label>
           <ImageUploader
             value={ogImage}
-            onChange={setOgImage}
+            onChange={(url) => {
+              // For OG images (used in public meta tags), use the proxied URL to hide backend
+              const proxiedUrl = getProxiedImageUrl(url)
+              const finalUrl = proxiedUrl || url
+              setOgImage(finalUrl)
+              console.log(`[SEO Editor] Setting OG image (proxied): ${finalUrl}`)
+            }}
             label="Select image for social media sharing"
           />
           <p className="text-xs text-muted-foreground">

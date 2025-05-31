@@ -24,6 +24,7 @@ import {
 import { apiRequest, getApiUrl } from '@/lib/apiClient'
 import { toast } from '@/components/ui/use-toast'
 import { formatFileSize } from '@/lib/utils'
+import { getProxiedImageUrl } from '@/lib/imageProxy'
 import {
   Tooltip,
   TooltipContent,
@@ -334,6 +335,14 @@ export function MediaLibrary({
     setImageInfoDialogOpen(true)
   }
   
+  // Helper function to get display URL (proxied for images)
+  const getDisplayUrl = (item: Media) => {
+    if (item.mimetype.startsWith('image/')) {
+      return getProxiedImageUrl(item.url) || item.url
+    }
+    return item.url
+  }
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -441,7 +450,7 @@ export function MediaLibrary({
                       {isImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img 
-                          src={item.url}
+                          src={getDisplayUrl(item)}
                           alt={item.alt || item.originalname}
                           className="object-cover w-full h-full"
                         />
@@ -531,7 +540,7 @@ export function MediaLibrary({
               {mediaToDelete.mimetype.startsWith('image/') ? (
                 <div className="h-20 w-20 rounded border overflow-hidden">
                   <img 
-                    src={mediaToDelete.url} 
+                    src={getDisplayUrl(mediaToDelete)} 
                     alt={mediaToDelete.alt || mediaToDelete.originalname} 
                     className="h-full w-full object-cover" 
                   />
@@ -575,7 +584,7 @@ export function MediaLibrary({
               {selectedMedia.mimetype.startsWith('image/') && (
                 <div className="rounded-md border overflow-hidden">
                   <img 
-                    src={selectedMedia.url} 
+                    src={getDisplayUrl(selectedMedia)} 
                     alt={selectedMedia.alt || selectedMedia.originalname} 
                     className="w-full object-contain max-h-64" 
                   />
