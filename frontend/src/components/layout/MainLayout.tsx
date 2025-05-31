@@ -23,13 +23,13 @@ import {
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
-import { ProcessingModeIndicator } from '@/components/ui/ProcessingModeIndicator'
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+// import { ProcessingModeIndicator } from '@/components/ui/ProcessingModeIndicator'
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -262,7 +262,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
             {/* CTA Button - always visible */}
             <div className="hidden md:flex items-center space-x-4">
-              <ProcessingModeIndicator />
+              {/* <ProcessingModeIndicator /> */}
               
               {/* Theme toggle */}
               <DropdownMenu>
