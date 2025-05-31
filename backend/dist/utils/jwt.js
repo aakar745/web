@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-for-jwt-should-be-long-and-secure';
-const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d'; // Default expiry of 7 days
+const JWT_EXPIRE = process.env.JWT_EXPIRE || '4h'; // Reduced from 7d to 4h for better security
 /**
  * Generate a JWT token for a user
  * @param payload User information to include in the token
@@ -33,6 +33,7 @@ function verifyToken(token) {
         return decoded;
     }
     catch (error) {
+        console.log('JWT verification failed:', error);
         return null;
     }
 }

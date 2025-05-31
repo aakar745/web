@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lightApiLimiter = exports.apiLimiter = exports.batchOperationLimiter = exports.imageProcessingLimiter = exports.createBatchOperationLimiter = exports.createImageProcessingLimiter = void 0;
+exports.createBatchOperationLimiter = exports.createImageProcessingLimiter = exports.lightApiLimiter = exports.apiLimiter = exports.batchOperationLimiter = exports.imageProcessingLimiter = void 0;
 exports.clearRateLimitCache = clearRateLimitCache;
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const settingsService_1 = require("../services/settingsService");
@@ -70,73 +70,85 @@ async function getRateLimitConfig() {
         };
     }
 }
+// Store for dynamic rate limiters
+const rateLimiters = new Map();
 /**
- * Dynamic rate limiter for image processing endpoints
+ * Get or create a rate limiter for specific configuration
  */
-const createImageProcessingLimiter = () => {
-    return (0, express_rate_limit_1.default)({
-        windowMs: 300000, // 5 minutes default, will be updated by middleware
-        max: 50, // default, will be updated by middleware  
-        message: {
-            status: 'error',
-            message: 'Too many image processing requests. Please wait before trying again.',
-            retryAfter: 300,
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-        // Skip rate limiting in development unless explicitly enabled
-        skip: (req) => {
-            return process.env.NODE_ENV === 'development' && process.env.ENABLE_RATE_LIMITING !== 'true';
-        },
-        // Use the user's IP address for identification
-        keyGenerator: (req) => {
-            return req.ip || req.connection.remoteAddress || 'unknown';
+function getOrCreateRateLimiter(key, config) {
+    const configKey = `${key}-${config.windowMs}-${config.max}`;
+    if (!rateLimiters.has(configKey)) {
+        const limiter = (0, express_rate_limit_1.default)({
+            windowMs: config.windowMs,
+            max: config.max,
+            message: config.message,
+            standardHeaders: true,
+            legacyHeaders: false,
+            skip: (req) => {
+                return process.env.NODE_ENV === 'development' && process.env.ENABLE_RATE_LIMITING !== 'true';
+            },
+            keyGenerator: (req) => {
+                return req.ip || req.connection.remoteAddress || 'unknown';
+            },
+            handler: (req, res) => {
+                console.log(`Rate limit hit for ${key}: ${req.ip}`);
+                res.status(429).json(config.message);
+            }
+        });
+        rateLimiters.set(configKey, limiter);
+        // Clean up old limiters (keep only last 10)
+        if (rateLimiters.size > 10) {
+            const firstKey = rateLimiters.keys().next().value;
+            rateLimiters.delete(firstKey);
         }
-    });
-};
-exports.createImageProcessingLimiter = createImageProcessingLimiter;
+    }
+    return rateLimiters.get(configKey);
+}
 /**
- * Dynamic rate limiter for batch operations
+ * Dynamic image processing rate limiter middleware
  */
-const createBatchOperationLimiter = () => {
-    return (0, express_rate_limit_1.default)({
-        windowMs: 600000, // 10 minutes default, will be updated by middleware
-        max: 15, // default, will be updated by middleware
-        message: {
-            status: 'error',
-            message: 'Too many batch operations. Please wait before trying again.',
-            retryAfter: 600,
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-        skip: (req) => {
-            return process.env.NODE_ENV === 'development' && process.env.ENABLE_RATE_LIMITING !== 'true';
-        },
-        keyGenerator: (req) => {
-            return req.ip || req.connection.remoteAddress || 'unknown';
-        }
-    });
+const imageProcessingLimiter = async (req, res, next) => {
+    try {
+        const config = await getRateLimitConfig();
+        const limiter = getOrCreateRateLimiter('imageProcessing', config.imageProcessing);
+        limiter(req, res, next);
+    }
+    catch (error) {
+        console.error('Error in image processing rate limiter:', error);
+        next(); // Continue without rate limiting on error
+    }
 };
-exports.createBatchOperationLimiter = createBatchOperationLimiter;
-// Create the limiters
-exports.imageProcessingLimiter = (0, exports.createImageProcessingLimiter)();
-exports.batchOperationLimiter = (0, exports.createBatchOperationLimiter)();
+exports.imageProcessingLimiter = imageProcessingLimiter;
+/**
+ * Dynamic batch operation rate limiter middleware
+ */
+const batchOperationLimiter = async (req, res, next) => {
+    try {
+        const config = await getRateLimitConfig();
+        const limiter = getOrCreateRateLimiter('batchOperation', config.batchOperation);
+        limiter(req, res, next);
+    }
+    catch (error) {
+        console.error('Error in batch operation rate limiter:', error);
+        next(); // Continue without rate limiting on error
+    }
+};
+exports.batchOperationLimiter = batchOperationLimiter;
 /**
  * Clear rate limit cache (call when settings are updated)
  */
 function clearRateLimitCache() {
     rateLimitCache = null;
     lastRateLimitUpdate = 0;
+    rateLimiters.clear(); // Clear all cached limiters to force recreation
+    console.log('Rate limit cache cleared - new settings will be applied');
 }
 /**
- * Rate limiting middleware for API endpoints
- *
- * Updated for higher concurrent usage while preventing abuse
+ * General API rate limiter - static for overall API protection
  */
-// General API rate limiter - more lenient for high traffic
 exports.apiLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Increased from 200 to 1000 requests per window
+    max: 1000, // 1000 requests per window
     standardHeaders: true,
     legacyHeaders: false,
     message: {
@@ -144,10 +156,12 @@ exports.apiLimiter = (0, express_rate_limit_1.default)({
         message: 'Too many requests, please try again later.',
     }
 });
-// New: Lighter rate limiter for non-processing endpoints
+/**
+ * Light API rate limiter for non-processing endpoints
+ */
 exports.lightApiLimiter = (0, express_rate_limit_1.default)({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 200, // 200 requests per minute for status checks, etc.
+    max: 200, // 200 requests per minute
     standardHeaders: true,
     legacyHeaders: false,
     message: {
@@ -155,4 +169,9 @@ exports.lightApiLimiter = (0, express_rate_limit_1.default)({
         message: 'Too many requests, please slow down.',
     }
 });
+// For backwards compatibility
+const createImageProcessingLimiter = () => exports.imageProcessingLimiter;
+exports.createImageProcessingLimiter = createImageProcessingLimiter;
+const createBatchOperationLimiter = () => exports.batchOperationLimiter;
+exports.createBatchOperationLimiter = createBatchOperationLimiter;
 //# sourceMappingURL=rateLimiter.js.map
