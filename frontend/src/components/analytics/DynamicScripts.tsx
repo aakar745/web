@@ -36,44 +36,67 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
   const [error, setError] = useState<string | null>(null)
   const pathname = usePathname()
 
-  // Improved script content extraction function
-  const extractScriptContent = (content: string): string => {
+  // Enhanced content processing function for any HTML content
+  const processContent = (content: string): { type: 'script' | 'noscript' | 'html', processedContent: string } => {
     try {
-      // If content doesn't contain script tags, return as-is (it's already plain JavaScript)
-      if (!content.includes('<script')) {
-        return content.trim()
-      }
-
-      // Extract JavaScript from script tags using regex
-      const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
-      let extractedContent = ''
-      let match
-      
-      while ((match = scriptRegex.exec(content)) !== null) {
-        const scriptContent = match[1]
-        if (scriptContent && scriptContent.trim()) {
-          extractedContent += scriptContent.trim() + '\n'
+      // Handle noscript content
+      if (content.includes('<noscript>')) {
+        const noscriptMatch = content.match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i)
+        return {
+          type: 'noscript',
+          processedContent: noscriptMatch ? noscriptMatch[1] : content
         }
       }
-      
-      // Basic cleanup
-      return extractedContent
-        .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-        .replace(/&lt;/g, '<')           // Decode HTML entities
+
+      // Handle script tags (extract JavaScript)
+      if (content.includes('<script')) {
+        const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
+        let extractedContent = ''
+        let match
+        
+        while ((match = scriptRegex.exec(content)) !== null) {
+          const scriptContent = match[1]
+          if (scriptContent && scriptContent.trim()) {
+            extractedContent += scriptContent.trim() + '\n'
+          }
+        }
+        
+        const cleanedScript = extractedContent
+          .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+          .replace(/&lt;/g, '<')           // Decode HTML entities
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .trim()
+
+        return {
+          type: 'script',
+          processedContent: cleanedScript
+        }
+      }
+
+      // Handle any other HTML content (meta, link, style, etc.)
+      // Clean up and decode entities but preserve HTML structure
+      const cleanedHTML = content
+        .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'")
         .trim()
-        
+
+      return {
+        type: 'html',
+        processedContent: cleanedHTML
+      }
+
     } catch (error) {
-      console.error('Error extracting script content:', error)
-      // Fallback: try to clean the content minimally
-      return content
-        .replace(/<script[^>]*>/gi, '')
-        .replace(/<\/script>/gi, '')
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .trim()
+      console.error('Error processing content:', error)
+      return {
+        type: 'html',
+        processedContent: content.trim()
+      }
     }
   }
 
@@ -189,16 +212,10 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         scriptLoadStatus.set(scriptId, 'loading')
 
         // Extract and clean script content
-        const cleanScriptContent = extractScriptContent(script.content)
-        
-        // CRITICAL FIX: Skip noscript content - it's not JavaScript!
-        if (script.content.includes('<noscript>') || script.content.includes('noscript')) {
-          console.log(`⚠️ Skipping noscript content for ${script.platform} in ${placement}`)
-          return null
-        }
+        const { type, processedContent } = processContent(script.content)
         
         // Validate that we have actual JavaScript content
-        if (!cleanScriptContent || cleanScriptContent.trim().length === 0) {
+        if (type === 'script' && (!processedContent || processedContent.trim().length === 0)) {
           console.warn(`⚠️ Empty script content for ${script.platform}:`, scriptId)
           return null
         }
@@ -208,31 +225,81 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         const isFacebookPixel = script.content.includes('fbq') || script.platform === 'Facebook Pixel'
         const isGoogleAnalytics = script.content.includes('gtag') || script.platform === 'Google Analytics'
         
-        // Log the script being loaded
-        if (isGTMScript) {
-          const gtmId = script.content.match(/GTM-[A-Z0-9]+/)?.[0]
-          console.log(`🏷️  Loading GTM script in ${placement}:`, gtmId)
-        } else if (isFacebookPixel) {
-          console.log(`📘 Loading Facebook Pixel script in ${placement}`)
-        } else if (isGoogleAnalytics) {
-          console.log(`📊 Loading Google Analytics script in ${placement}`)
-        } else {
-          console.log(`📜 Loading ${script.platform} script in ${placement}`)
+        // Render based on content type
+        if (type === 'noscript') {
+          console.log(`📄 Rendering noscript content for ${script.platform} in ${placement}`)
+          return (
+            <noscript 
+              key={scriptId}
+              dangerouslySetInnerHTML={{
+                __html: processedContent
+              }}
+            />
+          )
         }
 
-        // Use Next.js Script component with dangerouslySetInnerHTML for complex scripts
-        return (
-          <Script
-            key={scriptId}
-            id={`dynamic-script-${script._id}`}
-            strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
-            dangerouslySetInnerHTML={{
-              __html: cleanScriptContent
-            }}
-            onLoad={() => handleScriptLoad(scriptId, script.platform)}
-            onError={() => handleScriptError(scriptId, script.platform)}
-          />
-        )
+        if (type === 'script') {
+          // Log the script being loaded
+          if (isGTMScript) {
+            const gtmId = script.content.match(/GTM-[A-Z0-9]+/)?.[0]
+            console.log(`🏷️  Loading GTM script in ${placement}:`, gtmId)
+            // DEBUG: Log the actual script content being executed
+            console.log('🔍 GTM Script Content Preview:', processedContent.substring(0, 200) + '...')
+            console.log('🔍 Original Content Preview:', script.content.substring(0, 200) + '...')
+            console.log('🔍 Script Length - Original:', script.content.length, 'Cleaned:', processedContent.length)
+            console.log('🔍 Full Cleaned Script:', processedContent)
+          } else if (isFacebookPixel) {
+            console.log(`📘 Loading Facebook Pixel script in ${placement}`)
+          } else if (isGoogleAnalytics) {
+            console.log(`📊 Loading Google Analytics script in ${placement}`)
+          } else {
+            console.log(`📜 Loading ${script.platform} script in ${placement}`)
+          }
+
+          // Use Next.js Script component for JavaScript
+          return (
+            <Script
+              key={scriptId}
+              id={`dynamic-script-${script._id}`}
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: processedContent
+              }}
+              onLoad={() => handleScriptLoad(scriptId, script.platform)}
+              onError={() => handleScriptError(scriptId, script.platform)}
+            />
+          )
+        }
+
+        if (type === 'html') {
+          // Handle other HTML content (meta, link, style tags, etc.)
+          console.log(`🏗️  Rendering HTML content for ${script.platform} in ${placement}`)
+          
+          // For head placement, render directly as HTML
+          if (placement === 'head') {
+            return (
+              <div
+                key={scriptId}
+                dangerouslySetInnerHTML={{
+                  __html: processedContent
+                }}
+                style={{ display: 'none' }} // Hide the wrapper div
+              />
+            )
+          }
+
+          // For body/footer placement, render as regular HTML
+          return (
+            <div
+              key={scriptId}
+              dangerouslySetInnerHTML={{
+                __html: processedContent
+              }}
+            />
+          )
+        }
+
+        return null
       })}
     </>
   )
