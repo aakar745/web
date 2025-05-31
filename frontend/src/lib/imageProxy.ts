@@ -48,7 +48,6 @@ export function getProxiedImageUrl(imageUrl: string | undefined | null): string 
         const frontendDomain = getFrontendDomain()
         const proxiedUrl = `${frontendDomain}/api/images/${imagePath}`
         
-        console.log(`[Image Proxy] Converting: ${imageUrl} -> ${proxiedUrl}`)
         return proxiedUrl
       }
     }
@@ -115,7 +114,6 @@ export function getOriginalImageUrl(proxiedUrl: string | undefined | null): stri
       const backendDomain = backendApiUrl.replace('/api', '')
       const originalUrl = `${backendDomain}/api/media/file/${imagePath}`
       
-      console.log(`[Image Proxy] Reverting: ${proxiedUrl} -> ${originalUrl}`)
       return originalUrl
     }
     
