@@ -104,36 +104,21 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
   const handleScriptLoad = useCallback((scriptId: string, platform: string) => {
     scriptLoadStatus.set(scriptId, 'loaded')
     
-    // Platform-specific success logging and validation
-    if (platform === 'Google Tag Manager') {
-      console.log('✅ GTM script loaded successfully:', scriptId)
-      
-      // Check if dataLayer exists after GTM loads
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window.dataLayer) {
-          console.log('✅ GTM dataLayer initialized:', window.dataLayer.length, 'events')
-        }
-      }, 100)
-    } else if (platform === 'Facebook Pixel') {
-      console.log('✅ Facebook Pixel script loaded successfully:', scriptId)
-      
+    // Platform-specific initialization checks
+    if (platform === 'Facebook Pixel') {
       // Check if fbq function exists after Facebook Pixel loads
       setTimeout(() => {
         if (typeof window !== 'undefined' && (window as any).fbq) {
-          console.log('✅ Facebook Pixel fbq function initialized')
+          // Facebook Pixel initialized successfully
         }
       }, 100)
     } else if (platform === 'Google Analytics') {
-      console.log('✅ Google Analytics script loaded successfully:', scriptId)
-      
       // Check if gtag function exists after GA loads
       setTimeout(() => {
         if (typeof window !== 'undefined' && (window as any).gtag) {
-          console.log('✅ Google Analytics gtag function initialized')
+          // Google Analytics initialized successfully
         }
       }, 100)
-    } else {
-      console.log(`✅ ${platform} script loaded successfully:`, scriptId)
     }
   }, [])
 
@@ -154,8 +139,6 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
           return
         }
 
-        console.log(`🔄 Fetching ${placement} scripts for:`, pathname)
-
         const response = await apiRequest<{status: string; data: ScriptData[]}>(
           `/scripts/public?pathname=${encodeURIComponent(pathname)}&placement=${placement}`,
           {
@@ -169,11 +152,6 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
           // Sort by priority to ensure correct loading order
           const sortedScripts = (response.data || []).sort((a, b) => a.priority - b.priority)
           setScripts(sortedScripts)
-          
-          if (sortedScripts.length > 0) {
-            console.log(`📜 Loaded ${sortedScripts.length} ${placement} scripts:`, 
-              sortedScripts.map(s => `${s.platform} (priority: ${s.priority})`))
-          }
         }
       } catch (error) {
         console.error('Error fetching scripts:', error)
@@ -216,7 +194,6 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         
         // Validate that we have actual JavaScript content
         if (type === 'script' && (!processedContent || processedContent.trim().length === 0)) {
-          console.warn(`⚠️ Empty script content for ${script.platform}:`, scriptId)
           return null
         }
 
@@ -227,7 +204,6 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         
         // Render based on content type
         if (type === 'noscript') {
-          console.log(`📄 Rendering noscript content for ${script.platform} in ${placement}`)
           return (
             <noscript 
               key={scriptId}
@@ -239,23 +215,6 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         }
 
         if (type === 'script') {
-          // Log the script being loaded
-          if (isGTMScript) {
-            const gtmId = script.content.match(/GTM-[A-Z0-9]+/)?.[0]
-            console.log(`🏷️  Loading GTM script in ${placement}:`, gtmId)
-            // DEBUG: Log the actual script content being executed
-            console.log('🔍 GTM Script Content Preview:', processedContent.substring(0, 200) + '...')
-            console.log('🔍 Original Content Preview:', script.content.substring(0, 200) + '...')
-            console.log('🔍 Script Length - Original:', script.content.length, 'Cleaned:', processedContent.length)
-            console.log('🔍 Full Cleaned Script:', processedContent)
-          } else if (isFacebookPixel) {
-            console.log(`📘 Loading Facebook Pixel script in ${placement}`)
-          } else if (isGoogleAnalytics) {
-            console.log(`📊 Loading Google Analytics script in ${placement}`)
-          } else {
-            console.log(`📜 Loading ${script.platform} script in ${placement}`)
-          }
-
           // Use Next.js Script component for JavaScript
           return (
             <Script
@@ -272,9 +231,6 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         }
 
         if (type === 'html') {
-          // Handle other HTML content (meta, link, style tags, etc.)
-          console.log(`🏗️  Rendering HTML content for ${script.platform} in ${placement}`)
-          
           // For head placement, render directly as HTML
           if (placement === 'head') {
             return (
