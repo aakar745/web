@@ -716,11 +716,11 @@ export default function CompressTool() {
   };
   
   return (
-    <div className="max-w-[2000px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <ToolHeader 
         title="Image Compression" 
         description="Compress JPG, PNG, SVG, and GIFs while saving space and maintaining quality."
-        icon={<ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />}
+        icon={<ImageIcon className="h-6 w-6" />}
       />
       
       {/* Server Status Messages */}
@@ -836,12 +836,19 @@ export default function CompressTool() {
         </div>
       )}
       
-      <div className="grid gap-6 sm:gap-8 mt-6 sm:mt-8">
+      <div className="grid gap-6 lg:gap-8 mt-6 lg:mt-8">
         {/* File selection area */}
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left side - Dropzone and file list */}
-          <div className="flex-1">
-            <div className="space-y-3 sm:space-y-4">
+          <div className="order-1 lg:order-1">
+            <div className="space-y-4">
+              <ImageDropzone 
+                onImageDrop={handleImageDrop} 
+                existingFiles={files.length}
+                shouldClear={shouldClearDropzone}
+                onClearComplete={handleDropzoneClearComplete}
+              />
+              
               {/* Rate Limit Indicator */}
               {rateLimitUsage.used > 0 && (
                 <RateLimitIndicator 
@@ -852,24 +859,19 @@ export default function CompressTool() {
                 />
               )}
               
-              <ImageDropzone 
-                onImageDrop={handleImageDrop} 
-                existingFiles={files.length}
-                shouldClear={shouldClearDropzone}
-                onClearComplete={handleDropzoneClearComplete}
-              />
-              
               {files.length > 0 && (
                 <div className="border rounded-lg p-3 sm:p-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <h3 className="font-medium text-sm sm:text-base">Selected Files ({files.length})</h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <h3 className="font-medium text-sm sm:text-base">
+                      Selected Files ({files.length})
+                    </h3>
                     <Button 
                       variant="destructive" 
                       size="sm"
                       onClick={handleRemoveAllFiles}
                       className="w-full sm:w-auto"
                     >
-                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" /> Clear All
+                      <Trash2 className="h-4 w-4 mr-2" /> Clear All
                     </Button>
                   </div>
                   
@@ -877,13 +879,13 @@ export default function CompressTool() {
                     {files.map((file, index) => (
                       <div 
                         key={index} 
-                        className={`flex items-center justify-between p-2 sm:p-3 rounded ${
+                        className={`flex items-center justify-between p-2 rounded ${
                           selectedFileIndex === index ? 'bg-accent' : 'hover:bg-accent/50'
-                        } cursor-pointer`}
+                        } cursor-pointer transition-colors`}
                         onClick={() => setSelectedFileIndex(index)}
                       >
                         <div className="flex items-center min-w-0 flex-1">
-                          <div className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
                             <img 
                               src={previews[index]} 
                               alt={file.name} 
@@ -891,25 +893,41 @@ export default function CompressTool() {
                             />
                           </div>
                           <div className="overflow-hidden min-w-0 flex-1">
-                            <p className="text-xs sm:text-sm font-medium truncate">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(file.size / 1024).toFixed(2)} KB
-                              {results[index] && results[index] !== null && (
-                                <Badge className="ml-1 sm:ml-2 bg-green-600 text-xs" variant="secondary">
+                            <p className="text-sm font-medium truncate" title={file.name}>
+                              {file.name}
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <p className="text-xs text-muted-foreground">
+                                {(file.size / 1024).toFixed(2)} KB
+                                {results[index] && results[index] !== null && (
+                                  <span className="text-green-600 ml-1 sm:ml-2">
+                                    → {(results[index].compressedSize / 1024).toFixed(2)} KB ({results[index].compressionRatio}% smaller)
+                                  </span>
+                                )}
+                              </p>
+                              {/* Show appropriate badge based on processing state */}
+                              {results[index] ? (
+                                <Badge className="bg-green-600 text-xs" variant="secondary">
                                   Compressed
                                 </Badge>
+                              ) : (
+                                fileJobMapping[index] && (
+                                  <Badge className="bg-yellow-600 text-xs" variant="secondary">
+                                    Processing {jobProgress[fileJobMapping[index]] ? `${Math.round(jobProgress[fileJobMapping[index]])}%` : ''}
+                                  </Badge>
+                                )
                               )}
-                            </p>
+                            </div>
                           </div>
                         </div>
                         <button 
-                          className="p-1 hover:bg-background rounded ml-2 flex-shrink-0"
+                          className="p-1.5 hover:bg-background rounded ml-2 flex-shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFile(index);
                           }}
                         >
-                          <X className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          <X className="h-4 w-4 text-muted-foreground" />
                         </button>
                       </div>
                     ))}
@@ -920,41 +938,49 @@ export default function CompressTool() {
           </div>
           
           {/* Right side - Preview and settings */}
-          <div className="flex-1 lg:max-w-md xl:max-w-lg">
+          <div className="order-2 lg:order-2">
             <div className="border rounded-lg p-3 sm:p-4 h-full flex flex-col">
-              <h3 className="font-medium mb-3 sm:mb-4 text-sm sm:text-base">Image Preview</h3>
+              <h3 className="font-medium mb-4 text-sm sm:text-base">Image Preview</h3>
               
               {selectedFileIndex !== null ? (
                 <div className="flex-grow flex flex-col">
-                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-3 sm:mb-4 overflow-hidden min-h-[150px] sm:min-h-[200px] lg:min-h-[250px]">
+                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-4 overflow-hidden min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
                     <img 
                       src={previews[selectedFileIndex]} 
                       alt={files[selectedFileIndex].name}
-                      className="max-h-[150px] sm:max-h-[200px] lg:max-h-[250px] xl:max-h-[300px] max-w-full object-contain"
+                      className="max-h-full max-w-full object-contain"
                     />
                   </div>
                   
-                  <div className="text-xs sm:text-sm space-y-1">
-                    <p><span className="font-medium">Name:</span> <span className="break-all">{files[selectedFileIndex].name}</span></p>
-                    <p><span className="font-medium">Size:</span> {(files[selectedFileIndex].size / 1024).toFixed(2)} KB</p>
-                    <p><span className="font-medium">Type:</span> {files[selectedFileIndex].type}</p>
+                  <div className="text-sm space-y-2">
+                    <div className="grid grid-cols-1 gap-2">
+                      <p className="break-all">
+                        <span className="font-medium">Name:</span> {files[selectedFileIndex].name}
+                      </p>
+                      <p>
+                        <span className="font-medium">Size:</span> {(files[selectedFileIndex].size / 1024).toFixed(2)} KB
+                      </p>
+                      <p>
+                        <span className="font-medium">Type:</span> {files[selectedFileIndex].type}
+                      </p>
+                    </div>
                     
                     {results[selectedFileIndex] && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-green-600 text-xs sm:text-sm">Compressed Stats:</p>
-                        <p className="text-xs sm:text-sm">
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-medium text-green-600 mb-2">Compressed Stats:</p>
+                        <p className="mb-3">
                           Size: {(results[selectedFileIndex].compressedSize / 1024).toFixed(2)} KB 
-                          <span className="text-green-600 ml-1 sm:ml-2">
+                          <span className="text-green-600 ml-2">
                             ({results[selectedFileIndex].compressionRatio}% smaller)
                           </span>
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground mb-3">
                           Quality setting used: {results[selectedFileIndex].qualityUsed}%
                         </p>
-                        <div className="mt-2">
+                        <div>
                           <a 
                             href={`${getApiUrl().replace('/api', '')}${results[selectedFileIndex].downloadUrl}`}
-                            className="text-xs inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                            className="text-xs inline-flex items-center px-3 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
                           >
                             <Download className="h-3 w-3 mr-1" /> Download
                           </a>
@@ -966,15 +992,15 @@ export default function CompressTool() {
                     {selectedFileIndex !== null && 
                      !results[selectedFileIndex] && 
                      fileJobMapping[selectedFileIndex] && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-yellow-600 text-xs sm:text-sm">Processing Image...</p>
-                        <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-medium text-yellow-600 mb-2">Processing Image...</p>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mb-2">
                           <div
                             className="h-full bg-yellow-500 transition-all duration-300"
                             style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
                           />
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mb-2">
                           {jobProgress[fileJobMapping[selectedFileIndex]] 
                             ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete` 
                             : 'Starting process...'}
@@ -995,13 +1021,13 @@ export default function CompressTool() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg min-h-[150px] sm:min-h-[200px] lg:min-h-[250px]">
-                  <div className="px-4">
+                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
+                  <div>
                     <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 opacity-30" />
                     {files.length > 0 ? (
-                      <p className="text-xs sm:text-sm">Select an image from the list to preview</p>
+                      <p className="text-sm sm:text-base">Select an image from the list to preview</p>
                     ) : (
-                      <p className="text-xs sm:text-sm">Upload images to get started</p>
+                      <p className="text-sm sm:text-base">Upload images to get started</p>
                     )}
                   </div>
                 </div>
@@ -1012,29 +1038,21 @@ export default function CompressTool() {
         
         {/* Compression settings and actions */}
         <Card className="p-4 sm:p-6">
-          <Tabs defaultValue="single" className="space-y-4 sm:space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-medium">Compression Settings</h3>
-              
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                {processingMode === 'queued' && (
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Server className="h-3 w-3" /> Queue mode
-                  </span>
-                )}
-                <TabsList className="w-full sm:w-auto">
-                  <TabsTrigger value="single" disabled={files.length === 0} className="flex-1 sm:flex-none text-xs sm:text-sm">
-                    Single Image
-                  </TabsTrigger>
-                  <TabsTrigger value="batch" disabled={files.length < 2} className="flex-1 sm:flex-none text-xs sm:text-sm">
-                    Batch Compress
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h3 className="text-lg font-medium">Compression Settings</h3>
             
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              {processingMode === 'queued' && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Server className="h-3 w-3" /> Queue mode
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="space-y-6">
             <div>
-              <h4 className="text-xs sm:text-sm font-medium mb-2">Quality: {quality}%</h4>
+              <h4 className="text-sm font-medium mb-3">Quality: {quality}%</h4>
               <Slider
                 value={[quality]}
                 onValueChange={(values: number[]) => setQuality(values[0])}
@@ -1043,189 +1061,162 @@ export default function CompressTool() {
                 step={1}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <div className="flex justify-between text-xs text-muted-foreground mt-2">
                 <span>Lower quality, smaller size</span>
                 <span>Higher quality, larger size</span>
               </div>
             </div>
             
-            <TabsContent value="single" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
-              {/* Queue Status Indicator for Single Image */}
-              {selectedFileIndex !== null && 
-               !results[selectedFileIndex] && 
-               fileJobMapping[selectedFileIndex] && 
-               queueStatus[fileJobMapping[selectedFileIndex]] && (
-                <QueueStatusIndicator
-                  queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
-                  estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
-                  isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
-                />
-              )}
-              
-              {/* Visual Progress Bar for Single Image */}
-              {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted-foreground">Compressing image...</span>
-                    <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
-                  </div>
-                  <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary transition-all duration-300 ease-out"
-                      style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
-                    />
-                  </div>
+            {/* Queue Status Indicator for Single Image */}
+            {selectedFileIndex !== null && 
+             !results[selectedFileIndex] && 
+             fileJobMapping[selectedFileIndex] && 
+             queueStatus[fileJobMapping[selectedFileIndex]] && (
+              <QueueStatusIndicator
+                queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
+                estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
+                isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
+              />
+            )}
+            
+            {/* Visual Progress Bar for Single Image */}
+            {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Compressing image...</span>
+                  <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
                 </div>
-              )}
-              
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-300 ease-out"
+                    style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Visual Progress Bar for Batch Processing */}
+            {processingFiles.size > 1 && (
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Compressing {processingFiles.size} images...
+                  </span>
+                  <span className="font-medium">
+                    {Object.keys(visualProgress).length > 0 
+                      ? `${Math.round(Object.values(visualProgress).reduce((a, b) => a + b, 0) / Object.values(visualProgress).length)}%`
+                      : '0%'
+                    }
+                  </span>
+                </div>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {Array.from(processingFiles).map(fileIndex => (
+                    <div key={fileIndex} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="truncate text-muted-foreground flex-1 mr-2" title={files[fileIndex]?.name}>
+                          {files[fileIndex]?.name || `File ${fileIndex + 1}`}
+                        </span>
+                        <span className="font-medium flex-shrink-0">{visualProgress[fileIndex] || 0}%</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all duration-300 ease-out"
+                          style={{ width: `${visualProgress[fileIndex] || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button 
-                className="w-full h-10 sm:h-12" 
-                size="lg" 
+                className="flex-1" 
                 onClick={handleCompressSingle}
                 disabled={isLoading || selectedFileIndex === null || (selectedFileIndex !== null && results[selectedFileIndex])}
                 variant="default"
               >
-                {isLoading ? (
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <Download className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Compress Selected Image
-                  </span>
-                )}
-              </Button>
-              
-              {/* Show message if already processed */}
-              {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
-                <div className="text-center text-xs sm:text-sm text-muted-foreground">
-                  <p className="flex items-center justify-center gap-2">
-                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                    Image already compressed and ready for download.
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="batch" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
-              {/* Queue Status Indicator for Batch Processing */}
-              {Object.keys(fileJobMapping).length > 0 && 
-               Object.keys(queueStatus).length > 0 && (
-                <div className="space-y-2">
-                  {Object.entries(fileJobMapping).map(([fileIndex, jobId]) => {
-                    const status = queueStatus[jobId];
-                    if (!status || results[parseInt(fileIndex)]) return null;
-                    
-                    return (
-                      <div key={fileIndex} className="space-y-1">
-                        <p className="text-xs text-muted-foreground font-medium truncate">
-                          {files[parseInt(fileIndex)]?.name || `File ${parseInt(fileIndex) + 1}`}
-                        </p>
-                        <QueueStatusIndicator
-                          queuePosition={status.position}
-                          estimatedWaitTime={status.waitTime}
-                          isProcessing={status.isProcessing}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              
-              {/* Visual Progress Bar for Batch Processing */}
-              {processingFiles.size > 0 && (
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted-foreground">
-                      Compressing {processingFiles.size} image{processingFiles.size > 1 ? 's' : ''}...
-                    </span>
-                    <span className="font-medium">
-                      {Object.keys(visualProgress).length > 0 
-                        ? `${Math.round(Object.values(visualProgress).reduce((a, b) => a + b, 0) / Object.values(visualProgress).length)}%`
-                        : '0%'
-                      }
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {Array.from(processingFiles).map(fileIndex => (
-                      <div key={fileIndex} className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="truncate text-muted-foreground pr-2">
-                            {files[fileIndex]?.name || `File ${fileIndex + 1}`}
-                          </span>
-                          <span className="font-medium flex-shrink-0">{visualProgress[fileIndex] || 0}%</span>
-                        </div>
-                        <div className="h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary transition-all duration-300 ease-out"
-                            style={{ width: `${visualProgress[fileIndex] || 0}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <Button 
-                className="w-full h-10 sm:h-12" 
-                size="lg" 
-                onClick={handleCompressAll}
-                disabled={isLoading || files.length === 0 || files.every((_, index) => results[index])}
-              >
-                {isLoading ? (
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                {isLoading && selectedFileIndex !== null && processingFiles.has(selectedFileIndex) ? (
+                  <span className="flex items-center text-sm">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
                 ) : (
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <Download className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Compress All Images
+                  <span className="flex items-center text-sm">
+                    <Download className="mr-2 h-4 w-4" /> Compress Selected Image
                   </span>
                 )}
               </Button>
               
-              {/* Show message if all files are already processed */}
-              {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
-                <div className="text-center text-xs sm:text-sm text-muted-foreground">
-                  <p className="flex items-center justify-center gap-2">
-                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                    All images already compressed and ready for download.
-                  </p>
-                </div>
-              )}
-              
-              {results.filter(r => r).length > 1 && (
-                <Button 
-                  className="w-full h-10 sm:h-12" 
-                  variant="outline"
-                  onClick={handleDownloadArchive}
-                  disabled={isArchiveLoading}
-                >
-                  {isArchiveLoading ? (
-                    <span className="flex items-center text-xs sm:text-sm">
-                      <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating archive...
-                    </span>
-                  ) : (
-                    <span className="flex items-center text-xs sm:text-sm">
-                      <Package className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Download All as ZIP
-                    </span>
-                  )}
-                </Button>
-              )}
-            </TabsContent>
-          </Tabs>
+              <Button 
+                className="flex-1" 
+                onClick={handleCompressAll}
+                disabled={isLoading || files.length === 0 || files.every((_, index) => results[index])}
+                variant="outline"
+              >
+                {isLoading && processingFiles.size > 1 ? (
+                  <span className="flex items-center text-sm">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  <span className="flex items-center text-sm">
+                    <Download className="mr-2 h-4 w-4" /> Compress All Images
+                  </span>
+                )}
+              </Button>
+            </div>
+            
+            {/* Show message if already processed */}
+            {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
+              <div className="text-center text-sm text-muted-foreground">
+                <p className="flex items-center justify-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Image already compressed and ready for download.
+                </p>
+              </div>
+            )}
+            
+            {/* Show message if all files are already processed */}
+            {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
+              <div className="text-center text-sm text-muted-foreground">
+                <p className="flex items-center justify-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  All images already compressed and ready for download.
+                </p>
+              </div>
+            )}
+            
+            {results.filter(r => r).length > 1 && (
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={handleDownloadArchive}
+                disabled={isArchiveLoading}
+              >
+                {isArchiveLoading ? (
+                  <span className="flex items-center text-sm">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating archive...
+                  </span>
+                ) : (
+                  <span className="flex items-center text-sm">
+                    <Package className="mr-2 h-4 w-4" /> Download All as ZIP
+                  </span>
+                )}
+              </Button>
+            )}
+          </div>
         </Card>
       </div>
     </div>

@@ -13,6 +13,16 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'ToolsCandy',
   description: 'A collection of useful web tools',
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    shortcut: '/favicon.svg',
+  },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({
@@ -24,6 +34,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadScripts />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="shortcut icon" href="/favicon.svg" />
       </head>
       <body className={inter.className}>
         <BodyScripts />

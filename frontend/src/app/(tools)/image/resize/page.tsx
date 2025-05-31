@@ -803,18 +803,18 @@ export default function ResizeTool() {
   };
   
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <ToolHeader 
         title="Image Resizer" 
         description="Resize your images with precision while maintaining optimal quality."
         icon={<Maximize2 className="h-6 w-6" />}
       />
       
-      <div className="grid gap-8 mt-8">
+      <div className="grid gap-6 lg:gap-8 mt-6 lg:mt-8">
         {/* File selection area */}
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left side - Dropzone and file list */}
-          <div className="flex-1">
+          <div className="order-1 lg:order-1">
             <div className="space-y-4">
               <ImageDropzone 
                 onImageDrop={handleImageDrop} 
@@ -832,60 +832,67 @@ export default function ResizeTool() {
               />
               
               {files.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">Selected Files ({files.length})</h3>
+                <div className="border rounded-lg p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <h3 className="font-medium text-sm sm:text-base">
+                      Selected Files ({files.length})
+                    </h3>
                     <Button 
                       variant="destructive" 
                       size="sm"
                       onClick={handleRemoveAllFiles}
+                      className="w-full sm:w-auto"
                     >
                       <Trash2 className="h-4 w-4 mr-2" /> Clear All
                     </Button>
                   </div>
                   
-                  <div className="max-h-[250px] overflow-y-auto space-y-2">
+                  <div className="max-h-[200px] sm:max-h-[250px] lg:max-h-[300px] overflow-y-auto space-y-2">
                     {files.map((file, index) => (
                       <div 
                         key={index} 
                         className={`flex items-center justify-between p-2 rounded ${
                           selectedFileIndex === index ? 'bg-accent' : 'hover:bg-accent/50'
-                        } cursor-pointer`}
+                        } cursor-pointer transition-colors`}
                         onClick={() => setSelectedFileIndex(index)}
                       >
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
+                        <div className="flex items-center min-w-0 flex-1">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
                             <img 
                               src={previews[index]} 
                               alt={file.name} 
                               className="h-full w-full object-cover"
                             />
                           </div>
-                          <div className="overflow-hidden">
-                            <p className="text-sm font-medium truncate">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {results[index] ? (
-                                <span>{results[index].originalWidth}×{results[index].originalHeight} → {results[index].newWidth}×{results[index].newHeight}</span>
-                              ) : (
-                                <span>Dimensions will appear here</span>
-                              )}
+                          <div className="overflow-hidden min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate" title={file.name}>
+                              {file.name}
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <p className="text-xs text-muted-foreground">
+                                {results[index] ? (
+                                  <span>{results[index].originalWidth}×{results[index].originalHeight} → {results[index].newWidth}×{results[index].newHeight}</span>
+                                ) : (
+                                  <span>Dimensions will appear here</span>
+                                )}
+                              </p>
                               {/* Show appropriate badge based on processing state */}
                               {results[index] ? (
-                                <Badge className="ml-2 bg-green-600" variant="secondary">
+                                <Badge className="bg-green-600 text-xs" variant="secondary">
                                   Resized
                                 </Badge>
                               ) : (
                                 fileJobMapping[index] && (
-                                  <Badge className="ml-2 bg-yellow-600" variant="secondary">
+                                  <Badge className="bg-yellow-600 text-xs" variant="secondary">
                                     Processing {jobProgress[fileJobMapping[index]] ? `${Math.round(jobProgress[fileJobMapping[index]])}%` : ''}
                                   </Badge>
                                 )
                               )}
-                            </p>
+                            </div>
                           </div>
                         </div>
                         <button 
-                          className="p-1 hover:bg-background rounded"
+                          className="p-1.5 hover:bg-background rounded ml-2 flex-shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFile(index);
@@ -902,32 +909,38 @@ export default function ResizeTool() {
           </div>
           
           {/* Right side - Preview and settings */}
-          <div className="flex-1">
-            <div className="border rounded-lg p-4 h-full flex flex-col">
-              <h3 className="font-medium mb-4">Image Preview</h3>
+          <div className="order-2 lg:order-2">
+            <div className="border rounded-lg p-3 sm:p-4 h-full flex flex-col">
+              <h3 className="font-medium mb-4 text-sm sm:text-base">Image Preview</h3>
               
               {selectedFileIndex !== null ? (
                 <div className="flex-grow flex flex-col">
-                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-4 overflow-hidden">
+                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-4 overflow-hidden min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
                     <img 
                       src={previews[selectedFileIndex]} 
                       alt={files[selectedFileIndex].name}
-                      className="max-h-[300px] max-w-full object-contain"
+                      className="max-h-full max-w-full object-contain"
                     />
                   </div>
                   
-                  <div className="text-sm">
-                    <p><span className="font-medium">Name:</span> {files[selectedFileIndex].name}</p>
-                    <p><span className="font-medium">Original Size:</span> {originalDimensions.width} × {originalDimensions.height} px</p>
+                  <div className="text-sm space-y-2">
+                    <div className="grid grid-cols-1 gap-2">
+                      <p className="break-all">
+                        <span className="font-medium">Name:</span> {files[selectedFileIndex].name}
+                      </p>
+                      <p>
+                        <span className="font-medium">Original Size:</span> {originalDimensions.width} × {originalDimensions.height} px
+                      </p>
+                    </div>
                     
                     {results[selectedFileIndex] && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-green-600">Resize Results:</p>
-                        <p>New dimensions: {results[selectedFileIndex].newWidth} × {results[selectedFileIndex].newHeight} px</p>
-                        <div className="mt-2">
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-medium text-green-600 mb-2">Resize Results:</p>
+                        <p className="mb-3">New dimensions: {results[selectedFileIndex].newWidth} × {results[selectedFileIndex].newHeight} px</p>
+                        <div>
                           <a 
                             href={`${getApiUrl().replace('/api', '')}${results[selectedFileIndex].downloadUrl}`}
-                            className="text-xs inline-flex items-center px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                            className="text-xs inline-flex items-center px-3 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
                           >
                             <Download className="h-3 w-3 mr-1" /> Download
                           </a>
@@ -939,15 +952,15 @@ export default function ResizeTool() {
                     {selectedFileIndex !== null && 
                      !results[selectedFileIndex] && 
                      fileJobMapping[selectedFileIndex] && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-yellow-600">Processing Image...</p>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-medium text-yellow-600 mb-2">Processing Image...</p>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mb-2">
                           <div
                             className="h-full bg-yellow-500 transition-all duration-300"
                             style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
                           />
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mb-2">
                          {jobProgress[fileJobMapping[selectedFileIndex]] 
                            ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete` 
                            : 'Starting process...'}
@@ -968,13 +981,13 @@ export default function ResizeTool() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg">
+                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
                   <div>
-                    <Maximize2 className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                    <Maximize2 className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 opacity-30" />
                     {files.length > 0 ? (
-                      <p>Select an image from the list to preview</p>
+                      <p className="text-sm sm:text-base">Select an image from the list to preview</p>
                     ) : (
-                      <p>Upload images to get started</p>
+                      <p className="text-sm sm:text-base">Upload images to get started</p>
                     )}
                   </div>
                 </div>
@@ -984,30 +997,34 @@ export default function ResizeTool() {
         </div>
         
         {/* Resize settings and actions */}
-        <Card className="p-6">
-          <Tabs defaultValue="single" className="space-y-6">
-            <div className="flex items-center justify-between mb-4">
+        <Card className="p-4 sm:p-6">
+          <Tabs defaultValue="single" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <h3 className="text-lg font-medium">Resize Settings</h3>
               
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 {processingMode === 'queued' && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Server className="h-3 w-3" /> Queue mode
                   </span>
                 )}
-                <TabsList>
-                  <TabsTrigger value="single" disabled={files.length === 0}>Single Image</TabsTrigger>
-                  <TabsTrigger value="batch" disabled={files.length < 2}>Batch Resize</TabsTrigger>
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="single" disabled={files.length === 0} className="flex-1 sm:flex-none">
+                    Single Image
+                  </TabsTrigger>
+                  <TabsTrigger value="batch" disabled={files.length < 2} className="flex-1 sm:flex-none">
+                    Batch Resize
+                  </TabsTrigger>
                 </TabsList>
               </div>
             </div>
             
-            <div className="grid gap-6">
+            <div className="grid gap-4 sm:gap-6">
               {/* Dimensions */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="width">Width (px)</Label>
-                  <div className="flex mt-1">
+                  <Label htmlFor="width" className="text-sm font-medium">Width (px)</Label>
+                  <div className="mt-2">
                     <Input
                       id="width"
                       type="number"
@@ -1015,13 +1032,14 @@ export default function ResizeTool() {
                       value={width}
                       onChange={handleWidthChange}
                       disabled={!originalDimensions.width}
+                      className="w-full"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="height">Height (px)</Label>
-                  <div className="flex mt-1">
+                  <Label htmlFor="height" className="text-sm font-medium">Height (px)</Label>
+                  <div className="mt-2">
                     <Input
                       id="height"
                       type="number"
@@ -1029,19 +1047,21 @@ export default function ResizeTool() {
                       value={height}
                       onChange={handleHeightChange}
                       disabled={!originalDimensions.height}
+                      className="w-full"
                     />
                   </div>
                 </div>
               </div>
               
               {/* Aspect Ratio Control */}
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={toggleAspectRatio}
                   disabled={!originalDimensions.width}
+                  className="w-full sm:w-auto"
                 >
                   {aspectRatioLocked ? (
                     <>
@@ -1060,20 +1080,23 @@ export default function ResizeTool() {
                   size="sm"
                   onClick={handleResetDimensions}
                   disabled={!originalDimensions.width}
+                  className="w-full sm:w-auto"
                 >
+                  <RotateCcw className="h-4 w-4 mr-2" />
                   Reset to Original
                 </Button>
               </div>
               
               {/* Predefined Sizes */}
               <div>
-                <Label>Quick Resize</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <Label className="text-sm font-medium">Quick Resize</Label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => handleSetPercentage(25)}
                     disabled={!originalDimensions.width}
+                    className="text-xs"
                   >
                     25%
                   </Button>
@@ -1082,6 +1105,7 @@ export default function ResizeTool() {
                     size="sm" 
                     onClick={() => handleSetPercentage(50)}
                     disabled={!originalDimensions.width}
+                    className="text-xs"
                   >
                     50%
                   </Button>
@@ -1090,6 +1114,7 @@ export default function ResizeTool() {
                     size="sm" 
                     onClick={() => handleSetPercentage(75)}
                     disabled={!originalDimensions.width}
+                    className="text-xs"
                   >
                     75%
                   </Button>
@@ -1098,6 +1123,7 @@ export default function ResizeTool() {
                     size="sm" 
                     onClick={() => handleSetPercentage(100)}
                     disabled={!originalDimensions.width}
+                    className="text-xs"
                   >
                     100%
                   </Button>
@@ -1106,6 +1132,7 @@ export default function ResizeTool() {
                     size="sm" 
                     onClick={() => handleSetPercentage(150)}
                     disabled={!originalDimensions.width}
+                    className="text-xs"
                   >
                     150%
                   </Button>
@@ -1114,6 +1141,7 @@ export default function ResizeTool() {
                     size="sm" 
                     onClick={() => handleSetPercentage(200)}
                     disabled={!originalDimensions.width}
+                    className="text-xs"
                   >
                     200%
                   </Button>
@@ -1121,10 +1149,10 @@ export default function ResizeTool() {
               </div>
               
               {/* Resize Mode */}
-              <div className="grid grid-cols-1 gap-2">
-                <Label htmlFor="resize-mode">Resize Mode</Label>
+              <div className="space-y-2">
+                <Label htmlFor="resize-mode" className="text-sm font-medium">Resize Mode</Label>
                 <Select value={resizeMode} onValueChange={setResizeMode}>
-                  <SelectTrigger id="resize-mode">
+                  <SelectTrigger id="resize-mode" className="w-full">
                     <SelectValue placeholder="Select mode" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1135,7 +1163,7 @@ export default function ResizeTool() {
                     <SelectItem value="outside">Outside (covers area, no crop)</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-2">
                   {resizeMode === 'cover' && "Resizes to fill dimensions, maintaining aspect ratio but may crop edges."}
                   {resizeMode === 'contain' && "Resizes to fit within dimensions while maintaining aspect ratio."}
                   {resizeMode === 'fill' && "Stretches or squeezes image to exactly match dimensions."}
@@ -1210,14 +1238,14 @@ export default function ResizeTool() {
                       }
                     </span>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
                     {Array.from(processingFiles).map(fileIndex => (
                       <div key={fileIndex} className="space-y-1">
                         <div className="flex justify-between text-xs">
-                          <span className="truncate text-muted-foreground">
+                          <span className="truncate text-muted-foreground flex-1 mr-2" title={files[fileIndex]?.name}>
                             {files[fileIndex]?.name || `File ${fileIndex + 1}`}
                           </span>
-                          <span className="font-medium">{visualProgress[fileIndex] || 0}%</span>
+                          <span className="font-medium flex-shrink-0">{visualProgress[fileIndex] || 0}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div

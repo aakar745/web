@@ -10,16 +10,17 @@
  * - Or set up as a cron job
  * 
  * Configuration:
- * - RETENTION_DAYS: Number of days to keep temporary images before deletion
+ * - Uses admin panel retention settings from SystemSettings
+ * - Falls back to environment variables if database is unavailable
  */
 
 import fs from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
-
-// Configuration
-const RETENTION_DAYS = 0; // Keep temporary images for 7 days by default
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+import { getCurrentSettings } from '../services/settingsService';
+import logger from '../utils/logger';
+import { connectDB, isDatabaseConnected } from '../config/database';
+import mongoose from 'mongoose';
 
 // Paths
 const BASE_DIR = path.resolve(__dirname, '../../uploads');
@@ -36,102 +37,234 @@ export interface CleanupResult {
 }
 
 /**
- * Delete files older than the retention period with the specified prefix
+ * Ensure database connection for getting admin settings
  */
-async function cleanDirectory(directory: string, prefix: string, excludePrefix?: string): Promise<CleanupResult> {
+async function ensureDatabaseConnection(): Promise<boolean> {
   try {
-    console.log(`Cleaning directory: ${directory}`);
-    
-    // Check if directory exists
-    if (!existsSync(directory)) {
-      console.log(`Directory ${directory} does not exist, creating it...`);
-      await fs.mkdir(directory, { recursive: true });
-      return {
-        directory,
-        deletedCount: 0,
-        totalSize: 0,
-        sizeFormatted: '0 Bytes'
-      };
+    // Check if already connected
+    if (isDatabaseConnected()) {
+      return true;
     }
     
-    // Get current time for comparison
-    const now = Date.now();
-    const cutoffTime = now - (RETENTION_DAYS * MS_PER_DAY);
-    
-    // Read all files in the directory
-    const files = await fs.readdir(directory);
-    
-    let deletedCount = 0;
-    let totalSize = 0;
-    
-    for (const file of files) {
-      // Check if file matches our criteria
-      const shouldProcess = excludePrefix 
-        ? !file.startsWith(excludePrefix) // If excludePrefix is provided, process files NOT starting with it
-        : prefix === '' || file.startsWith(prefix); // If prefix is empty, process all files, otherwise check prefix
-      
-      if (shouldProcess) {
-        const filePath = path.join(directory, file);
-        
-        try {
-          // Get file stats
-          const stats = await fs.stat(filePath);
-          
-          // Skip directories
-          if (stats.isDirectory()) {
-            continue;
-          }
-          
-          // Check if file is older than retention period
-          if (stats.mtimeMs < cutoffTime) {
-            const fileSize = stats.size;
-            totalSize += fileSize;
-            
-            // Delete the file
-            await fs.unlink(filePath);
-            deletedCount++;
-            
-            console.log(`Deleted: ${file} (${formatSize(fileSize)})`);
-          }
-        } catch (fileError) {
-          console.error(`Error processing file ${filePath}:`, fileError);
-          // Continue with other files
-        }
-      }
-    }
-    
-    console.log(`Cleanup complete for ${directory}:`);
-    console.log(`- ${deletedCount} files deleted`);
-    console.log(`- ${formatSize(totalSize)} recovered`);
-    
-    return {
-      directory,
-      deletedCount,
-      totalSize,
-      sizeFormatted: formatSize(totalSize)
-    };
+    // Try to connect
+    await connectDB();
+    return isDatabaseConnected();
   } catch (error) {
-    console.error(`Error cleaning directory ${directory}:`, error);
-    return {
-      directory,
-      deletedCount: 0,
-      totalSize: 0,
-      sizeFormatted: '0 Bytes'
-    };
+    logger.warn('Failed to connect to database for cleanup settings:', error);
+    return false;
   }
 }
 
 /**
- * Format file size in human-readable format
+ * Get retention settings from admin panel
+ */
+async function getRetentionSettings() {
+  try {
+    // Ensure database connection
+    const dbConnected = await ensureDatabaseConnection();
+    
+    if (!dbConnected) {
+      logger.warn('Database not available, using environment fallbacks');
+      throw new Error('Database connection failed');
+    }
+    
+    const settings = await getCurrentSettings();
+    
+    if (!settings.autoCleanupEnabled) {
+      logger.info('Auto cleanup is disabled in admin panel');
+      return null; // Don't clean if disabled
+    }
+    
+    logger.info('Successfully loaded retention settings from admin panel:', {
+      processedFileRetentionHours: settings.processedFileRetentionHours,
+      archiveFileRetentionHours: settings.archiveFileRetentionHours,
+      tempFileRetentionHours: settings.tempFileRetentionHours,
+      autoCleanupEnabled: settings.autoCleanupEnabled
+    });
+    
+    return {
+      processedFileRetentionHours: settings.processedFileRetentionHours,
+      archiveFileRetentionHours: settings.archiveFileRetentionHours,
+      tempFileRetentionHours: settings.tempFileRetentionHours,
+      autoCleanupEnabled: settings.autoCleanupEnabled
+    };
+  } catch (error) {
+    logger.warn('Failed to get retention settings from database, using environment fallbacks:', error);
+    
+    // Fallback to environment variables
+    const autoCleanupEnabled = process.env.AUTO_CLEANUP_ENABLED !== 'false';
+    
+    if (!autoCleanupEnabled) {
+      logger.info('Auto cleanup is disabled via environment variable');
+      return null;
+    }
+    
+    const fallbackSettings = {
+      processedFileRetentionHours: parseInt(process.env.PROCESSED_FILE_RETENTION_HOURS || '48'),
+      archiveFileRetentionHours: parseInt(process.env.ARCHIVE_FILE_RETENTION_HOURS || '24'),
+      tempFileRetentionHours: parseFloat(process.env.TEMP_FILE_RETENTION_HOURS || '2'),
+      autoCleanupEnabled: true
+    };
+    
+    logger.info('Using environment fallback settings:', fallbackSettings);
+    return fallbackSettings;
+  }
+}
+
+/**
+ * Format file size in human readable format
  */
 function formatSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  
-  const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  if (bytes === 0) return '0 Bytes';
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+/**
+ * Check if a file is older than the retention period
+ */
+function isFileOlderThan(filePath: string, retentionHours: number): boolean {
+  try {
+    const stats = require('fs').statSync(filePath);
+    const fileAge = Date.now() - stats.mtime.getTime();
+    const retentionMs = retentionHours * 60 * 60 * 1000; // Convert hours to milliseconds
+    return fileAge > retentionMs;
+  } catch (error) {
+    logger.error(`Error checking file age for ${filePath}:`, error);
+    return false; // Don't delete if we can't check the age
+  }
+}
+
+/**
+ * Clean a directory based on retention settings
+ */
+async function cleanDirectory(dirPath: string, prefix: string, retentionHours: number): Promise<CleanupResult> {
+  const result: CleanupResult = {
+    directory: dirPath,
+    deletedCount: 0,
+    totalSize: 0,
+    sizeFormatted: '0 Bytes'
+  };
   
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  try {
+    if (!existsSync(dirPath)) {
+      console.log(`Directory doesn't exist: ${dirPath}`);
+      return result;
+    }
+    
+    const files = await fs.readdir(dirPath);
+    console.log(`Checking ${files.length} files in ${dirPath} (retention: ${retentionHours} hours)`);
+    
+    for (const file of files) {
+      // Only process files with the specified prefix (e.g., 'tool-')
+      if (!file.startsWith(prefix)) {
+        continue;
+      }
+      
+      const filePath = path.join(dirPath, file);
+      
+      try {
+        const stats = await fs.stat(filePath);
+        
+        // Skip directories
+        if (stats.isDirectory()) {
+          continue;
+        }
+        
+        // Check if file is older than retention period
+        if (isFileOlderThan(filePath, retentionHours)) {
+          console.log(`Deleting old file: ${file} (${formatSize(stats.size)})`);
+          
+          await fs.unlink(filePath);
+          result.deletedCount++;
+          result.totalSize += stats.size;
+        } else {
+          // File is still within retention period
+          const fileAge = Date.now() - stats.mtime.getTime();
+          const hoursOld = Math.round(fileAge / (1000 * 60 * 60) * 10) / 10;
+          console.log(`Keeping file: ${file} (${hoursOld}h old, retention: ${retentionHours}h)`);
+        }
+        
+      } catch (fileError) {
+        console.error(`Error processing file ${file}:`, fileError);
+      }
+    }
+    
+    result.sizeFormatted = formatSize(result.totalSize);
+    console.log(`Cleaned ${dirPath}: ${result.deletedCount} files, ${result.sizeFormatted} recovered`);
+    
+  } catch (error) {
+    console.error(`Error cleaning directory ${dirPath}:`, error);
+  }
+  
+  return result;
+}
+
+/**
+ * Clean main uploads directory (files not in subdirectories)
+ */
+async function cleanMainDirectory(retentionHours: number): Promise<CleanupResult> {
+  const result: CleanupResult = {
+    directory: BASE_DIR,
+    deletedCount: 0,
+    totalSize: 0,
+    sizeFormatted: '0 Bytes'
+  };
+  
+  try {
+    if (!existsSync(BASE_DIR)) {
+      console.log(`Base directory doesn't exist: ${BASE_DIR}`);
+      return result;
+    }
+    
+    const items = await fs.readdir(BASE_DIR);
+    console.log(`Checking ${items.length} items in main uploads directory (retention: ${retentionHours} hours)`);
+    
+    for (const item of items) {
+      const itemPath = path.join(BASE_DIR, item);
+      
+      try {
+        const stats = await fs.stat(itemPath);
+        
+        // Skip directories (like processed/, archives/, blogs/)
+        if (stats.isDirectory()) {
+          continue;
+        }
+        
+        // Skip blog images (they should be in blogs/ directory, but just in case)
+        if (item.startsWith('blog-')) {
+          console.log(`Skipping blog image: ${item}`);
+          continue;
+        }
+        
+        // Check if file is older than retention period
+        if (isFileOlderThan(itemPath, retentionHours)) {
+          console.log(`Deleting old file: ${item} (${formatSize(stats.size)})`);
+          
+          await fs.unlink(itemPath);
+          result.deletedCount++;
+          result.totalSize += stats.size;
+        } else {
+          // File is still within retention period
+          const fileAge = Date.now() - stats.mtime.getTime();
+          const hoursOld = Math.round(fileAge / (1000 * 60 * 60) * 10) / 10;
+          console.log(`Keeping file: ${item} (${hoursOld}h old, retention: ${retentionHours}h)`);
+        }
+        
+      } catch (fileError) {
+        console.error(`Error processing item ${item}:`, fileError);
+      }
+    }
+    
+    result.sizeFormatted = formatSize(result.totalSize);
+    console.log(`Cleaned main directory: ${result.deletedCount} files, ${result.sizeFormatted} recovered`);
+    
+  } catch (error) {
+    console.error(`Error cleaning main directory:`, error);
+  }
+  
+  return result;
 }
 
 /**
@@ -144,9 +277,42 @@ async function main(): Promise<{
   totalDeleted: number;
   totalSizeRecovered: string;
 }> {
+  let shouldCloseConnection = false;
+  
   try {
-    console.log('Starting tool image cleanup');
-    console.log(`Retention period: ${RETENTION_DAYS} days`);
+    console.log('Starting tool image cleanup with admin panel settings');
+    
+    // Track if we need to close the connection at the end
+    shouldCloseConnection = !isDatabaseConnected();
+    
+    // Get retention settings from admin panel
+    const retentionSettings = await getRetentionSettings();
+    
+    if (!retentionSettings) {
+      console.log('Cleanup is disabled - skipping all cleanup operations');
+      
+      // Return empty results
+      const emptyResult: CleanupResult = {
+        directory: '',
+        deletedCount: 0,
+        totalSize: 0,
+        sizeFormatted: '0 Bytes'
+      };
+      
+      return {
+        processedFiles: emptyResult,
+        archiveFiles: emptyResult,
+        uploadedFiles: emptyResult,
+        totalDeleted: 0,
+        totalSizeRecovered: '0 Bytes'
+      };
+    }
+    
+    console.log('Retention settings:', {
+      processedFiles: `${retentionSettings.processedFileRetentionHours} hours`,
+      archiveFiles: `${retentionSettings.archiveFileRetentionHours} hours`,
+      tempFiles: `${retentionSettings.tempFileRetentionHours} hours`
+    });
     
     // Ensure all required directories exist
     for (const dir of [BASE_DIR, PROCESSED_DIR, ARCHIVES_DIR, BLOGS_DIR]) {
@@ -156,15 +322,22 @@ async function main(): Promise<{
       }
     }
     
-    // Clean processed directory (tool-*.*)
-    const processedResult = await cleanDirectory(PROCESSED_DIR, 'tool-');
+    // Clean processed directory (tool-*.*) - use processedFileRetentionHours
+    const processedResult = await cleanDirectory(
+      PROCESSED_DIR, 
+      'tool-', 
+      retentionSettings.processedFileRetentionHours
+    );
     
-    // Clean archives directory (tool-*.zip)
-    const archivesResult = await cleanDirectory(ARCHIVES_DIR, 'tool-');
+    // Clean archives directory (tool-*.zip) - use archiveFileRetentionHours
+    const archivesResult = await cleanDirectory(
+      ARCHIVES_DIR, 
+      'tool-', 
+      retentionSettings.archiveFileRetentionHours
+    );
     
-    // Clean main uploads directory (all files except those in subdirectories)
-    // We'll need to check if a path is a directory before trying to clean it
-    const uploadsResult = await cleanMainDirectory();
+    // Clean main uploads directory - use tempFileRetentionHours for temp files
+    const uploadsResult = await cleanMainDirectory(retentionSettings.tempFileRetentionHours);
     
     // Calculate totals
     const totalDeletedCount = processedResult.deletedCount + archivesResult.deletedCount + uploadsResult.deletedCount;
@@ -184,95 +357,31 @@ async function main(): Promise<{
   } catch (error) {
     console.error('Cleanup failed:', error);
     throw error;
-  }
-}
-
-/**
- * Special function to clean the main uploads directory
- * This will skip any subdirectories like blogs/
- */
-async function cleanMainDirectory(): Promise<CleanupResult> {
-  try {
-    console.log(`Cleaning directory: ${BASE_DIR}`);
-    
-    // Check if directory exists
-    if (!existsSync(BASE_DIR)) {
-      console.log(`Directory ${BASE_DIR} does not exist, creating it...`);
-      await fs.mkdir(BASE_DIR, { recursive: true });
-      return {
-        directory: BASE_DIR,
-        deletedCount: 0,
-        totalSize: 0,
-        sizeFormatted: '0 Bytes'
-      };
-    }
-    
-    // Get current time for comparison
-    const now = Date.now();
-    const cutoffTime = now - (RETENTION_DAYS * MS_PER_DAY);
-    
-    // Read all files in the directory
-    const files = await fs.readdir(BASE_DIR);
-    
-    let deletedCount = 0;
-    let totalSize = 0;
-    
-    for (const file of files) {
-      const filePath = path.join(BASE_DIR, file);
-      
+  } finally {
+    // Close database connection if we opened it in this script
+    if (shouldCloseConnection && isDatabaseConnected()) {
       try {
-        // Get file stats
-        const stats = await fs.stat(filePath);
-        
-        // Skip directories and files that start with 'blog-'
-        if (stats.isDirectory()) {
-          continue;
-        }
-        
-        // Check if file is older than retention period
-        if (stats.mtimeMs < cutoffTime) {
-          const fileSize = stats.size;
-          totalSize += fileSize;
-          
-          // Delete the file
-          await fs.unlink(filePath);
-          deletedCount++;
-          
-          console.log(`Deleted: ${file} (${formatSize(fileSize)})`);
-        }
-      } catch (fileError) {
-        console.error(`Error processing file ${filePath}:`, fileError);
-        // Continue with other files
+        await mongoose.disconnect();
+        console.log('Database connection closed');
+      } catch (error) {
+        logger.warn('Error closing database connection:', error);
       }
     }
-    
-    console.log(`Cleanup complete for ${BASE_DIR}:`);
-    console.log(`- ${deletedCount} files deleted`);
-    console.log(`- ${formatSize(totalSize)} recovered`);
-    
-    return {
-      directory: BASE_DIR,
-      deletedCount,
-      totalSize,
-      sizeFormatted: formatSize(totalSize)
-    };
-  } catch (error) {
-    console.error(`Error cleaning directory ${BASE_DIR}:`, error);
-    return {
-      directory: BASE_DIR,
-      deletedCount: 0,
-      totalSize: 0,
-      sizeFormatted: '0 Bytes'
-    };
   }
 }
 
-// Run the script
-if (require.main === module) {
-  main().catch(error => {
-    console.error('Cleanup failed:', error);
-    process.exit(1);
-  });
-}
+// Export the main function for use by other modules
+export default main;
 
-export default main; 
+// Run cleanup if this script is executed directly
+if (require.main === module) {
+  main()
+    .then((results) => {
+      console.log('Cleanup completed:', results);
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('Cleanup failed:', error);
+      process.exit(1);
+    });
+} 

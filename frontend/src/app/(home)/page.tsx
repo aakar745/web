@@ -16,9 +16,9 @@ import {
   Clock, 
   Award,
   CreditCard,
+  CalendarIcon,
   Check,
   MoveRight,
-  CalendarIcon,
   FileText,
   ArrowUpRight
 } from 'lucide-react'

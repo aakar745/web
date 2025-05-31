@@ -759,18 +759,18 @@ export default function ConvertTool() {
   }
   
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <ToolHeader 
         title="Image Converter" 
         description="Convert your images between different formats while maintaining quality."
         icon={<Repeat className="h-6 w-6" />}
       />
       
-      <div className="grid gap-8 mt-8">
+      <div className="grid gap-6 lg:gap-8 mt-6 lg:mt-8">
         {/* File selection area */}
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left side - Dropzone and file list */}
-          <div className="flex-1">
+          <div className="order-1 lg:order-1">
             <div className="space-y-4">
               <ImageDropzone 
                 onImageDrop={handleImageDrop} 
@@ -788,60 +788,67 @@ export default function ConvertTool() {
               />
               
               {files.length > 0 && (
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">Selected Files ({files.length})</h3>
+                <div className="border rounded-lg p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <h3 className="font-medium text-sm sm:text-base">
+                      Selected Files ({files.length})
+                    </h3>
                     <Button 
                       variant="destructive" 
                       size="sm"
                       onClick={handleRemoveAllFiles}
+                      className="w-full sm:w-auto"
                     >
                       <Trash2 className="h-4 w-4 mr-2" /> Clear All
                     </Button>
                   </div>
                   
-                  <div className="max-h-[250px] overflow-y-auto space-y-2">
+                  <div className="max-h-[200px] sm:max-h-[250px] lg:max-h-[300px] overflow-y-auto space-y-2">
                     {files.map((file, index) => (
                       <div 
                         key={index} 
                         className={`flex items-center justify-between p-2 rounded ${
                           selectedFileIndex === index ? 'bg-accent' : 'hover:bg-accent/50'
-                        } cursor-pointer`}
+                        } cursor-pointer transition-colors`}
                         onClick={() => setSelectedFileIndex(index)}
                       >
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
+                        <div className="flex items-center min-w-0 flex-1">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 mr-3 flex-shrink-0 bg-background rounded overflow-hidden">
                             <img 
                               src={previews[index]} 
                               alt={file.name} 
                               className="h-full w-full object-cover"
                             />
                           </div>
-                          <div className="overflow-hidden">
-                            <p className="text-sm font-medium truncate">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {results[index] ? (
-                                <span>{results[index].originalFormat.toUpperCase()} → {results[index].convertedFormat.toUpperCase()}</span>
-                              ) : (
-                                <span>Format: {getFileExtension(file.name).toUpperCase()}</span>
-                              )}
+                          <div className="overflow-hidden min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate" title={file.name}>
+                              {file.name}
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <p className="text-xs text-muted-foreground">
+                                {results[index] ? (
+                                  <span>{results[index].originalFormat.toUpperCase()} → {results[index].convertedFormat.toUpperCase()}</span>
+                                ) : (
+                                  <span>Format: {getFileExtension(file.name).toUpperCase()}</span>
+                                )}
+                              </p>
                               {/* Show appropriate badge based on processing state */}
                               {results[index] ? (
-                                <Badge className="ml-2 bg-green-600" variant="secondary">
+                                <Badge className="bg-green-600 text-xs" variant="secondary">
                                   Converted
                                 </Badge>
                               ) : (
                                 jobIds.includes(index.toString()) && (
-                                  <Badge className="ml-2 bg-yellow-600" variant="secondary">
+                                  <Badge className="bg-yellow-600 text-xs" variant="secondary">
                                     Processing {jobProgress[index.toString()] ? `${Math.round(jobProgress[index.toString()])}%` : ''}
                                   </Badge>
                                 )
                               )}
-                            </p>
+                            </div>
                           </div>
                         </div>
                         <button 
-                          className="p-1 hover:bg-background rounded"
+                          className="p-1.5 hover:bg-background rounded ml-2 flex-shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFile(index);
@@ -858,32 +865,38 @@ export default function ConvertTool() {
           </div>
           
           {/* Right side - Preview and settings */}
-          <div className="flex-1">
-            <div className="border rounded-lg p-4 h-full flex flex-col">
-              <h3 className="font-medium mb-4">Image Preview</h3>
+          <div className="order-2 lg:order-2">
+            <div className="border rounded-lg p-3 sm:p-4 h-full flex flex-col">
+              <h3 className="font-medium mb-4 text-sm sm:text-base">Image Preview</h3>
               
               {selectedFileIndex !== null ? (
                 <div className="flex-grow flex flex-col">
-                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-4 overflow-hidden">
+                  <div className="flex-grow flex items-center justify-center bg-accent/20 rounded-lg mb-4 overflow-hidden min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
                     <img 
                       src={previews[selectedFileIndex]} 
                       alt={files[selectedFileIndex].name}
-                      className="max-h-[300px] max-w-full object-contain"
+                      className="max-h-full max-w-full object-contain"
                     />
                   </div>
                   
-                  <div className="text-sm">
-                    <p><span className="font-medium">Name:</span> {files[selectedFileIndex].name}</p>
-                    <p><span className="font-medium">Current Format:</span> {getFileExtension(files[selectedFileIndex].name).toUpperCase()}</p>
+                  <div className="text-sm space-y-2">
+                    <div className="grid grid-cols-1 gap-2">
+                      <p className="break-all">
+                        <span className="font-medium">Name:</span> {files[selectedFileIndex].name}
+                      </p>
+                      <p>
+                        <span className="font-medium">Current Format:</span> {getFileExtension(files[selectedFileIndex].name).toUpperCase()}
+                      </p>
+                    </div>
                     
                     {results[selectedFileIndex] && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-green-600">Conversion Results:</p>
-                        <p>New format: {results[selectedFileIndex].convertedFormat.toUpperCase()}</p>
-                        <div className="mt-2">
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-medium text-green-600 mb-2">Conversion Results:</p>
+                        <p className="mb-3">New format: {results[selectedFileIndex].convertedFormat.toUpperCase()}</p>
+                        <div>
                           <a 
                             href={`${getApiUrl().replace('/api', '')}${results[selectedFileIndex].downloadUrl}`}
-                            className="text-xs inline-flex items-center px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                            className="text-xs inline-flex items-center px-3 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
                           >
                             <Download className="h-3 w-3 mr-1" /> Download
                           </a>
@@ -895,15 +908,15 @@ export default function ConvertTool() {
                     {selectedFileIndex !== null && 
                      !results[selectedFileIndex] && 
                      fileJobMapping[selectedFileIndex] && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="font-medium text-yellow-600">Processing Image...</p>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mt-2">
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-medium text-yellow-600 mb-2">Processing Image...</p>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mb-2">
                           <div
                             className="h-full bg-yellow-500 transition-all duration-300"
                             style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
                           />
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mb-2">
                           {jobProgress[fileJobMapping[selectedFileIndex]] 
                             ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete` 
                             : 'Starting process...'}
@@ -924,13 +937,13 @@ export default function ConvertTool() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg">
+                <div className="flex-grow flex items-center justify-center text-center text-muted-foreground bg-accent/10 rounded-lg min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
                   <div>
-                    <Repeat className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                    <Repeat className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 opacity-30" />
                     {files.length > 0 ? (
-                      <p>Select an image from the list to preview</p>
+                      <p className="text-sm sm:text-base">Select an image from the list to preview</p>
                     ) : (
-                      <p>Upload images to get started</p>
+                      <p className="text-sm sm:text-base">Upload images to get started</p>
                     )}
                   </div>
                 </div>
@@ -940,33 +953,37 @@ export default function ConvertTool() {
         </div>
         
         {/* Convert settings and actions */}
-        <Card className="p-6">
-          <Tabs defaultValue="single" className="space-y-6">
-            <div className="flex items-center justify-between mb-4">
+        <Card className="p-4 sm:p-6">
+          <Tabs defaultValue="single" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <h3 className="text-lg font-medium">Conversion Settings</h3>
               
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 {processingMode === 'queued' && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Server className="h-3 w-3" /> Queue mode
                   </span>
                 )}
-                <TabsList>
-                  <TabsTrigger value="single" disabled={files.length === 0}>Single Image</TabsTrigger>
-                  <TabsTrigger value="batch" disabled={files.length < 2}>Batch Convert</TabsTrigger>
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="single" disabled={files.length === 0} className="flex-1 sm:flex-none">
+                    Single Image
+                  </TabsTrigger>
+                  <TabsTrigger value="batch" disabled={files.length < 2} className="flex-1 sm:flex-none">
+                    Batch Convert
+                  </TabsTrigger>
                 </TabsList>
               </div>
             </div>
             
-            <div className="grid gap-6">
+            <div className="grid gap-4 sm:gap-6">
               {/* Format Selection */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label className="text-sm font-medium">Target Format</label>
                 <Select 
                   value={targetFormat} 
                   onValueChange={setTargetFormat}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select format" />
                   </SelectTrigger>
                   <SelectContent>
@@ -995,7 +1012,7 @@ export default function ConvertTool() {
                   {targetFormat === 'tiff' && "TIFF offers the highest quality for printing and professional editing, but creates larger files."}
                 </p>
                 {(getCurrentFormat() === 'heic' || getCurrentFormat() === 'heif') && (
-                  <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md text-xs text-blue-800 dark:text-blue-300">
+                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-xs text-blue-800 dark:text-blue-300">
                     <p className="font-medium">HEIC/HEIF Detected</p>
                     <p>HEIC/HEIF files are automatically converted to JPEG before processing. Original files remain unchanged.</p>
                   </div>
@@ -1003,10 +1020,10 @@ export default function ConvertTool() {
               </div>
               
               {/* Format Comparison */}
-              <div className="grid grid-cols-2 gap-4 text-sm border-t pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm border-t pt-4">
                 <div>
-                  <h4 className="font-medium mb-2">Best For</h4>
-                  <ul className="space-y-1 list-disc pl-5 text-muted-foreground">
+                  <h4 className="font-medium mb-3">Best For</h4>
+                  <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
                     {targetFormat === 'webp' && (
                       <>
                         <li>Web images</li>
@@ -1045,8 +1062,8 @@ export default function ConvertTool() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2">Limitations</h4>
-                  <ul className="space-y-1 list-disc pl-5 text-muted-foreground">
+                  <h4 className="font-medium mb-3">Limitations</h4>
+                  <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
                     {targetFormat === 'webp' && (
                       <>
                         <li>Limited support in older browsers</li>
@@ -1150,14 +1167,14 @@ export default function ConvertTool() {
                       }
                     </span>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
                     {Array.from(processingFiles).map(fileIndex => (
                       <div key={fileIndex} className="space-y-1">
                         <div className="flex justify-between text-xs">
-                          <span className="truncate text-muted-foreground">
+                          <span className="truncate text-muted-foreground flex-1 mr-2" title={files[fileIndex]?.name}>
                             {files[fileIndex]?.name || `File ${fileIndex + 1}`}
                           </span>
-                          <span className="font-medium">{visualProgress[fileIndex] || 0}%</span>
+                          <span className="font-medium flex-shrink-0">{visualProgress[fileIndex] || 0}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
