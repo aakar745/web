@@ -39,88 +39,41 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
   // Improved script content extraction function
   const extractScriptContent = (content: string): string => {
     try {
-      // If content doesn't contain script tags, return as-is
+      // If content doesn't contain script tags, return as-is (it's already plain JavaScript)
       if (!content.includes('<script')) {
         return content.trim()
       }
 
-      // For production SSR robustness, prioritize server-side regex parsing
-      // This ensures consistent behavior between development and production
-      const extractWithRegex = (): string => {
-        const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
-        let extractedContent = ''
-        let match
-        
-        while ((match = scriptRegex.exec(content)) !== null) {
-          const scriptContent = match[1]
-          if (scriptContent && scriptContent.trim()) {
-            extractedContent += scriptContent.trim() + '\n'
-          }
-        }
-        
-        // Comprehensive cleanup for production
-        return extractedContent
-          .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-          .replace(/<[^>]*>/g, '')         // Remove any remaining HTML tags
-          .replace(/&lt;/g, '<')           // Decode HTML entities
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'")
-          .trim()
-      }
-
-      // Try regex first (more reliable in production)
-      const regexResult = extractWithRegex()
-      if (regexResult && regexResult.length > 0) {
-        return regexResult
-      }
-
-      // Client-side DOM parsing as fallback (development)
-      if (typeof window !== 'undefined') {
-        try {
-          const tempDiv = document.createElement('div')
-          tempDiv.innerHTML = content
-          
-          // Find all script tags and extract their text content
-          const scriptTags = tempDiv.querySelectorAll('script')
-          let extractedScript = ''
-          
-          scriptTags.forEach(script => {
-            // Get the text content of each script tag
-            const scriptText = script.textContent || script.innerHTML || ''
-            if (scriptText.trim()) {
-              extractedScript += scriptText.trim() + '\n'
-            }
-          })
-          
-          return extractedScript.trim()
-        } catch (domError) {
-          console.warn('DOM parsing failed, using regex fallback:', domError)
-          return regexResult
+      // Extract JavaScript from script tags using regex
+      const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi
+      let extractedContent = ''
+      let match
+      
+      while ((match = scriptRegex.exec(content)) !== null) {
+        const scriptContent = match[1]
+        if (scriptContent && scriptContent.trim()) {
+          extractedContent += scriptContent.trim() + '\n'
         }
       }
       
-      return regexResult
+      // Basic cleanup
+      return extractedContent
+        .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+        .replace(/&lt;/g, '<')           // Decode HTML entities
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .trim()
         
     } catch (error) {
       console.error('Error extracting script content:', error)
-      console.error('Problematic content:', content.substring(0, 200) + '...')
-      
-      // Ultimate fallback with aggressive HTML removal
-      try {
-        return content
-          .replace(/<script[^>]*>/gi, '')
-          .replace(/<\/script>/gi, '')
-          .replace(/<!--[\s\S]*?-->/g, '')
-          .replace(/<[^>]*>/g, '') // Remove ALL HTML tags
-          .replace(/&[a-zA-Z0-9#]+;/g, ' ') // Remove HTML entities
-          .replace(/\s+/g, ' ') // Normalize whitespace
-          .trim()
-      } catch (finalError) {
-        console.error('Even fallback extraction failed:', finalError)
-        return '' // Return empty string to prevent script execution
-      }
+      // Fallback: try to clean the content minimally
+      return content
+        .replace(/<script[^>]*>/gi, '')
+        .replace(/<\/script>/gi, '')
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .trim()
     }
   }
 
@@ -244,24 +197,9 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
           return null
         }
         
-        // Production debugging - log problematic content
-        if (process.env.NODE_ENV === 'production' && script.content.includes('<')) {
-          console.log(`🔍 [PROD DEBUG] Processing ${script.platform} script:`)
-          console.log('Original content preview:', script.content.substring(0, 150) + '...')
-          console.log('Cleaned content preview:', cleanScriptContent.substring(0, 150) + '...')
-          console.log('Contains HTML tags:', /<[^>]*>/.test(cleanScriptContent))
-        }
-        
         // Validate that we have actual JavaScript content
         if (!cleanScriptContent || cleanScriptContent.trim().length === 0) {
           console.warn(`⚠️ Empty script content for ${script.platform}:`, scriptId)
-          return null
-        }
-
-        // Additional validation for production - check for remaining HTML
-        if (cleanScriptContent.includes('<') && !cleanScriptContent.includes('<!--')) {
-          console.error(`🚨 [PROD] Potential HTML in script content for ${script.platform}:`, cleanScriptContent.substring(0, 100))
-          // Skip this script to prevent errors
           return null
         }
 
@@ -282,17 +220,18 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
           console.log(`📜 Loading ${script.platform} script in ${placement}`)
         }
 
-        // Use Next.js Script component with cleaned content
+        // Use Next.js Script component with dangerouslySetInnerHTML for complex scripts
         return (
           <Script
             key={scriptId}
-            id={`script-${script._id}`}
+            id={`dynamic-script-${script._id}`}
             strategy={placement === 'head' ? 'beforeInteractive' : 'afterInteractive'}
+            dangerouslySetInnerHTML={{
+              __html: cleanScriptContent
+            }}
             onLoad={() => handleScriptLoad(scriptId, script.platform)}
             onError={() => handleScriptError(scriptId, script.platform)}
-          >
-            {cleanScriptContent}
-          </Script>
+          />
         )
       })}
     </>
