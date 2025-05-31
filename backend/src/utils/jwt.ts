@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-for-jwt-should-be-long-and-secure';
-const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d'; // Default expiry of 7 days
+const JWT_EXPIRE = process.env.JWT_EXPIRE || '4h'; // Reduced from 7d to 4h for better security
 
 export interface TokenPayload {
   id: string;
@@ -34,6 +34,7 @@ export function verifyToken(token: string): TokenPayload | null {
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
     return decoded;
   } catch (error) {
+    console.log('JWT verification failed:', error);
     return null;
   }
 }

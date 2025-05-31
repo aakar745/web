@@ -1,7 +1,8 @@
 'use client'
 
-import React, { createContext, useState, useEffect, useContext } from 'react'
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react'
 import { apiRequest } from '@/lib/apiClient';
+import { toast } from '@/components/ui/use-toast';
 
 interface User {
   id: string;
@@ -16,6 +17,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  refreshSession: () => Promise<boolean>;
+  sessionTimeRemaining: number | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,13 +27,161 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   login: async () => false,
   logout: () => {},
+  refreshSession: async () => false,
+  sessionTimeRemaining: null,
 });
+
+// Session timeout configuration
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const SESSION_WARNING_MS = 10 * 60 * 1000; // Show warning 10 minutes before expiry
+const SESSION_CHECK_INTERVAL = 60 * 1000; // Check every minute
+const ACTIVITY_EVENTS = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sessionTimeRemaining, setSessionTimeRemaining] = useState<number | null>(null);
+  
+  const lastActivityRef = useRef<number>(Date.now());
+  const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionCheckRef = useRef<NodeJS.Timeout | null>(null);
+  const warningShownRef = useRef<boolean>(false);
+  const userRef = useRef<User | null>(null);
+  const tokenRef = useRef<string | null>(null);
+
+  // Wrapped setters to keep refs in sync
+  const setUserWithRef = (newUser: User | null) => {
+    setUser(newUser);
+    userRef.current = newUser; // Keep ref in sync
+  };
+
+  const setTokenWithRef = (newToken: string | null) => {
+    setToken(newToken);
+    tokenRef.current = newToken; // Keep ref in sync
+  };
+
+  // Update last activity time
+  const updateActivity = () => {
+    lastActivityRef.current = Date.now();
+    warningShownRef.current = false;
+  };
+
+  // Set up activity listeners
+  useEffect(() => {
+    const handleActivity = () => updateActivity();
+
+    ACTIVITY_EVENTS.forEach(event => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    return () => {
+      ACTIVITY_EVENTS.forEach(event => {
+        document.removeEventListener(event, handleActivity, true);
+      });
+    };
+  }, []);
+
+  // Session timeout management
+  const startSessionTimer = () => {
+    clearSessionTimers();
+    lastActivityRef.current = Date.now();
+    warningShownRef.current = false;
+
+    // Check session status every minute
+    sessionCheckRef.current = setInterval(() => {
+      const currentUser = userRef.current;
+      const currentToken = tokenRef.current;
+      
+      if (!currentUser || !currentToken) {
+        return;
+      }
+
+      const now = Date.now();
+      const timeSinceActivity = now - lastActivityRef.current;
+      const timeRemaining = SESSION_TIMEOUT_MS - timeSinceActivity;
+
+      setSessionTimeRemaining(Math.max(0, timeRemaining));
+
+      // Show warning if approaching timeout
+      if (timeRemaining <= SESSION_WARNING_MS && timeRemaining > 0 && !warningShownRef.current) {
+        warningShownRef.current = true;
+        const minutesRemaining = Math.ceil(timeRemaining / (60 * 1000));
+        
+        toast({
+          title: 'Session Expiring Soon',
+          description: `Your session will expire in ${minutesRemaining} minute(s). Click anywhere to extend your session.`,
+          variant: 'destructive',
+          duration: 8000,
+        });
+      }
+
+      // Auto-logout if session expired
+      if (timeRemaining <= 0) {
+        handleSessionExpiry();
+      }
+    }, SESSION_CHECK_INTERVAL);
+  };
+
+  const clearSessionTimers = () => {
+    if (sessionTimeoutRef.current) {
+      clearTimeout(sessionTimeoutRef.current);
+      sessionTimeoutRef.current = null;
+    }
+    if (sessionCheckRef.current) {
+      clearInterval(sessionCheckRef.current);
+      sessionCheckRef.current = null;
+    }
+  };
+
+  const handleSessionExpiry = () => {
+    clearSessionTimers();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setTokenWithRef(null);
+    setUserWithRef(null);
+    setSessionTimeRemaining(null);
+    
+    toast({
+      title: 'Session Expired',
+      description: 'Your session has expired due to inactivity. Please log in again.',
+      variant: 'destructive',
+      duration: 5000,
+    });
+
+    // Redirect to login if on admin page
+    if (window.location.pathname.startsWith('/dashboard') || window.location.pathname.startsWith('/settings')) {
+      window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+    }
+  };
+
+  // Refresh session function
+  const refreshSession = async (): Promise<boolean> => {
+    if (!tokenRef.current) return false;
+
+    try {
+      const response = await apiRequest<{status: string; data: User}>('/auth/me', {
+        requireAuth: true,
+        noRedirect: true
+      });
+      
+      setUserWithRef(response.data);
+      updateActivity(); // Reset activity timer
+      
+      toast({
+        title: 'Session Extended',
+        description: 'Your session has been extended successfully.',
+        duration: 3000,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+      handleSessionExpiry();
+      return false;
+    }
+  };
 
   // Initialize auth state from localStorage and validate token
   useEffect(() => {
@@ -38,7 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
       
-              if (storedToken && storedUser && storedUser !== "undefined") {
+      if (storedToken && storedUser && storedUser !== "undefined") {
         try {
           // Try to parse the stored user first
           const parsedUser = JSON.parse(storedUser);
@@ -48,10 +199,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             requireAuth: true,
             noRedirect: true // Prevent automatic redirect during validation
           });
-          
+         
           // Token is valid, set the user data from response
-          setToken(storedToken);
-          setUser(response.data);
+          setTokenWithRef(storedToken);
+          setUserWithRef(response.data);
+          startSessionTimer(); // Start session management
         } catch (error: any) {
           console.log('Token validation failed:', error.message);
           
@@ -59,22 +211,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             try {
               const parsedUser = JSON.parse(storedUser);
-              setToken(storedToken);
-              setUser(parsedUser);
+              setTokenWithRef(storedToken);
+              setUserWithRef(parsedUser);
+              startSessionTimer(); // Start session management even with cached data
               console.log('Using cached user data due to network error');
             } catch (parseError) {
               // If can't parse stored user, clear everything
               localStorage.removeItem('token');
               localStorage.removeItem('user');
-              setToken(null);
-              setUser(null);
+              setTokenWithRef(null);
+              setUserWithRef(null);
             }
           } else {
             // Token is invalid, clear it
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            setToken(null);
-            setUser(null);
+            setTokenWithRef(null);
+            setUserWithRef(null);
           }
         }
       }
@@ -83,6 +236,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     initializeAuth();
+
+    // Cleanup on unmount
+    return () => {
+      clearSessionTimers();
+    };
   }, []);
 
   // Login function
@@ -111,8 +269,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('user', JSON.stringify(user));
       
       // Update state
-      setToken(token);
-      setUser(user);
+      setTokenWithRef(token);
+      setUserWithRef(user);
+      
+      // Start session management
+      startSessionTimer();
+      
+      toast({
+        title: 'Login Successful',
+        description: `Welcome back, ${user.name}!`,
+        duration: 3000,
+      });
       
       return true;
     } catch (error) {
@@ -126,18 +293,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // Logout function
   const logout = () => {
+    clearSessionTimers();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
+    setTokenWithRef(null);
+    setUserWithRef(null);
+    setSessionTimeRemaining(null);
+    
+    toast({
+      title: 'Logged Out',
+      description: 'You have been successfully logged out.',
+      duration: 3000,
+    });
   };
   
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      isLoading, 
+      login, 
+      logout, 
+      refreshSession,
+      sessionTimeRemaining 
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Custom hook to use auth context
-export const useAuth = () => useContext(AuthContext); 
+export function useAuth() {
+  return useContext(AuthContext);
+} 

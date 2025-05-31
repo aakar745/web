@@ -55,6 +55,7 @@ interface BlogData {
   tags: string[];
   featuredImage?: string;
   views: number;
+  likes: number;
   slug: string;
   readingTime?: string;
   createdAt: string;
@@ -71,6 +72,7 @@ interface FormattedBlog {
   category: string;
   featuredImage: string;
   views: number;
+  likes: number;
 }
 
 export default function BlogsPage() {
@@ -162,7 +164,8 @@ export default function BlogsPage() {
       author: authorName,
       category: blog.category,
       featuredImage: blog.featuredImage || '/placeholder-image-1.jpg',
-      views: blog.views || 0
+      views: blog.views || 0,
+      likes: blog.likes || 0
     }
   })
   

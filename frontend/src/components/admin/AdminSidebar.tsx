@@ -18,7 +18,8 @@ import {
   Activity,
   MessageSquare,
   Search,
-  Code
+  Code,
+  X
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -32,9 +33,11 @@ interface NavItem {
 
 interface AdminSidebarProps {
   onToggle?: (collapsed: boolean) => void
+  isMobile?: boolean
+  isOpen?: boolean
 }
 
-export function AdminSidebar({ onToggle }: AdminSidebarProps) {
+export function AdminSidebar({ onToggle, isMobile = false, isOpen = true }: AdminSidebarProps) {
   const pathname = usePathname()
   const { logout } = useAuth()
   const router = useRouter()
@@ -46,18 +49,26 @@ export function AdminSidebar({ onToggle }: AdminSidebarProps) {
   }
 
   const toggleSidebar = () => {
-    const newCollapsedState = !isCollapsed
-    setIsCollapsed(newCollapsedState)
-    if (onToggle) {
-      onToggle(newCollapsedState)
+    if (isMobile) {
+      // On mobile, toggle means close the menu
+      if (onToggle) {
+        onToggle(false)
+      }
+    } else {
+      // On desktop, toggle collapse state
+      const newCollapsedState = !isCollapsed
+      setIsCollapsed(newCollapsedState)
+      if (onToggle) {
+        onToggle(newCollapsedState)
+      }
     }
   }
 
   useEffect(() => {
-    if (onToggle) {
+    if (onToggle && !isMobile) {
       onToggle(isCollapsed)
     }
-  }, [isCollapsed, onToggle])
+  }, [isCollapsed, onToggle, isMobile])
 
   const navItems: NavItem[] = [
     {
@@ -110,58 +121,70 @@ export function AdminSidebar({ onToggle }: AdminSidebarProps) {
     }
   ]
 
+  // Different behavior for mobile vs desktop
+  const showCollapsed = !isMobile && isCollapsed
+  const showTitle = isMobile || !isCollapsed
+
   return (
-    <motion.div 
+    <div 
       className={cn(
-        "bg-card h-screen border-r flex flex-col transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-20" : "w-64"
+        "bg-card h-full border-r flex flex-col",
+        isMobile ? "w-64" : (isCollapsed ? "w-20" : "w-64")
       )}
-      animate={{ width: isCollapsed ? 80 : 256 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      <div className="h-16 border-b flex items-center px-6 justify-between">
-        {!isCollapsed && <h1 className="font-bold text-xl">ToolsCandy</h1>}
+      <div className="h-14 sm:h-16 border-b flex items-center px-3 sm:px-6 justify-between">
+        {showTitle && (
+          <h1 className="font-bold text-lg sm:text-xl">ToolsCandy</h1>
+        )}
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={toggleSidebar}
           className={cn(
-            "rounded-full hover:bg-primary/10",
-            isCollapsed ? "ml-auto mr-auto" : "ml-auto"
+            "rounded-full hover:bg-primary/10 h-8 w-8 sm:h-10 sm:w-10",
+            showCollapsed ? "ml-auto mr-auto" : "ml-auto"
           )}
         >
-          {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          {isMobile ? (
+            <X className="h-4 w-4 sm:h-5 sm:w-5" />
+          ) : showCollapsed ? (
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+          ) : (
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          )}
         </Button>
       </div>
       
-      <nav className="flex-1 p-3 overflow-y-auto">
-        <ul className="space-y-2">
+      <nav className="flex-1 p-2 sm:p-3 overflow-y-auto">
+        <ul className="space-y-1 sm:space-y-2">
           {navItems.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
+                  "flex items-center gap-3 rounded-lg px-2 sm:px-3 py-2 sm:py-2.5 text-sm transition-all duration-200 min-h-[44px] sm:min-h-[48px]",
                   pathname === item.href
                     ? `${item.color} font-medium` 
                     : "text-muted-foreground hover:bg-primary/5",
-                  isCollapsed ? "justify-center" : ""
+                  showCollapsed ? "justify-center" : ""
                 )}
               >
                 <div className={cn(
-                  "p-1.5 rounded-md",
+                  "p-1.5 rounded-md flex-shrink-0",
                   pathname === item.href ? item.color : "bg-background"
                 )}>
                   {React.cloneElement(item.icon as React.ReactElement, {
                     className: cn(
-                      "h-5 w-5",
+                      "h-4 w-4 sm:h-5 sm:w-5",
                       pathname === item.href 
                         ? "" 
                         : "text-muted-foreground"
                     )
                   })}
                 </div>
-                {!isCollapsed && <span>{item.title}</span>}
+                {showTitle && (
+                  <span className="truncate text-sm sm:text-base">{item.title}</span>
+                )}
               </Link>
             </li>
           ))}
@@ -170,39 +193,43 @@ export function AdminSidebar({ onToggle }: AdminSidebarProps) {
       
       <div className={cn(
         "border-t mt-auto",
-        isCollapsed ? "p-3" : "p-4"
+        showCollapsed ? "p-2 sm:p-3" : "p-3 sm:p-4"
       )}>
-        <ul className="space-y-2">
+        <ul className="space-y-1 sm:space-y-2">
           <li>
             <Link
               href="/"
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-primary/5 transition-all duration-200",
-                isCollapsed ? "justify-center" : ""
+                "flex items-center gap-3 rounded-lg px-2 sm:px-3 py-2 sm:py-2.5 text-sm text-muted-foreground hover:bg-primary/5 transition-all duration-200 min-h-[44px] sm:min-h-[48px]",
+                showCollapsed ? "justify-center" : ""
               )}
             >
-              <div className="p-1.5 rounded-md bg-background">
-                <Home className="h-5 w-5 text-muted-foreground" />
+              <div className="p-1.5 rounded-md bg-background flex-shrink-0">
+                <Home className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               </div>
-              {!isCollapsed && <span>Back to Website</span>}
+              {showTitle && (
+                <span className="truncate text-sm sm:text-base">Back to Website</span>
+              )}
             </Link>
           </li>
           <li>
             <button
               className={cn(
-                "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-primary/5 transition-all duration-200",
-                isCollapsed ? "justify-center" : ""
+                "w-full flex items-center gap-3 rounded-lg px-2 sm:px-3 py-2 sm:py-2.5 text-sm text-muted-foreground hover:bg-primary/5 transition-all duration-200 min-h-[44px] sm:min-h-[48px]",
+                showCollapsed ? "justify-center" : ""
               )}
               onClick={handleLogout}
             >
-              <div className="p-1.5 rounded-md bg-background">
-                <LogOut className="h-5 w-5 text-muted-foreground" />
+              <div className="p-1.5 rounded-md bg-background flex-shrink-0">
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               </div>
-              {!isCollapsed && <span>Logout</span>}
+              {showTitle && (
+                <span className="truncate text-sm sm:text-base">Logout</span>
+              )}
             </button>
           </li>
         </ul>
       </div>
-    </motion.div>
+    </div>
   )
 } 

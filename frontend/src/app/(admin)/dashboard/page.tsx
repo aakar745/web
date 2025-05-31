@@ -26,13 +26,15 @@ import {
   Server,
   Calendar,
   MessageSquare,
-  Plus
+  Plus,
+  Settings
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { withAdminAuth } from '@/middleware/authCheck'
 import { apiRequest } from '@/lib/apiClient'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 // Type definitions for real data
 interface BlogPost {
@@ -275,381 +277,387 @@ function AdminDashboard() {
   }
 
   return (
-    <motion.div 
+    <motion.div
+      className="space-y-4 sm:space-y-6 lg:space-y-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6"
     >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="flex justify-between items-start">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Overview and statistics for your website.
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Monitor your platform's performance and activity
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={refreshing}
+            className="flex-1 sm:flex-none"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            <RefreshCw className={cn("h-4 w-4 mr-2", refreshing && "animate-spin")} />
+            Refresh
           </Button>
-          <Badge variant="secondary" className="text-xs">
-            <Clock className="h-3 w-3 mr-1" />
-            Last updated: {new Date().toLocaleTimeString()}
-          </Badge>
+          <Link href="/dashboard/blogs/new">
+            <Button size="sm" className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              New Post
+            </Button>
+          </Link>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Error Alert */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-          >
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
+      {/* Time Range Selector */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <span className="text-sm font-medium">Time Range:</span>
+        <div className="flex flex-wrap gap-1 sm:gap-2">
+          {['7days', '30days', '90days'].map((range) => (
+            <Button
+              key={range}
+              variant={timeRange === range ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleTimeRangeChange(range)}
+              className="text-xs sm:text-sm"
+            >
+              {range === '7days' ? '7 Days' : range === '30days' ? '30 Days' : '90 Days'}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {/* Stats Overview */}
-      <motion.div 
-        variants={itemVariants}
-        className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex flex-col">
-                <span className="text-muted-foreground text-sm">Total Blog Posts</span>
-                <span className="text-2xl font-bold">
-                  {stats ? formatNumber(stats.totalBlogs) : '0'}
-                </span>
-                <span className="text-xs text-green-500">
-                  {stats && stats.publishedBlogs > 0 ? `${stats.publishedBlogs} published` : 'No posts yet'}
-                </span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <motion.div variants={itemVariants}>
+          <Card className="p-4 sm:p-6">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Blogs</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(stats?.totalBlogs || 0)}</p>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
+                      +{calculateGrowth(stats?.totalBlogs || 0)}%
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats?.publishedBlogs || 0} published, {stats?.draftBlogs || 0} drafts
+                  </p>
+                </div>
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+                </div>
               </div>
-              <div className="bg-blue-500/10 p-2 rounded-full">
-                <FileText className="h-5 w-5 text-blue-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex flex-col">
-                <span className="text-muted-foreground text-sm">Total Users</span>
-                <span className="text-2xl font-bold">
-                  {stats ? formatNumber(stats.totalUsers) : '0'}
-                </span>
-                <span className="text-xs text-green-500">
-                  {stats ? calculateGrowth(stats.totalUsers) : '0%'} from last month
-                </span>
+        <motion.div variants={itemVariants}>
+          <Card className="p-4 sm:p-6">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Views</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(stats?.totalViews || 0)}</p>
+                    <Badge variant="outline" className="bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                      +{calculateGrowth(stats?.totalViews || 0)}%
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Across all published content
+                  </p>
+                </div>
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
+                </div>
               </div>
-              <div className="bg-green-500/10 p-2 rounded-full">
-                <Users className="h-5 w-5 text-green-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex flex-col">
-                <span className="text-muted-foreground text-sm">Image Processing</span>
-                <span className="text-2xl font-bold">
-                  {stats ? formatNumber(stats.totalImageProcessing) : '0'}
-                </span>
-                <span className="text-xs text-blue-500">
-                  {stats ? stats.last24HourProcessing : 0} in last 24h
-                </span>
+        <motion.div variants={itemVariants}>
+          <Card className="p-4 sm:p-6">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Users</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(stats?.totalUsers || 0)}</p>
+                    <Badge variant="outline" className="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 text-xs">
+                      +{calculateGrowth(stats?.totalUsers || 0)}%
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Registered platform users
+                  </p>
+                </div>
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
+                </div>
               </div>
-              <div className="bg-purple-500/10 p-2 rounded-full">
-                <Image className="h-5 w-5 text-purple-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex flex-col">
-                <span className="text-muted-foreground text-sm">Page Views</span>
-                <span className="text-2xl font-bold">
-                  {stats ? formatNumber(stats.totalViews) : '0'}
-                </span>
-                <span className="text-xs text-green-500">
-                  {stats ? calculateGrowth(stats.totalViews) : '0%'} from last month
-                </span>
+        <motion.div variants={itemVariants}>
+          <Card className="p-4 sm:p-6">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Image Processing</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-xl sm:text-2xl font-bold">{formatNumber(stats?.totalImageProcessing || 0)}</p>
+                    <Badge variant="outline" className="bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 text-xs">
+                      +{stats?.last24HourProcessing || 0} today
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Total images processed
+                  </p>
+                </div>
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <Image className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
+                </div>
               </div>
-              <div className="bg-orange-500/10 p-2 rounded-full">
-                <Eye className="h-5 w-5 text-orange-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
 
-      {/* System Health Status */}
+      {/* System Health */}
       {systemHealth && (
         <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5" />
-                <span>System Health</span>
+          <Card className="p-4 sm:p-6">
+            <CardHeader className="p-0 pb-4 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
+                System Health
               </CardTitle>
+              <CardDescription className="text-sm">
+                Real-time system status and performance metrics
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Database Status */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
-                  <div className={`p-2 rounded-full ${
-                    systemHealth.mongodb.status === 'connected' 
-                      ? 'bg-green-500/10' : 'bg-red-500/10'
-                  }`}>
-                    <Database className={`h-4 w-4 ${
-                      systemHealth.mongodb.status === 'connected' 
-                        ? 'text-green-500' : 'text-red-500'
-                    }`} />
-                  </div>
+            <CardContent className="p-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30">
                   <div>
-                    <div className="text-sm font-medium">MongoDB</div>
-                    <div className="text-xs text-muted-foreground">
-                      {systemHealth.mongodb.status} ({systemHealth.mongodb.responseTime}ms)
-                    </div>
+                    <p className="text-xs sm:text-sm font-medium">MongoDB</p>
+                    <p className="text-xs text-muted-foreground">{systemHealth.mongodb.responseTime}ms</p>
                   </div>
+                  <div className={cn(
+                    "h-2 w-2 sm:h-3 sm:w-3 rounded-full",
+                    systemHealth.mongodb.status === 'connected' ? 'bg-green-500' : 'bg-red-500'
+                  )} />
                 </div>
-
-                {/* Redis Status */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
-                  <div className={`p-2 rounded-full ${
-                    systemHealth.redis.status === 'connected' 
-                      ? 'bg-green-500/10' : 'bg-red-500/10'
-                  }`}>
-                    <Server className={`h-4 w-4 ${
-                      systemHealth.redis.status === 'connected' 
-                        ? 'text-green-500' : 'text-red-500'
-                    }`} />
-                  </div>
+                <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30">
                   <div>
-                    <div className="text-sm font-medium">Redis</div>
-                    <div className="text-xs text-muted-foreground">
-                      {systemHealth.redis.status} ({systemHealth.redis.responseTime}ms)
-                    </div>
+                    <p className="text-xs sm:text-sm font-medium">Redis</p>
+                    <p className="text-xs text-muted-foreground">{systemHealth.redis.responseTime}ms</p>
                   </div>
+                  <div className={cn(
+                    "h-2 w-2 sm:h-3 sm:w-3 rounded-full",
+                    systemHealth.redis.status === 'connected' ? 'bg-green-500' : 'bg-red-500'
+                  )} />
                 </div>
-
-                {/* System Info */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
-                  <div className="p-2 rounded-full bg-blue-500/10">
-                    <Activity className="h-4 w-4 text-blue-500" />
-                  </div>
+                <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30">
                   <div>
-                    <div className="text-sm font-medium">System</div>
-                    <div className="text-xs text-muted-foreground">
-                      Memory: {systemHealth.system.memoryUsage.percentage}% ({systemHealth.system.memoryUsage.used})
-                    </div>
+                    <p className="text-xs sm:text-sm font-medium">Memory</p>
+                    <p className="text-xs text-muted-foreground">{systemHealth.system.memoryUsage.percentage}%</p>
                   </div>
+                  <div className={cn(
+                    "h-2 w-2 sm:h-3 sm:w-3 rounded-full",
+                    systemHealth.system.memoryUsage.percentage < 80 ? 'bg-green-500' : 
+                    systemHealth.system.memoryUsage.percentage < 90 ? 'bg-yellow-500' : 'bg-red-500'
+                  )} />
+                </div>
+                <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium">CPU</p>
+                    <p className="text-xs text-muted-foreground">{systemHealth.system.cpuUsage}%</p>
+                  </div>
+                  <div className={cn(
+                    "h-2 w-2 sm:h-3 sm:w-3 rounded-full",
+                    systemHealth.system.cpuUsage < 70 ? 'bg-green-500' : 
+                    systemHealth.system.cpuUsage < 85 ? 'bg-yellow-500' : 'bg-red-500'
+                  )} />
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
       )}
-      
-      {/* Main Dashboard Tabs */}
-      <motion.div variants={itemVariants}>
-        <Tabs defaultValue="blog" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="blog">
-              <FileText className="h-4 w-4 mr-2" />
-              Blog Posts
-            </TabsTrigger>
-            <TabsTrigger value="tools">
-              <Zap className="h-4 w-4 mr-2" />
-              Tools Usage
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <BarChart className="h-4 w-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* Blog Posts Tab */}
-          <TabsContent value="blog" className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Recent Blog Posts</h2>
-              <Link href="/dashboard/blogs/new">
-                <Button size="sm">
-                  <Plus className="h-4 w-4 mr-1" />
-                  New Post
-                </Button>
-              </Link>
-            </div>
-            
-            <Card>
-              <CardHeader className="px-6 py-4">
-                <div className="grid grid-cols-12 text-sm text-muted-foreground">
-                  <div className="col-span-5">Title</div>
-                  <div className="col-span-2">Date</div>
-                  <div className="col-span-2">Status</div>
-                  <div className="col-span-2">Views</div>
-                  <div className="col-span-1">Likes</div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 py-0">
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+        {/* Recent Posts */}
+        <motion.div variants={itemVariants}>
+          <Card className="h-full">
+            <CardHeader className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                  <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
+                  Recent Posts
+                </CardTitle>
+                <Link href="/dashboard/blogs">
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                    View All
+                  </Button>
+                </Link>
+              </div>
+              <CardDescription className="text-sm">
+                Latest blog posts and their performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="space-y-3 sm:space-y-4">
                 {recentPosts.length > 0 ? (
-                  <div className="divide-y">
-                    {recentPosts.map((post) => (
-                      <div key={post._id} className="grid grid-cols-12 py-3 items-center">
-                        <div className="col-span-5">
-                          <Link 
-                            href={`/dashboard/blogs/edit/${post._id}`}
-                            className="font-medium truncate hover:text-primary transition-colors"
-                          >
-                            {post.title}
-                          </Link>
-                        </div>
-                        <div className="col-span-2 text-sm text-muted-foreground">
-                          {new Date(post.date).toLocaleDateString()}
-                        </div>
-                        <div className="col-span-2">
+                  recentPosts.map((post, index) => (
+                    <motion.div
+                      key={post._id}
+                      variants={itemVariants}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 rounded-lg hover:bg-secondary/30 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm sm:text-base truncate">{post.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           <Badge 
-                            variant={
-                              post.status === "published" ? "default" : 
-                              post.status === "draft" ? "secondary" : "outline"
-                            }
+                            variant={post.status === 'published' ? 'default' : 'outline'}
                             className="text-xs"
                           >
                             {post.status}
                           </Badge>
-                        </div>
-                        <div className="col-span-2 text-sm">
-                          {post.views?.toLocaleString() || 0}
-                        </div>
-                        <div className="col-span-1 text-sm">
-                          {post.likes?.toLocaleString() || 0}
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(post.date).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span>{post.views || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span>{post.likes || 0}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
                 ) : (
-                  <div className="py-8 text-center text-muted-foreground">
-                    <FileText className="h-10 w-10 mx-auto mb-4 opacity-50" />
-                    <p>No blog posts yet. Create your first post!</p>
+                  <div className="text-center py-6 sm:py-8">
+                    <FileText className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-2 sm:mb-4" />
+                    <p className="text-sm sm:text-base text-muted-foreground">No recent posts</p>
+                    <Link href="/dashboard/blogs/new">
+                      <Button variant="outline" size="sm" className="mt-2 sm:mt-4">
+                        Create your first post
+                      </Button>
+                    </Link>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Tools Usage Tab */}
-          <TabsContent value="tools" className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Tool Usage Statistics</h2>
-              <div className="flex items-center space-x-2">
-                <select 
-                  value={timeRange} 
-                  onChange={(e) => handleTimeRangeChange(e.target.value)}
-                  className="text-sm border rounded px-2 py-1"
-                >
-                  <option value="today">Today</option>
-                  <option value="7days">Last 7 days</option>
-                  <option value="30days">Last 30 days</option>
-                  <option value="1year">Last year</option>
-                </select>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {toolUsage && Object.entries(toolUsage).map(([toolName, data]) => (
-                <Card key={toolName}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold capitalize">{toolName.replace(/([A-Z])/g, ' $1')}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        {data.successRate}% success
-                      </Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Total Uses:</span>
-                        <span className="font-medium">{data.totalUses.toLocaleString()}</span>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Tool Usage Analytics */}
+        <motion.div variants={itemVariants}>
+          <Card className="h-full">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
+                Tool Usage Analytics
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Image processing tool performance metrics
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="space-y-3 sm:space-y-4">
+                {toolUsage && Object.keys(toolUsage).length > 0 ? (
+                  Object.entries(toolUsage).map(([tool, usage]) => (
+                    <div key={tool} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 rounded-lg bg-secondary/30">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-sm sm:text-base capitalize">{tool}</h3>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
+                          <span className="text-xs text-muted-foreground">
+                            {usage.totalUses} total uses
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {usage.last24Hours} in 24h
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Last 24h:</span>
-                        <span className="font-medium">{data.last24Hours.toLocaleString()}</span>
+                      <div className="flex flex-col sm:items-end gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">{usage.successRate}% success</span>
+                          <div className={cn(
+                            "h-2 w-2 rounded-full",
+                            usage.successRate > 95 ? 'bg-green-500' :
+                            usage.successRate > 85 ? 'bg-yellow-500' : 'bg-red-500'
+                          )} />
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          Avg: {usage.averageProcessingTime}
+                        </span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Avg Time:</span>
-                        <span className="font-medium">{data.averageProcessingTime}</span>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-          
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Website Analytics</CardTitle>
-                <CardDescription>
-                  Comprehensive analytics for the past {timeRange === 'today' ? 'day' : timeRange === '7days' ? 'week' : timeRange === '30days' ? 'month' : 'year'}.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {stats ? formatNumber(stats.totalViews) : '0'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Total Page Views</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      {stats ? formatNumber(stats.totalImageProcessing) : '0'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Images Processed</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {stats ? formatNumber(stats.totalLikes) : '0'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Total Likes</div>
-                  </div>
-                </div>
-                
-                {/* Placeholder for future chart implementation */}
-                <div className="h-[300px] flex items-center justify-center bg-accent/10 rounded-md">
-                  <div className="text-center">
-                    <BarChart className="h-10 w-10 mx-auto text-muted-foreground opacity-50" />
-                    <p className="mt-2 text-muted-foreground">
-                      Advanced analytics charts coming soon
+                  ))
+                ) : (
+                  <div className="text-center py-6 sm:py-8">
+                    <BarChart className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-2 sm:mb-4" />
+                    <p className="text-sm sm:text-base text-muted-foreground">No usage data available</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tool usage analytics will appear here once users start processing images
                     </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Quick Actions */}
+      <motion.div variants={itemVariants}>
+        <Card className="p-4 sm:p-6">
+          <CardHeader className="p-0 pb-4 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">Quick Actions</CardTitle>
+            <CardDescription className="text-sm">
+              Common administrative tasks and shortcuts
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <Link href="/dashboard/blogs/new">
+                <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-primary/5">
+                  <FilePlus2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-xs sm:text-sm">New Blog Post</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/users">
+                <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-primary/5">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-xs sm:text-sm">Manage Users</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/monitoring">
+                <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-primary/5">
+                  <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-xs sm:text-sm">View Analytics</span>
+                </Button>
+              </Link>
+              <Link href="/settings">
+                <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-primary/5">
+                  <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-xs sm:text-sm">Settings</span>
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     </motion.div>
   )
