@@ -16,10 +16,8 @@ import {
   Link2,
   Tag,
   Twitter,
-  UserIcon,
   EyeIcon,
   Linkedin,
-  Bookmark,
   Share2,
   MessageSquare,
   List,
@@ -27,7 +25,6 @@ import {
   Copy,
   ChevronUp,
   Share,
-  BookmarkIcon,
   Instagram,
   X,
 } from 'lucide-react'
@@ -40,91 +37,20 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { getProxiedImageUrl } from '@/lib/imageProxy'
-
-// Define blog post interface
-interface BlogPost {
-  _id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  date: string;
-  status: string;
-  author: { name: string; email: string } | string;
-  category: string;
-  tags: string[];
-  featuredImage?: string;
-  views: number;
-  likes: number;
-  readingTime?: string;
-  slug: string;
-  // SEO metadata fields
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string[];
-  canonicalUrl?: string;
-  ogImage?: string;
-  // Comment settings
-  commentsEnabled?: boolean;
-  requireCommentApproval?: boolean;
-  limitCommentsPerIp?: boolean;
-}
-
-// Component to get related posts based on tags
-const getRelatedPosts = (currentPost: BlogPost, allPosts: BlogPost[]) => {
-  if (!currentPost) return []
-  
-  // Filter out the current post and get posts with matching tags
-  return allPosts
-    .filter(post => post._id !== currentPost._id)
-    .map(post => {
-      // Count matching tags
-      const matchingTags = post.tags.filter(tag => 
-        currentPost.tags.includes(tag)
-      ).length
-      
-      return { ...post, matchingTags }
-    })
-    .filter(post => post.matchingTags > 0) // Only include posts with at least one matching tag
-    .sort((a, b) => b.matchingTags - a.matchingTags) // Sort by number of matching tags
-    .slice(0, 3) // Get top 3 related posts
-}
-
-interface HeadingInfo {
-  id: string;
-  text: string;
-  level: number;
-}
-
-// Import the WhatsApp icon since it's not available in lucide
-const WhatsAppIcon = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.274-.101-.475-.15-.676.15-.2.301-.767.966-.94 1.164-.173.199-.347.223-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.77-1.66-2.07-.174-.3-.019-.465.13-.615.136-.135.301-.353.451-.528.146-.181.194-.301.297-.496.1-.21.049-.375-.025-.524-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.51-.172-.015-.371-.015-.571-.015-.2 0-.523.074-.797.359-.273.3-1.045 1.02-1.045 2.475s1.07 2.865 1.219 3.075c.149.18 2.095 3.195 5.076 4.483.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414-.074-.124-.272-.223-.571-.372m-5.448 7.45h-.016a9.156 9.156 0 01-4.678-1.28l-.335-.201-3.465.908.928-3.39-.222-.347a9.19 9.19 0 01-1.398-4.895c0-5.088 4.139-9.227 9.228-9.227 2.463 0 4.776.96 6.515 2.699 1.738 1.742 2.694 4.058 2.694 6.516 0 5.091-4.139 9.228-9.231 9.228"/>
-    <path d="M12.001 2.002a9.965 9.965 0 00-9.964 9.965c0 1.725.444 3.407 1.285 4.903l-1.36 4.965 5.09-1.334a9.975 9.975 0 004.942 1.296h.004c5.5 0 9.965-4.465 9.966-9.966 0-2.664-1.04-5.168-2.926-7.054-1.887-1.887-4.392-2.926-7.055-2.926l-.016.016.032-.032z" fill="none"/>
-  </svg>
-);
-
-// Define a Comment interface
-interface Comment {
-  _id: string;
-  text: string;
-  name: string;
-  email: string;
-  approved: boolean;
-  ipAddress: string;
-  createdAt: string;
-  replies?: Comment[];
-}
+import { BlogPost, Comment, HeadingInfo } from './types'
+import { 
+  formatCommentDate, 
+  processContentImages, 
+  getProxiedFeaturedImage,
+  copyToClipboard,
+  shareOnSocial,
+  getAuthorName,
+  getAuthorInitials
+} from './utils'
+import { WhatsAppIcon } from './WhatsAppIcon'
+import { useBlogPostData } from './useBlogPostData'
+import { useComments } from './useComments'
+import { useScrollTracking } from './useScrollTracking'
 
 export default function BlogPostPage() {
   const params = useParams()
@@ -132,642 +58,50 @@ export default function BlogPostPage() {
   const pathname = usePathname()
   const blogId = params.id as string
   
-  const [post, setPost] = useState<BlogPost | null>(null)
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [headings, setHeadings] = useState<HeadingInfo[]>([])
-  const [activeHeading, setActiveHeading] = useState<string>('')
-  const [readingProgress, setReadingProgress] = useState(0)
-  const [liked, setLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(0)
-  const [showScrollTop, setShowScrollTop] = useState(false)
-  const [isTocOpen, setIsTocOpen] = useState(false)
+  // Use the blog post data hook
+  const {
+    post,
+    relatedPosts,
+    loading,
+    error,
+    headings,
+    liked,
+    likeCount,
+    handleLike,
+    categories,
+    latestPosts
+  } = useBlogPostData(blogId)
   
-  const articleRef = useRef<HTMLDivElement>(null)
+  // Use the comments hook
+  const {
+    comments,
+    commentCount,
+    commentText,
+    setCommentText,
+    commentName,
+    setCommentName,
+    commentEmail,
+    setCommentEmail,
+    showComments,
+    setShowComments,
+    isSubmittingComment,
+    hasSubmittedComment,
+    hasMoreComments,
+    isLoadingMoreComments,
+    handleLoadMoreComments,
+    handleSubmitComment
+  } = useComments(post)
   
-  // Categories and latest posts state
-  const [categories, setCategories] = useState<string[]>([])
-  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([])
-  
-  // Comments state
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [commentText, setCommentText] = useState('');
-  const [commentName, setCommentName] = useState('');
-  const [commentEmail, setCommentEmail] = useState('');
-  const [showComments, setShowComments] = useState(false);
-  const [commentCount, setCommentCount] = useState(0);
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [commentPage, setCommentPage] = useState(1);
-  const [hasMoreComments, setHasMoreComments] = useState(false);
-  const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false);
-  
-  // Format author name
-  const getAuthorName = (author: { name: string; email: string } | string): string => {
-    if (typeof author === 'string') {
-      return 'Anonymous'
-    }
-    return author.name
-  }
-  
-  // Format author initials
-  const getAuthorInitials = (author: { name: string; email: string } | string): string => {
-    if (typeof author === 'string') {
-      return 'A'
-    }
-    return author.name.split(' ').map(n => n[0]).join('')
-  }
-  
-  // Copy current URL to clipboard
-  const copyToClipboard = () => {
-    const url = window.location.href
-    navigator.clipboard.writeText(url)
-    toast({
-      title: "Link copied!",
-      description: "The link has been copied to your clipboard.",
-      duration: 2000,
-    })
-  }
-  
-  // Handle liking a post with persistence
-  const handleLike = async () => {
-    if (!post) return;
-    
-    // If already liked, don't allow unliking
-    if (liked) {
-      toast({
-        title: "Already liked",
-        description: "You've already liked this article!",
-        duration: 2000,
-      });
-      return;
-    }
-    
-    // Set new state to true (only allow liking, not unliking)
-    const newLikedState = true;
-    
-    // Optimistically update the UI
-    setLiked(newLikedState);
-    setLikeCount(prevCount => prevCount + 1);
-    
-    try {
-      // Make real API call to update like status
-      const response = await apiRequest<{
-        status: string;
-        data: { likes: number; hasLiked: boolean };
-      }>(`/blogs/${post._id}/like`, {
-        method: 'POST',
-        body: { liked: newLikedState },
-      });
-      
-      if (response.status === 'success') {
-        // Update with the actual count from the server
-        setLikeCount(response.data.likes);
-        setLiked(response.data.hasLiked);
-        
-        toast({
-          title: "Thanks for your like!",
-          description: "We're glad you enjoyed this article!",
-          duration: 2000,
-        });
-      } else {
-        throw new Error('Failed to update like');
-      }
-    } catch (error) {
-      // If the API call fails, revert the optimistic update
-      console.error('Error updating like on server:', error);
-      setLiked(false);
-      setLikeCount(prevCount => prevCount - 1);
-      
-      toast({
-        title: 'Error',
-        description: 'Failed to update like status. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }
-  
-  // Scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
-  }
-  
-  // Extract headings from the content
-  const extractHeadings = (htmlContent: string) => {
-    if (typeof window === 'undefined') {
-      return { headingsData: [], updatedContent: htmlContent };
-    }
-    
-    try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlContent, 'text/html');
-      
-      // Safe query for heading elements
-      const headingElements = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6') || []);
-      
-      const headingsData = headingElements.map((el, index) => {
-        // Create an ID from the heading text if not present
-        const headingId = el.id || `heading-${index}`;
-        
-        // Apply the ID to the element - safely
-        if (!el.id) {
-          el.id = headingId;
-        }
-        
-        return {
-          id: headingId,
-          text: el.textContent || `Heading ${index + 1}`,
-          level: parseInt(el.tagName.substring(1), 10) || 2 // Default to h2 if parsing fails
-        };
-      });
-      
-      return { 
-        headingsData, 
-        updatedContent: doc.body.innerHTML 
-      };
-    } catch (error) {
-      console.error('Error extracting headings:', error);
-      return { headingsData: [], updatedContent: htmlContent };
-    }
-  };
-  
-  // Track reading progress and active heading
-  useEffect(() => {
-    if (typeof window === 'undefined' || !articleRef.current) return;
-    
-    const handleScroll = () => {
-      try {
-        if (articleRef.current) {
-          const element = articleRef.current;
-          const totalHeight = element.clientHeight;
-          const windowHeight = window.innerHeight;
-          const scrollTop = window.scrollY;
-          
-          // How far scrolled in the article in percentage
-          const scrolled = (scrollTop / (totalHeight - windowHeight)) * 100;
-          setReadingProgress(Math.min(Math.max(scrolled, 0), 100));
-          
-          // Show scroll to top button after 50% progress
-          setShowScrollTop(scrolled > 50);
-          
-          // Track active heading - safer implementation
-          if (headings.length > 0) {
-            // Find all heading elements that exist in the DOM
-            let foundActiveHeading = false;
-            
-            for (let i = headings.length - 1; i >= 0; i--) {
-              const headingElement = document.getElementById(headings[i].id);
-              
-              if (headingElement && headingElement.getBoundingClientRect().top <= 100) {
-                setActiveHeading(headings[i].id);
-                foundActiveHeading = true;
-                break;
-              }
-            }
-            
-            // If no active heading found (maybe at very top of page)
-            if (!foundActiveHeading && headings.length > 0) {
-              setActiveHeading(headings[0].id);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error in scroll handler:', error);
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [headings]);
-  
-  // Fetch blog post data
-  useEffect(() => {
-    const fetchBlogPost = async () => {
-      try {
-        setLoading(true)
-        setError(false)
-        
-        // First try to fetch by slug using the new endpoint
-        try {
-          // This is likely a slug if it doesn't look like a MongoDB ID
-          const isSlug = !blogId.match(/^[0-9a-fA-F]{24}$/);
-          
-          if (isSlug) {
-            const response = await apiRequest<{
-              status: string;
-              data: BlogPost;
-            }>(`/blogs/by-slug/${encodeURIComponent(blogId)}`, { 
-              noRedirect: true 
-            });
-            
-            if (response.data) {
-              // Set the post data after processing
-              setPost(response.data);
-              
-              // Process headings and update content
-              const { headingsData, updatedContent } = extractHeadings(response.data.content);
-              setHeadings(headingsData);
-              
-              // Set the actual like count from the database
-              setLikeCount(response.data.likes || 0);
-              
-              // Check if user has already liked via API
-              const likeStatusResponse = await apiRequest<{
-                status: string;
-                data: { hasLiked: boolean; likes: number };
-              }>(`/blogs/${response.data._id}/like`, {
-                method: 'GET',
-                noRedirect: true
-              });
-              
-              if (likeStatusResponse.status === 'success') {
-                setLiked(likeStatusResponse.data.hasLiked);
-              }
-              
-              // Fetch related posts (posts with similar tags)
-              if (response.data.tags && response.data.tags.length > 0) {
-                const allPostsResponse = await apiRequest<{
-                  status: string;
-                  data: BlogPost[];
-                }>('/blogs', { 
-                  noRedirect: true 
-                });
-                
-                if (allPostsResponse.data) {
-                  const related = getRelatedPosts(response.data, allPostsResponse.data);
-                  setRelatedPosts(related);
-                }
-              }
-              
-              // Update the content with the heading IDs for the TOC to work
-              const contentWithIds = { ...response.data, content: updatedContent };
-              setPost(contentWithIds);
-              
-              return; // Exit early if found by slug
-            }
-          }
-        } catch (slugError) {
-          console.log('Not found by slug, trying ID...', slugError);
-        }
-        
-        // If not found by slug or it's a MongoDB ID, try to fetch by ID
-        const response = await apiRequest<{
-          status: string;
-          data: BlogPost;
-        }>(`/blogs/${blogId}`, { 
-          noRedirect: true 
-        });
-        
-        setPost(response.data);
-        
-        // Process headings and update content
-        const { headingsData, updatedContent } = extractHeadings(response.data.content);
-        setHeadings(headingsData);
-        
-        // Set the actual like count from the database
-        setLikeCount(response.data.likes || 0);
-        
-        // Check if user has already liked via API
-        const likeStatusResponse = await apiRequest<{
-          status: string;
-          data: { hasLiked: boolean; likes: number };
-        }>(`/blogs/${response.data._id}/like`, {
-          method: 'GET',
-          noRedirect: true
-        });
-        
-        if (likeStatusResponse.status === 'success') {
-          setLiked(likeStatusResponse.data.hasLiked);
-        }
-        
-        // Update URL to use slug if available (for better SEO)
-        // But don't cause a page reload - just update the address bar
-        if (response.data.slug && blogId !== response.data.slug) {
-          window.history.pushState(
-            { id: response.data._id, slug: response.data.slug },
-            '',
-            `/blog/${response.data.slug}`
-          );
-        }
-        
-        // Fetch related posts (posts with similar tags)
-        const allPostsResponse = await apiRequest<{
-          status: string;
-          data: BlogPost[];
-        }>('/blogs', { 
-          noRedirect: true 
-        });
-        
-        if (allPostsResponse.data && response.data) {
-          const related = getRelatedPosts(response.data, allPostsResponse.data);
-          setRelatedPosts(related);
-        }
-      } catch (error) {
-        console.error('Error fetching blog post:', error);
-        setError(true);
-        toast({
-          title: 'Error',
-          description: 'Failed to load the blog post. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (blogId) {
-      fetchBlogPost();
-    }
-  }, [blogId, router]);
-  
-  // Load comments from localStorage
-  useEffect(() => {
-    if (!post) return;
-    
-    const fetchComments = async () => {
-      try {
-        const response = await apiRequest<{ status: string; data: Comment[]; total: number; page: number; pages: number }>(
-          `/blogs/${post._id}/comments?limit=5`, 
-          { requireAuth: false }
-        );
-        
-        setComments(response.data);
-        setCommentCount(response.total);
-        setCommentPage(1);
-        setHasMoreComments(response.pages > 1);
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-        setComments([]);
-        setCommentCount(0);
-        setHasMoreComments(false);
-      }
-    };
-    
-    fetchComments();
-  }, [post]);
-  
-  // Fetch categories and latest posts
-  useEffect(() => {
-    const fetchCategoriesAndLatest = async () => {
-      try {
-        // Fetch all blog posts to extract categories
-        const allPostsResponse = await apiRequest<{
-          status: string;
-          data: BlogPost[];
-        }>('/blogs?limit=20', { 
-          noRedirect: true 
-        });
-        
-        if (allPostsResponse.data) {
-          // Extract unique categories
-          const uniqueCategories = Array.from(
-            new Set(allPostsResponse.data.map(post => post.category))
-          ).sort();
-          setCategories(uniqueCategories);
-          
-          // Get latest posts (sorted by date)
-          const latest = [...allPostsResponse.data]
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 3); // Show only 3 latest posts
-          setLatestPosts(latest);
-        }
-      } catch (error) {
-        console.error('Error fetching categories and latest posts:', error);
-      }
-    };
-    
-    fetchCategoriesAndLatest();
-  }, []);
-  
-  // Add email validation function
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  };
-
-  // Add URL detection function (more comprehensive)
-  const containsUrl = (text: string): boolean => {
-    // Check for common URL patterns including those without http/https
-    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9][-a-zA-Z0-9]+\.[a-zA-Z0-9]{2,}(\/[^\s]*)?)/gi;
-    return urlRegex.test(text);
-  };
-  
-  // Function to load more comments
-  const handleLoadMoreComments = async () => {
-    if (!post || isLoadingMoreComments) return;
-    
-    setIsLoadingMoreComments(true);
-    
-    try {
-      const nextPage = commentPage + 1;
-      const response = await apiRequest<{ status: string; data: Comment[]; total: number; page: number; pages: number }>(
-        `/blogs/${post._id}/comments?page=${nextPage}&limit=5`, 
-        { requireAuth: false }
-      );
-      
-      // Append new comments to existing ones
-      setComments(prevComments => [...prevComments, ...response.data]);
-      setCommentPage(nextPage);
-      setHasMoreComments(nextPage < response.pages);
-    } catch (error) {
-      console.error('Error loading more comments:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load more comments. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoadingMoreComments(false);
-    }
-  };
-  
-  // Handle submitting a comment
-  const handleSubmitComment = async () => {
-    // Reset any previous validation errors
-    let hasError = false;
-    
-    // Validate required fields
-    if (!commentText.trim() || !commentName.trim() || !commentEmail.trim() || !post) {
-      toast({
-        title: 'Missing information',
-        description: 'Please fill in all required fields',
-        variant: 'destructive'
-      });
-      return;
-    }
-    
-    // Validate email format
-    if (!isValidEmail(commentEmail.trim())) {
-      toast({
-        title: 'Invalid email',
-        description: 'Please enter a valid email address',
-        variant: 'destructive',
-        duration: 5000,
-      });
-      return;
-    }
-    
-    // Check for URLs in the comment text
-    if (containsUrl(commentText)) {
-      toast({
-        title: 'Links not allowed',
-        description: 'Please remove any URLs or web addresses from your comment',
-        variant: 'destructive',
-        duration: 5000,
-      });
-      return;
-    }
-    
-    setIsSubmittingComment(true);
-    
-    try {
-      // Call the API to post the comment
-      const submitResponse = await apiRequest(`/blogs/${post._id}/comments`, {
-        method: 'POST',
-        body: {
-          name: commentName,
-          email: commentEmail,
-          text: commentText
-        },
-        requireAuth: false
-      });
-      
-      // Clear the form
-      setCommentText('');
-      setCommentName('');
-      setCommentEmail('');
-      
-      // Refresh comments (reset to first page)
-      const commentsResponse = await apiRequest<{ status: string; data: Comment[]; total: number; page: number; pages: number }>(
-        `/blogs/${post._id}/comments?limit=5`, 
-        { requireAuth: false }
-      );
-      
-      setComments(commentsResponse.data);
-      setCommentCount(commentsResponse.total);
-      setCommentPage(1);
-      setHasMoreComments(commentsResponse.pages > 1);
-      
-      // Show success message
-      toast({
-        title: 'Comment submitted',
-        description: post.requireCommentApproval ? 
-          'Your comment has been submitted and is awaiting approval.' :
-          'Your comment has been posted successfully.',
-        duration: 5000,
-      });
-    } catch (error: any) {
-      console.error('Error posting comment:', error);
-      
-      // Display specific validation error messages from the API
-      let errorMessage = 'Failed to post your comment. Please try again.';
-      
-      if (error.validation && error.message) {
-        // If it's a validation error, show the specific message
-        errorMessage = error.message;
-        
-        // Highlight the specific field with error if possible
-        if (error.message.toLowerCase().includes('email')) {
-          toast({
-            title: 'Invalid Email',
-            description: errorMessage,
-            variant: 'destructive',
-            duration: 5000,
-          });
-          return;
-        } else if (error.message.toLowerCase().includes('link') || error.message.toLowerCase().includes('url')) {
-          toast({
-            title: 'Links Not Allowed',
-            description: errorMessage,
-            variant: 'destructive',
-            duration: 5000,
-          });
-          return;
-        }
-      }
-      
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmittingComment(false);
-    }
-  };
-  
-  // Format date
-  const formatCommentDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
-      
-      // Calculate the difference in milliseconds
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      
-      // Convert to different units
-      const diffSecs = Math.floor(diffMs / 1000);
-      const diffMins = Math.floor(diffSecs / 60);
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-      
-      // Format based on how recent the comment is
-      if (diffSecs < 60) {
-        return 'Just now';
-      } else if (diffMins < 60) {
-        return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
-      } else if (diffHours < 24) {
-        return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
-      } else if (diffDays < 7) {
-        return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
-      } else {
-        // For older comments, show the actual date
-        return date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
-      }
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Unknown date';
-    }
-  };
-  
-  // Function to process blog content and replace backend URLs with proxied ones
-  const processContentImages = (htmlContent: string): string => {
-    if (!htmlContent) return htmlContent
-    
-    // Replace backend image URLs in the HTML content with proxied URLs
-    return htmlContent.replace(
-      /src="([^"]*\/api\/media\/file\/[^"]*)"/g,
-      (match, url) => {
-        const proxiedUrl = getProxiedImageUrl(url)
-        return `src="${proxiedUrl || url}"`
-      }
-    ).replace(
-      /src='([^']*\/api\/media\/file\/[^']*)'/g,
-      (match, url) => {
-        const proxiedUrl = getProxiedImageUrl(url)
-        return `src='${proxiedUrl || url}'`
-      }
-    )
-  }
-
-  // Helper function to get proxied featured image URL
-  const getProxiedFeaturedImage = (imageUrl: string): string => {
-    if (!imageUrl) return imageUrl
-    return getProxiedImageUrl(imageUrl) || imageUrl
-  }
+  // Use the scroll tracking hook
+  const {
+    activeHeading,
+    readingProgress,
+    showScrollTop,
+    isTocOpen,
+    setIsTocOpen,
+    articleRef,
+    handleScrollToTop
+  } = useScrollTracking(headings)
   
   // Show loading state
   if (loading) {
@@ -805,44 +139,6 @@ export default function BlogPostPage() {
       </div>
     )
   }
-  
-  // Add a shareOnSocial function
-  const shareOnSocial = (platform: string) => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    const text = post?.title || 'Check out this article';
-    
-    let shareUrl = '';
-    
-    switch (platform) {
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-        break;
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-        break;
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-        break;
-      case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-        break;
-      case 'instagram':
-        // Instagram doesn't have a direct share URL, so we'll copy the link instead
-        navigator.clipboard.writeText(url);
-        toast({
-          title: "Link copied!",
-          description: "Share this link on Instagram.",
-          duration: 2000,
-        });
-        return;
-      default:
-        return;
-    }
-    
-    if (shareUrl) {
-      window.open(shareUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
   
   return (
     <>
@@ -914,7 +210,7 @@ export default function BlogPostPage() {
           <div className="aspect-[16/9] w-full transform transition-transform duration-700 hover:scale-105 bg-muted/50">
             {post.featuredImage ? (
               <img 
-                src={getProxiedFeaturedImage(post.featuredImage)} 
+                src={getProxiedImageUrl(post.featuredImage)} 
                 alt={post.title}
                 className="w-full h-full object-cover"
                 loading="eager"
@@ -1146,7 +442,7 @@ export default function BlogPostPage() {
                   variant="ghost" 
                   size="icon" 
                   className="h-9 w-9 rounded-full"
-                  onClick={() => shareOnSocial('twitter')}
+                  onClick={() => shareOnSocial('twitter', post)}
                 >
                   <Twitter className="h-4 w-4" />
                 </Button>
@@ -1154,7 +450,7 @@ export default function BlogPostPage() {
                   variant="ghost" 
                   size="icon" 
                   className="h-9 w-9 rounded-full"
-                  onClick={() => shareOnSocial('facebook')}
+                  onClick={() => shareOnSocial('facebook', post)}
                 >
                   <Facebook className="h-4 w-4" />
                 </Button>
@@ -1162,7 +458,7 @@ export default function BlogPostPage() {
                   variant="ghost" 
                   size="icon" 
                   className="h-9 w-9 rounded-full"
-                  onClick={() => shareOnSocial('linkedin')}
+                  onClick={() => shareOnSocial('linkedin', post)}
                 >
                   <Linkedin className="h-4 w-4" />
                 </Button>
@@ -1170,7 +466,7 @@ export default function BlogPostPage() {
                   variant="ghost" 
                   size="icon" 
                   className="h-9 w-9 rounded-full"
-                  onClick={() => shareOnSocial('whatsapp')}
+                  onClick={() => shareOnSocial('whatsapp', post)}
                 >
                   <WhatsAppIcon className="h-4 w-4" />
                 </Button>
@@ -1178,7 +474,7 @@ export default function BlogPostPage() {
                   variant="ghost" 
                   size="icon" 
                   className="h-9 w-9 rounded-full"
-                  onClick={() => shareOnSocial('instagram')}
+                  onClick={() => shareOnSocial('instagram', post)}
                 >
                   <Instagram className="h-4 w-4" />
                 </Button>
@@ -1196,6 +492,18 @@ export default function BlogPostPage() {
               
               {/* Comment form */}
               <div className="mb-8 space-y-4">
+                {hasSubmittedComment && post.limitCommentsPerIp && (
+                  <div className="p-4 rounded-lg bg-muted/50 border border-muted-foreground/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium text-sm">Comment Already Submitted</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      You have already posted a comment on this article. Only one comment per person is allowed.
+                    </p>
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="commentName">Name *</Label>
@@ -1205,6 +513,7 @@ export default function BlogPostPage() {
                       className="mt-1"
                       value={commentName}
                       onChange={(e) => setCommentName(e.target.value)}
+                      disabled={hasSubmittedComment && post.limitCommentsPerIp}
                       required
                     />
                   </div>
@@ -1217,15 +526,7 @@ export default function BlogPostPage() {
                       className="mt-1"
                       value={commentEmail}
                       onChange={(e) => setCommentEmail(e.target.value)}
-                      onBlur={(e) => {
-                        if (e.target.value && !isValidEmail(e.target.value)) {
-                          toast({
-                            title: 'Invalid email format',
-                            description: 'Please enter a valid email address',
-                            variant: 'destructive',
-                          });
-                        }
-                      }}
+                      disabled={hasSubmittedComment && post.limitCommentsPerIp}
                       required
                     />
                   </div>
@@ -1235,20 +536,13 @@ export default function BlogPostPage() {
                   <Label htmlFor="commentText">Comment * <span className="text-xs text-muted-foreground">(no links or web addresses allowed)</span></Label>
                   <Textarea
                     id="commentText"
-                    placeholder="Write your comment here..."
+                    placeholder={hasSubmittedComment && post.limitCommentsPerIp ? "You have already submitted a comment for this article" : "Write your comment here..."}
                     className="resize-none mt-1 h-24"
                     value={commentText}
                     onChange={(e) => {
                       setCommentText(e.target.value);
-                      // Check for URLs as the user types and show a warning
-                      if (containsUrl(e.target.value) && e.target.value !== commentText) {
-                        toast({
-                          title: 'Links detected',
-                          description: 'Please remove any URLs or web addresses from your comment',
-                          variant: 'destructive',
-                        });
-                      }
                     }}
+                    disabled={hasSubmittedComment && post.limitCommentsPerIp}
                     required
                   />
                 </div>
@@ -1256,9 +550,9 @@ export default function BlogPostPage() {
                 <div className="flex justify-end">
                   <Button 
                     onClick={handleSubmitComment} 
-                    disabled={!commentText.trim() || !commentName.trim() || !commentEmail.trim() || isSubmittingComment}
+                    disabled={!commentText.trim() || !commentName.trim() || !commentEmail.trim() || isSubmittingComment || (hasSubmittedComment && post.limitCommentsPerIp)}
                   >
-                    {isSubmittingComment ? 'Posting...' : 'Post Comment'}
+                    {isSubmittingComment ? 'Posting...' : (hasSubmittedComment && post.limitCommentsPerIp) ? 'Comment Already Submitted' : 'Post Comment'}
                   </Button>
                 </div>
               </div>
@@ -1377,7 +671,7 @@ export default function BlogPostPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full"
-                    onClick={() => shareOnSocial('twitter')}
+                    onClick={() => shareOnSocial('twitter', post)}
                   >
                     <Twitter className="h-4 w-4" />
                   </Button>
@@ -1385,7 +679,7 @@ export default function BlogPostPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full"
-                    onClick={() => shareOnSocial('facebook')}
+                    onClick={() => shareOnSocial('facebook', post)}
                   >
                     <Facebook className="h-4 w-4" />
                   </Button>
@@ -1393,7 +687,7 @@ export default function BlogPostPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full"
-                    onClick={() => shareOnSocial('linkedin')}
+                    onClick={() => shareOnSocial('linkedin', post)}
                   >
                     <Linkedin className="h-4 w-4" />
                   </Button>
@@ -1401,7 +695,7 @@ export default function BlogPostPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full"
-                    onClick={() => shareOnSocial('whatsapp')}
+                    onClick={() => shareOnSocial('whatsapp', post)}
                   >
                     <WhatsAppIcon className="h-4 w-4" />
                   </Button>
@@ -1409,7 +703,7 @@ export default function BlogPostPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full"
-                    onClick={() => shareOnSocial('instagram')}
+                    onClick={() => shareOnSocial('instagram', post)}
                   >
                     <Instagram className="h-4 w-4" />
                   </Button>
@@ -1509,7 +803,7 @@ export default function BlogPostPage() {
                 <div className="h-48 overflow-hidden bg-muted/50">
                   {post.featuredImage ? (
                     <img 
-                      src={getProxiedFeaturedImage(post.featuredImage)} 
+                      src={getProxiedImageUrl(post.featuredImage)} 
                       alt={post.title}
                       className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
                       loading="lazy"
@@ -1558,16 +852,59 @@ export default function BlogPostPage() {
         </div>
       )}
       
-      {/* Scroll to top button */}
+      {/* Enhanced Scroll to top button */}
       {showScrollTop && (
-        <Button
-          onClick={scrollToTop}
-          className="fixed bottom-6 right-6 h-10 w-10 rounded-full shadow-lg z-50 animate-in fade-in duration-300"
-          variant="secondary"
-          aria-label="Scroll to top"
-        >
-          <ChevronUp className="h-5 w-5" />
-        </Button>
+        <div className="fixed bottom-6 right-6 z-50 group">
+          {/* Background glow effect */}
+          <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl scale-150 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out" />
+          
+          {/* Main button */}
+          <Button
+            onClick={handleScrollToTop}
+            className="relative h-14 w-14 rounded-full shadow-2xl border border-white/10 backdrop-blur-md bg-background/80 hover:bg-primary hover:text-primary-foreground text-primary transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 group"
+            variant="ghost"
+            aria-label="Scroll to top"
+          >
+            {/* Inner glow */}
+            <div className="absolute inset-1 rounded-full bg-gradient-to-tr from-primary/5 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            {/* Icon */}
+            <ChevronUp className="h-6 w-6 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5" />
+            
+            {/* Ripple effect */}
+            <div className="absolute inset-0 rounded-full bg-primary/10 scale-0 group-active:scale-100 transition-transform duration-150" />
+          </Button>
+          
+          {/* Progress ring around button */}
+          <svg 
+            className="absolute inset-0 h-14 w-14 -rotate-90 transition-all duration-300"
+            viewBox="0 0 56 56"
+          >
+            <circle
+              cx="28"
+              cy="28"
+              r="26"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-muted-foreground/20"
+            />
+            <circle
+              cx="28"
+              cy="28"
+              r="26"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="text-primary transition-all duration-300"
+              style={{
+                strokeDasharray: `${2 * Math.PI * 26}`,
+                strokeDashoffset: `${2 * Math.PI * 26 * (1 - readingProgress / 100)}`
+              }}
+            />
+          </svg>
+        </div>
       )}
     </>
   )
