@@ -68,6 +68,12 @@ domain.run(async () => {
     // Ensure blogs subdirectory is also accessible
     app.use('/uploads/blogs', express.static(path.join(uploadsPath, 'blogs')));
     
+    // Serve frontend public files (favicon, manifest, etc.)
+    const frontendPublicPath = path.join(__dirname, '../../frontend/public');
+    app.use(express.static(frontendPublicPath, { 
+      maxAge: '1d'
+    }));
+    
     // Serve Next.js static files
     app.use('/_next', express.static(path.join(__dirname, '../public/static')));
     app.use('/static', express.static(path.join(__dirname, '../public/static')));
@@ -152,39 +158,6 @@ domain.run(async () => {
     app.use('/api/comments', commentRoutes);
     app.use('/api/seo', seoRoutes);
     app.use('/api/scripts', scriptsRoutes);
-    
-    // Serve favicon directly from backend (since frontend/backend are separate)
-    app.get('/favicon.svg', (req, res) => {
-      const faviconSvg = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="candyGradient" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%" stop-color="#ec4899"/>
-            <stop offset="50%" stop-color="#8b5cf6"/>
-            <stop offset="100%" stop-color="#7c3aed"/>
-          </radialGradient>
-          <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
-            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-          </linearGradient>
-        </defs>
-        <circle cx="16" cy="16" r="14" fill="url(#candyGradient)"/>
-        <ellipse cx="12" cy="12" rx="8" ry="10" fill="url(#shineGradient)" opacity="0.6"/>
-        <circle cx="16" cy="14" r="6" fill="#fff" opacity="0.9"/>
-        <circle cx="16" cy="14" r="4" fill="#ff69b4"/>
-        <rect x="15" y="20" width="2" height="6" fill="#8b4513" rx="1"/>
-        <circle cx="24" cy="8" r="1.5" fill="#fbbf24" opacity="0.8"/>
-        <circle cx="8" cy="24" r="1" fill="#fbbf24" opacity="0.8"/>
-      </svg>`;
-      
-      res.setHeader('Content-Type', 'image/svg+xml');
-      res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
-      res.send(faviconSvg);
-    });
-    
-    app.get('/favicon.ico', (req, res) => {
-      // Redirect ICO requests to SVG
-      res.redirect(301, '/favicon.svg');
-    });
     
     // Add a catch-all route for Next.js frontend - after all API routes
     app.get('*', (req, res) => {

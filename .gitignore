@@ -75,7 +75,8 @@ out
 
 # Gatsby files
 .cache/
-public
+# Only ignore Gatsby's public folder, not frontend/public
+.gatsby/public
 
 # Storybook build outputs
 .out
