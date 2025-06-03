@@ -12,36 +12,39 @@ interface SeoData {
 
 // Function to fetch SEO data server-side
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  // Only use fallback data during build time when backend isn't available
-  const isStaticBuild = process.env.NODE_ENV === 'production' && typeof window === 'undefined' && !process.env.VERCEL
+  // Only use fallback data during actual build process
+  // Build detection: we're in build if there's no request context and we're not in browser
+  const isBuildTime = typeof window === 'undefined' && !process.env.NEXT_RUNTIME
   
-  if (isStaticBuild) {
-    console.log(`Using fallback SEO data for ${pagePath} (static build mode)`)
+  if (isBuildTime) {
+    console.log(`📋 Using fallback SEO data for ${pagePath} (build time)`)
     return getFallbackSeoData(pagePath)
   }
   
   try {
-    // Use environment variable or default to localhost for development
+    // Use environment variable or default for development
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    console.log(`🔗 Attempting to fetch SEO data from: ${baseUrl}/seo/page/${encodeURIComponent(pagePath)}`)
+    
     const response = await fetch(`${baseUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
       cache: 'no-store', // Always fetch fresh data
       // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(10000)
     })
     
     if (response.ok) {
       const data = await response.json()
-      console.log(`✅ Fetched real SEO data for ${pagePath} from admin panel`)
+      console.log(`✅ Successfully fetched real SEO data for ${pagePath} from admin panel`)
       return data.data
     } else {
       console.log(`❌ API returned ${response.status} for ${pagePath}, using fallback`)
     }
   } catch (error) {
-    console.log(`❌ Failed to fetch SEO data for ${pagePath}, using fallback:`, error instanceof Error ? error.message : 'Unknown error')
+    console.log(`❌ Failed to fetch SEO data for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
+    console.log(`📋 Using fallback SEO data for ${pagePath}`)
   }
   
   // Return fallback SEO data as last resort
-  console.log(`📋 Using fallback SEO data for ${pagePath}`)
   return getFallbackSeoData(pagePath)
 }
 
