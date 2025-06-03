@@ -14,10 +14,8 @@ import {
   Lightbulb,
   CheckCircle
 } from 'lucide-react'
-import { useSeo } from '@/hooks/useSeo'
 
 export default function DisclaimerPage() {
-  useSeo('/disclaimer')
 
   return (
     <div className="min-h-screen">

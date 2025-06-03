@@ -19,7 +19,8 @@ import {
   Maximize,
   RefreshCw,
   Crop,
-  ImageIcon
+  ImageIcon,
+  Newspaper
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -241,9 +242,11 @@ export function MainLayout({ children }: MainLayoutProps) {
               
               <Link
                 href="/blog"
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${isActiveLink('/blog') ? 'bg-accent/50 text-primary' : ''}`}
+                className={`group flex items-center px-4 py-3 mx-3 rounded-xl text-sm font-medium bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-100 dark:border-emerald-800/50 hover:from-emerald-100 hover:to-teal-100 dark:hover:from-emerald-900/50 dark:hover:to-teal-900/50 transition-all duration-300 ${isActiveLink('/blog') ? 'ring-2 ring-emerald-200 dark:ring-emerald-800' : ''}`}
+                onClick={closeMenu}
               >
-                Latest News
+                <Newspaper className="w-4 h-4 mr-3 text-emerald-600 dark:text-emerald-400" />
+                <span className="bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-300 dark:to-teal-300 bg-clip-text text-transparent font-semibold">Latest News</span>
               </Link>
             </nav>
 
@@ -389,10 +392,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             
             <Link
               href="/blog"
-              className={`block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground ${isActiveLink('/blog') ? 'bg-accent/50 text-primary' : ''}`}
+              className={`group flex items-center px-4 py-3 mx-3 rounded-xl text-sm font-medium bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-100 dark:border-emerald-800/50 hover:from-emerald-100 hover:to-teal-100 dark:hover:from-emerald-900/50 dark:hover:to-teal-900/50 transition-all duration-300 ${isActiveLink('/blog') ? 'ring-2 ring-emerald-200 dark:ring-emerald-800' : ''}`}
               onClick={closeMenu}
             >
-              Latest News
+              <Newspaper className="w-4 h-4 mr-3 text-emerald-600 dark:text-emerald-400" />
+              <span className="bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-300 dark:to-teal-300 bg-clip-text text-transparent font-semibold">Latest News</span>
             </Link>
             
             <div className="mt-4 px-3 space-y-3">

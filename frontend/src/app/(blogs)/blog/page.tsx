@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DynamicMeta } from '@/components/meta/DynamicMeta'
-import { useSeo } from '@/hooks/useSeo'
 import { 
   CalendarIcon, 
   Search, 
@@ -47,8 +45,6 @@ interface BlogPost {
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   
-  // Load SEO data for blog page
-  const { seoData, loading: seoLoading } = useSeo('/blog')
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [allCategories, setAllCategories] = useState<string[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
@@ -296,17 +292,6 @@ export default function BlogPage() {
   
   return (
     <>
-      {seoData && (
-        <DynamicMeta 
-          title={seoData.metaTitle}
-          description={seoData.metaDescription}
-          keywords={seoData.metaKeywords.join(', ')}
-          ogImage={seoData.ogImage || (filteredPosts.length > 0 ? filteredPosts[0].featuredImage : undefined)}
-          canonicalUrl={seoData.canonicalUrl}
-          ogType={seoData.ogType as 'website' | 'article'}
-        />
-      )}
-      
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Web Tools Blog</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

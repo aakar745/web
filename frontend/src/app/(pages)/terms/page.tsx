@@ -15,10 +15,8 @@ import {
   Gavel,
   Info
 } from 'lucide-react'
-import { useSeo } from '@/hooks/useSeo'
 
 export default function TermsPage() {
-  useSeo('/terms')
 
   return (
     <div className="min-h-screen">

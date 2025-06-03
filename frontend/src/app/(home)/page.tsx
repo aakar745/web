@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { useSeo } from '@/hooks/useSeo'
 import { getProxiedImageUrl } from '@/lib/imageProxy'
 import { 
   ArrowRight, 
@@ -65,9 +64,6 @@ const item = {
 export default function Home() {
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
-  
-  // Load SEO data for homepage
-  const { seoData, loading: seoLoading } = useSeo('/')
   
   // Fetch latest blog posts
   useEffect(() => {

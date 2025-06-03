@@ -17,12 +17,9 @@ import {
   Phone,
   Globe
 } from 'lucide-react'
-import { useSeo } from '@/hooks/useSeo'
 import { toast } from '@/components/ui/use-toast'
 
 export default function ContactPage() {
-  useSeo('/contact')
-  
   const [formData, setFormData] = useState({
     name: '',
     email: '',

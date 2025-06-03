@@ -1,18 +1,16 @@
 import type { Metadata } from 'next'
-import { MainLayout } from '@/components/layout/MainLayout'
-import HomeContent from './(home)/page'
 import { fetchSeoData, generateMetadataFromSeo } from '@/lib/seoUtils'
 
 // Generate metadata server-side for SEO
 export async function generateMetadata(): Promise<Metadata> {
-  const seoData = await fetchSeoData('/')
+  const seoData = await fetchSeoData('/blog')
   return generateMetadataFromSeo(seoData)
 }
 
-export default function Home() {
-  return (
-    <MainLayout>
-      <HomeContent />
-    </MainLayout>
-  )
+export default function BlogPageLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return <>{children}</>
 } 

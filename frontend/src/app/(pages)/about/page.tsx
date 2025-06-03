@@ -14,11 +14,8 @@ import {
   Lightbulb,
   Heart
 } from 'lucide-react'
-import { useSeo } from '@/hooks/useSeo'
 
 export default function AboutPage() {
-  useSeo('/about')
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

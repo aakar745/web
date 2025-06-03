@@ -10,9 +10,8 @@ import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 
+// Only keep essential metadata that won't conflict with page-specific SEO
 export const metadata: Metadata = {
-  title: 'ToolsCandy',
-  description: 'A collection of useful web tools',
   icons: {
     icon: [
       {

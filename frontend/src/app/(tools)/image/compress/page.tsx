@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import { ToolHeader } from '@/components/tools/ToolHeader'
-import { useSeo } from '@/hooks/useSeo'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { ImageIcon, Download, X, Trash2, Plus, Package, Server, WifiOff, RefreshCw, AlertCircle, Clock, CheckCircle } from 'lucide-react'
@@ -40,9 +39,6 @@ interface ArchiveResponse {
 }
 
 export default function CompressTool() {
-  // Load SEO data for image compression tool
-  const { seoData, loading: seoLoading } = useSeo('/image/compress')
-  
   const [quality, setQuality] = useState(80)
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
