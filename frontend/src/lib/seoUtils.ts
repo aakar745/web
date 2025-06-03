@@ -12,9 +12,19 @@ interface SeoData {
 
 // Function to fetch SEO data server-side
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
+  // Use the same API URL logic as other parts of the app
+  const getServerApiUrl = () => {
+    // In production, use the environment variable or fallback to production URL
+    if (process.env.NODE_ENV === 'production') {
+      return process.env.NEXT_PUBLIC_API_URL || 'https://toolscandy.com/api'
+    }
+    
+    // In development, try the configured URL or localhost
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+  }
+  
   try {
-    // Use environment variable or default for development
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    const baseUrl = getServerApiUrl()
     
     const response = await fetch(`${baseUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
       cache: 'no-store', // Always fetch fresh data
