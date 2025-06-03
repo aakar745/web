@@ -12,9 +12,23 @@ function getFrontendDomain(): string {
   }
   
   // For server-side rendering, use the deployment URL or localhost
-  return process.env.NEXT_PUBLIC_FRONTEND_URL || 
-         process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
-         'http://localhost:3000'
+  // First check for explicit frontend URL
+  if (process.env.NEXT_PUBLIC_FRONTEND_URL) {
+    return process.env.NEXT_PUBLIC_FRONTEND_URL
+  }
+  
+  // Check for Vercel deployment
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  
+  // For production, use the known production domain
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://toolscandy.com'
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:3000'
 }
 
 // Get the backend API URL for comparison
