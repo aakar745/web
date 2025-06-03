@@ -12,26 +12,27 @@ interface SeoData {
 
 // Function to fetch SEO data server-side
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  // Use the same API URL logic as other parts of the app
-  const getServerApiUrl = () => {
-    // In production runtime, use the environment variable
-    if (process.env.NODE_ENV === 'production') {
-      return process.env.NEXT_PUBLIC_API_URL || 'https://toolscandy.com/api'
+  try {
+    // Use the same API URL logic as apiClient.ts for consistency
+    let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    
+    // Ensure the URL ends with /api
+    if (!baseUrl.endsWith('/api')) {
+      baseUrl = baseUrl + '/api'
     }
     
-    // In development, try the configured URL or localhost
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
-  }
-  
-  try {
-    const baseUrl = getServerApiUrl()
+    console.log(`🔍 Fetching SEO data for ${pagePath} from ${baseUrl}`)
     
-    // Very short timeout to prevent hanging during builds or when backend is unavailable
+    // Short timeout to prevent hanging during builds or when backend is unavailable
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 3000)
+    const timeoutId = setTimeout(() => controller.abort(), 2000)
     
     const response = await fetch(`${baseUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
-      cache: 'no-store', // Always fetch fresh data
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store', // Always fetch fresh SEO data
       signal: controller.signal
     })
     
