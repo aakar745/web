@@ -6,17 +6,39 @@ import { BlogPostClient } from './BlogPostClient'
 
 // Server-side blog data fetching
 async function getBlogPost(id: string) {
-  const urlsToTry = [
-    // Development URLs to try in order
-    'http://localhost:5000/api',
-    'http://backend:5000/api',
-    'http://127.0.0.1:5000/api'
-  ]
+  // Use the same API URL logic as the client-side apiClient
+  const getServerApiUrl = () => {
+    // In production, use the environment variable or fallback to production URL
+    if (process.env.NODE_ENV === 'production') {
+      return process.env.NEXT_PUBLIC_API_URL || 'https://toolscandy.com/api'
+    }
+    
+    // In development, try multiple local URLs
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+  }
   
-  // In production, only use the production URL
+  const urlsToTry: string[] = []
+  
+  // In production, use the configured API URL
   if (process.env.NODE_ENV === 'production') {
-    urlsToTry.length = 0
-    urlsToTry.push('https://toolscandy.com/api')
+    urlsToTry.push(getServerApiUrl())
+  } else {
+    // In development, try multiple URLs in order
+    const primaryUrl = getServerApiUrl()
+    urlsToTry.push(primaryUrl)
+    
+    // Add fallback development URLs if not already included
+    const fallbackUrls = [
+      'http://localhost:5000/api',
+      'http://backend:5000/api', 
+      'http://127.0.0.1:5000/api'
+    ]
+    
+    fallbackUrls.forEach(url => {
+      if (!urlsToTry.includes(url)) {
+        urlsToTry.push(url)
+      }
+    })
   }
   
   for (const baseUrl of urlsToTry) {
@@ -31,7 +53,7 @@ async function getBlogPost(id: string) {
             headers: {
               'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(5000), // 5 second timeout
+            signal: AbortSignal.timeout(10000), // Increased timeout for production
           })
           
           if (slugResponse.ok) {
@@ -49,7 +71,7 @@ async function getBlogPost(id: string) {
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: AbortSignal.timeout(5000), // 5 second timeout
+        signal: AbortSignal.timeout(10000), // Increased timeout for production
       })
 
       if (response.ok) {
@@ -58,6 +80,10 @@ async function getBlogPost(id: string) {
       }
       
     } catch (error) {
+      // Log error in development, continue trying other URLs
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Failed to fetch from ${baseUrl}:`, error)
+      }
       continue // Try next URL
     }
   }

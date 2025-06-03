@@ -82,7 +82,6 @@ function NewBlogPage() {
         .replace(/-+/g, '-')      // Replace multiple hyphens with single hyphen
         .trim();                  // Trim any whitespace
       
-      console.log('Generated slug:', slug);
       // Update the formData with the new slug
       setFormData(prev => ({ ...prev, slug: slug }));
     }
@@ -114,14 +113,12 @@ function NewBlogPage() {
     // For featured images selected from media library, use original URL for storage
     // Display will be handled by the ImageUploader component using proxied URLs
     setFormData(prev => ({ ...prev, featuredImage: media.url }))
-    console.log(`[Blog Editor] Selected featured image: ${media.url}`)
   }
   
   const handleOgImageSelect = (media: any) => {
     // For OG images (used in public meta tags), use the proxied URL to hide backend
     const proxiedUrl = getProxiedImageUrl(media.url)
     setFormData(prev => ({ ...prev, ogImage: proxiedUrl || media.url }))
-    console.log(`[Blog Editor] Selected OG image (proxied): ${proxiedUrl || media.url}`)
   }
   
   // Add a tag to the list
@@ -220,8 +217,6 @@ function NewBlogPage() {
         author: user?.id,
       }
       
-      console.log('Submitting payload:', payload)
-      
       // Submit to API using apiClient
       interface BlogResponse {
         status: string;
@@ -236,8 +231,6 @@ function NewBlogPage() {
         body: payload,
         requireAuth: true
       });
-      
-      console.log('Blog created successfully:', result.data._id);
       
       // Show success message
       toast({
@@ -551,7 +544,6 @@ function NewBlogPage() {
                               if (prev.some(cat => cat.toLowerCase() === trimmedCategory.toLowerCase())) {
                                 return prev;
                               }
-                              console.log('Adding category:', trimmedCategory);
                               return [...prev, trimmedCategory];
                             });
                             setFormData(prev => ({ ...prev, category: trimmedCategory }));

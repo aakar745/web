@@ -146,8 +146,6 @@ function EditBlogPage() {
           return;
         }
         
-        console.log('Fetching blog post with ID:', params.id);
-        
         const response = await apiRequest<BlogResponse>(`/blogs/${params.id}`, {
           requireAuth: true
         });
@@ -161,27 +159,19 @@ function EditBlogPage() {
         
         // If the post has a category, check if it's already in our categories list
         if (data.category) {
-          console.log('Blog category:', data.category);
-          console.log('Current categories:', JSON.stringify(categories));
-          
           // Case-insensitive check if the category already exists in our list
           const categoryExists = categories.some(
             cat => cat.toLowerCase() === data.category.toLowerCase()
           );
           
           if (!categoryExists) {
-            console.log('Adding new category from blog post:', data.category);
             setCategories(prev => {
               // Double check again to avoid duplicates
               if (prev.some(cat => cat.toLowerCase() === data.category.toLowerCase())) {
-                console.log('Category already exists in previous state, not adding');
                 return prev;
               }
-              console.log('Category added to state');
               return [...prev, data.category];
             });
-          } else {
-            console.log('Category already exists, not adding');
           }
         }
         
@@ -206,7 +196,6 @@ function EditBlogPage() {
           limitCommentsPerIp: data.limitCommentsPerIp !== false,
         });
         
-        console.log('Successfully loaded blog post data');
       } catch (error) {
         console.error('Error fetching blog post:', error);
         toast({
@@ -237,7 +226,6 @@ function EditBlogPage() {
         .replace(/-+/g, '-')      // Replace multiple hyphens with single hyphen
         .trim();                  // Trim any whitespace
       
-      console.log('Generated slug:', slug);
       // Update the formData with the new slug
       setFormData(prev => ({ ...prev, slug: slug }));
     }
@@ -269,14 +257,12 @@ function EditBlogPage() {
     // For featured images selected from media library, use original URL for storage
     // Display will be handled by the ImageUploader component using proxied URLs
     setFormData(prev => ({ ...prev, featuredImage: media.url }))
-    console.log(`[Blog Editor] Selected featured image: ${media.url}`)
   }
   
   const handleOgImageSelect = (media: any) => {
     // For OG images (used in public meta tags), use the proxied URL to hide backend
     const proxiedUrl = getProxiedImageUrl(media.url)
     setFormData(prev => ({ ...prev, ogImage: proxiedUrl || media.url }))
-    console.log(`[Blog Editor] Selected OG image (proxied): ${proxiedUrl || media.url}`)
   }
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -672,7 +658,6 @@ function EditBlogPage() {
                               if (prev.some(cat => cat.toLowerCase() === trimmedCategory.toLowerCase())) {
                                 return prev;
                               }
-                              console.log('Adding category:', trimmedCategory);
                               return [...prev, trimmedCategory];
                             });
                             setFormData(prev => ({ ...prev, category: trimmedCategory }));

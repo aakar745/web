@@ -106,8 +106,6 @@ export default function BlogsPage() {
         queryParams.append('search', searchQuery)
       }
       
-      console.log('Fetching blogs with auth token...');
-      
       interface BlogResponse {
         status: string;
         data: BlogData[];
@@ -119,7 +117,6 @@ export default function BlogsPage() {
         requireAuth: true
       });
       
-      console.log('Fetched blogs:', data)
       setBlogs(data.data || [])
       setTotalBlogs(data.total || 0)
       setTotalPages(data.pages || 1)
