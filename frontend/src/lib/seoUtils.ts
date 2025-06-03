@@ -12,49 +12,36 @@ interface SeoData {
 
 // Function to fetch SEO data server-side
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
+  // During build time or if no API URL is configured, return fallback data immediately
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  const isBuild = process.env.NODE_ENV === 'production' && !process.env.VERCEL
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  
+  // If we're in build mode, or no API URL is set, or in development without backend, use fallback
+  if (isBuild || !apiUrl) {
+    console.log(`Using fallback SEO data for ${pagePath} (build mode or no API URL)`)
+    return getFallbackSeoData(pagePath)
+  }
+  
   try {
-    // Use the same API URL logic as apiClient.ts for consistency
-    let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
-    
-    // Ensure the URL ends with /api
-    if (!baseUrl.endsWith('/api')) {
-      baseUrl = baseUrl + '/api'
-    }
-    
-    console.log(`🔍 Fetching SEO data for ${pagePath} from ${baseUrl}`)
-    
-    // Short timeout to prevent hanging during builds or when backend is unavailable
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 2000)
-    
-    const response = await fetch(`${baseUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store', // Always fetch fresh SEO data
-      signal: controller.signal
+    const response = await fetch(`${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
+      cache: 'no-store', // Always fetch fresh data
+      // Add timeout to prevent hanging during builds
+      signal: AbortSignal.timeout(5000)
     })
-    
-    clearTimeout(timeoutId)
     
     if (response.ok) {
       const data = await response.json()
-      console.log(`✅ Successfully fetched real SEO data for ${pagePath}`)
+      console.log(`Fetched SEO data for ${pagePath}`)
       return data.data
     } else {
-      console.log(`❌ API returned ${response.status} for ${pagePath}, using fallback`)
+      console.log(`API returned ${response.status} for ${pagePath}, using fallback`)
     }
   } catch (error) {
-    // Silently fail during builds or when backend unavailable
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.log(`⏱️ SEO fetch timeout for ${pagePath}, using fallback`)
-    } else {
-      console.log(`❌ Failed to fetch SEO data for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
-    }
+    console.log(`Failed to fetch SEO data for ${pagePath}, using fallback:`, error instanceof Error ? error.message : 'Unknown error')
   }
   
-  // Return fallback SEO data - this ensures pages always work
+  // Return fallback SEO data based on page path
   return getFallbackSeoData(pagePath)
 }
 

@@ -76,8 +76,9 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         }
       }
 
-      // Handle any other HTML content (but FILTER OUT meta tags to prevent SEO conflicts)
-      let cleanedHTML = content
+      // Handle any other HTML content (meta, link, style, etc.)
+      // Clean up and decode entities but preserve HTML structure
+      const cleanedHTML = content
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')
@@ -85,24 +86,9 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         .replace(/&#39;/g, "'")
         .trim()
 
-      // CRITICAL FIX: Remove any meta tags to prevent conflicts with server-side SEO
-      cleanedHTML = cleanedHTML.replace(/<meta[^>]*>/gi, '')
-      
-      // Also remove any title tags as these should come from server-side metadata
-      cleanedHTML = cleanedHTML.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '')
-      
-      // Remove any canonical link tags as these should come from server-side metadata
-      cleanedHTML = cleanedHTML.replace(/<link[^>]*rel=['"]*canonical['"]*[^>]*>/gi, '')
-      
-      // Remove any Open Graph meta tags
-      cleanedHTML = cleanedHTML.replace(/<meta[^>]*property=['"]*og:[^'"]*['"]*[^>]*>/gi, '')
-      
-      // Remove any Twitter meta tags
-      cleanedHTML = cleanedHTML.replace(/<meta[^>]*name=['"]*twitter:[^'"]*['"]*[^>]*>/gi, '')
-
       return {
         type: 'html',
-        processedContent: cleanedHTML.trim()
+        processedContent: cleanedHTML
       }
 
     } catch (error) {
@@ -206,12 +192,7 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         // Extract and clean script content
         const { type, processedContent } = processContent(script.content)
         
-        // Skip if no content after filtering
-        if (!processedContent || processedContent.trim().length === 0) {
-          return null
-        }
-
-        // Validate that we have actual JavaScript content for scripts
+        // Validate that we have actual JavaScript content
         if (type === 'script' && (!processedContent || processedContent.trim().length === 0)) {
           return null
         }
@@ -250,7 +231,7 @@ export default function DynamicScripts({ placement }: DynamicScriptsProps) {
         }
 
         if (type === 'html') {
-          // For head placement, render directly as HTML (but meta tags are already filtered out)
+          // For head placement, render directly as HTML
           if (placement === 'head') {
             return (
               <div

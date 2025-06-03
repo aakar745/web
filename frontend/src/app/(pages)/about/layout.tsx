@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { fetchSeoData, generateMetadataFromSeo } from '@/lib/seoUtils'
 
 // Generate metadata server-side for SEO
@@ -12,5 +12,5 @@ export default function AboutLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return <>{children}</>
 } 

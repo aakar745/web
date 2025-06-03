@@ -32,11 +32,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <HeadScripts />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/favicon.svg" />
       </head>
       <body className={inter.className}>
-        <HeadScripts />
         <BodyScripts />
         <AuthProvider>
           <ThemeProvider
