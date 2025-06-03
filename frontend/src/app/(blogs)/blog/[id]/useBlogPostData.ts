@@ -148,7 +148,7 @@ export function useBlogPostData(blogId: string) {
             }
           }
         } catch (slugError) {
-          console.log('Not found by slug, trying ID...', slugError);
+          // Not found by slug, will try by ID
         }
         
         // If not found by slug or it's a MongoDB ID, try to fetch by ID
