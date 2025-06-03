@@ -26,11 +26,16 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   try {
     const baseUrl = getServerApiUrl()
     
+    // Very short timeout to prevent hanging during builds or when backend is unavailable
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000)
+    
     const response = await fetch(`${baseUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
       cache: 'no-store', // Always fetch fresh data
-      // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(8000)
+      signal: controller.signal
     })
+    
+    clearTimeout(timeoutId)
     
     if (response.ok) {
       const data = await response.json()
@@ -40,11 +45,15 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
       console.log(`❌ API returned ${response.status} for ${pagePath}, using fallback`)
     }
   } catch (error) {
-    console.log(`❌ Failed to fetch SEO data for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
+    // Silently fail during builds or when backend unavailable
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log(`⏱️ SEO fetch timeout for ${pagePath}, using fallback`)
+    } else {
+      console.log(`❌ Failed to fetch SEO data for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
+    }
   }
   
-  // Return fallback SEO data as last resort
-  console.log(`📋 Using fallback SEO data for ${pagePath}`)
+  // Return fallback SEO data - this ensures pages always work
   return getFallbackSeoData(pagePath)
 }
 
