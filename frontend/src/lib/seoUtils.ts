@@ -12,15 +12,6 @@ interface SeoData {
 
 // Function to fetch SEO data server-side
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  // During build time, always use fallback data (no API calls during static generation)
-  // Simple detection: if we're on server-side and no runtime environment detected
-  const isBuildTime = typeof window === 'undefined' && !process.env.VERCEL && !process.env.RENDER && !process.env.RAILWAY
-  
-  if (isBuildTime) {
-    console.log(`📋 Using fallback SEO data for ${pagePath} (build time)`)
-    return getFallbackSeoData(pagePath)
-  }
-  
   // Use the same API URL logic as other parts of the app
   const getServerApiUrl = () => {
     // In production runtime, use the environment variable
