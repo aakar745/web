@@ -12,34 +12,40 @@ interface SeoData {
 
 // Function to fetch SEO data server-side (safe for builds)
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  // Use the same API URL that works client-side
-  const apiUrl = 'https://webtools-backend.a6zqlx.easypanel.host/api'
+  // Only attempt API call in development or when specifically enabled
+  const shouldFetchFromAPI = process.env.NODE_ENV === 'development' || process.env.ENABLE_SERVER_SEO === 'true'
   
-  try {
-    const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
-    console.log('🔄 Server-side fetching SEO from:', fullUrl)
-    
-    const response = await fetch(fullUrl, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(10000) // 10 second timeout
-    })
-    
-    if (!response.ok) {
+  if (shouldFetchFromAPI) {
+    try {
+      const apiUrl = 'https://webtools-backend.a6zqlx.easypanel.host/api'
+      const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
+      console.log('🔄 Server-side fetching SEO from:', fullUrl)
+      
+      const response = await fetch(fullUrl, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000) // Reduced timeout
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data?.data) {
+          console.log('✅ Server-side SEO data loaded:', data.data.metaTitle)
+          return data.data
+        }
+      }
+      
       throw new Error(`API responded with ${response.status}`)
+    } catch (error) {
+      console.log('❌ Server-side SEO fetch failed:', error instanceof Error ? error.message : 'Unknown error')
     }
-    
-    const data = await response.json()
-    console.log('✅ Server-side SEO data loaded:', data.data?.metaTitle)
-    
-    return data.data
-  } catch (error) {
-    console.log('❌ Server-side SEO fetch failed:', error instanceof Error ? error.message : 'Unknown error')
-    console.log('📋 Using fallback SEO data for:', pagePath)
-    return getFallbackSeoData(pagePath)
   }
+  
+  // Always fallback to static SEO data for build safety
+  console.log('📋 Using fallback SEO data for:', pagePath)
+  return getFallbackSeoData(pagePath)
 }
 
 // Function to fetch dynamic SEO data at runtime (client-side)
