@@ -14,9 +14,34 @@ interface SeoData {
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   
-  // For static generation, always use fallback to prevent build errors
-  // Dynamic SEO will be handled by updatePageSeo function after hydration
-  console.log(`Using static SEO data for ${pagePath} (build-safe approach)`)
+  // If API URL is available, try to fetch dynamic SEO data first
+  if (apiUrl) {
+    try {
+      const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
+      console.log(`🔄 Fetching server-side SEO data from: ${fullUrl}`)
+      
+      const response = await fetch(fullUrl, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          'User-Agent': 'NextJS-SSR-SEO-Fetch'
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log(`✅ Server-side SEO data loaded for ${pagePath}:`, data.data.metaTitle)
+        return data.data
+      } else {
+        console.log(`❌ Server-side SEO API returned ${response.status} for ${pagePath}, falling back to static data`)
+      }
+    } catch (error) {
+      console.log(`❌ Failed to fetch server-side SEO for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error', ', falling back to static data')
+    }
+  }
+  
+  // Fallback to static SEO data for build-time or when API is unavailable
+  console.log(`Using static SEO data for ${pagePath} (fallback)`)
   return getFallbackSeoData(pagePath)
 }
 
@@ -137,7 +162,7 @@ function updateMetaProperty(property: string, content: string) {
 }
 
 // Fallback SEO data based on page path
-function getFallbackSeoData(pagePath: string): SeoData {
+export function getFallbackSeoData(pagePath: string): SeoData {
   switch (pagePath) {
     case '/':
       return {
