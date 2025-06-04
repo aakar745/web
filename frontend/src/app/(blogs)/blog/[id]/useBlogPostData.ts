@@ -5,19 +5,19 @@ import { toast } from '@/components/ui/use-toast'
 import { BlogPost, HeadingInfo } from './types'
 import { getRelatedPosts, extractHeadings } from './utils'
 
-export function useBlogPostData(blogId: string) {
+export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
   const router = useRouter()
   
-  // State for blog post data
-  const [post, setPost] = useState<BlogPost | null>(null)
+  // State for blog post data - initialize with initialPost if provided
+  const [post, setPost] = useState<BlogPost | null>(initialPost || null)
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialPost) // Don't show loading if we have initial data
   const [error, setError] = useState(false)
   const [headings, setHeadings] = useState<HeadingInfo[]>([])
   
   // State for like functionality
   const [liked, setLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(0)
+  const [likeCount, setLikeCount] = useState(initialPost?.likes || 0) // Initialize with initial data
   
   // State for sidebar data
   const [categories, setCategories] = useState<string[]>([])
@@ -216,10 +216,63 @@ export function useBlogPostData(blogId: string) {
       }
     };
     
-    if (blogId) {
+    // Only fetch if we don't have initial data
+    if (blogId && !initialPost) {
       fetchBlogPost();
     }
-  }, [blogId, router]);
+  }, [blogId, router, initialPost]);
+
+  // Process initial post data if provided (extract headings, fetch related posts, etc.)
+  useEffect(() => {
+    const processInitialData = async () => {
+      if (!initialPost) return;
+      
+      try {
+        // Process headings from initial post content
+        const { headingsData, updatedContent } = extractHeadings(initialPost.content);
+        setHeadings(headingsData);
+        
+        // Update post with processed content for TOC
+        const contentWithIds = { ...initialPost, content: updatedContent };
+        setPost(contentWithIds);
+        
+        // Check like status
+        const likeStatusResponse = await apiRequest<{
+          status: string;
+          data: { hasLiked: boolean; likes: number };
+        }>(`/blogs/${initialPost._id}/like`, {
+          method: 'GET',
+          noRedirect: true
+        });
+        
+        if (likeStatusResponse.status === 'success') {
+          setLiked(likeStatusResponse.data.hasLiked);
+          setLikeCount(likeStatusResponse.data.likes);
+        }
+        
+        // Fetch related posts
+        if (initialPost.tags && initialPost.tags.length > 0) {
+          const allPostsResponse = await apiRequest<{
+            status: string;
+            data: BlogPost[];
+          }>('/blogs', { 
+            noRedirect: true 
+          });
+          
+          if (allPostsResponse.data) {
+            const related = getRelatedPosts(initialPost, allPostsResponse.data);
+            setRelatedPosts(related);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing initial post data:', error);
+      }
+    };
+    
+    if (initialPost) {
+      processInitialData();
+    }
+  }, [initialPost]);
 
   // Fetch categories and latest posts
   useEffect(() => {

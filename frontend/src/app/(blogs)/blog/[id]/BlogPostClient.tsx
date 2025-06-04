@@ -54,7 +54,7 @@ interface BlogPostClientProps {
 }
 
 export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
-  // Use the blog post data hook
+  // Use the blog post data hook but pass initialPost to avoid re-fetching
   const {
     post,
     relatedPosts,
@@ -66,7 +66,7 @@ export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
     handleLike,
     categories,
     latestPosts
-  } = useBlogPostData(initialPost._id)
+  } = useBlogPostData(initialPost._id, initialPost) // Pass initialPost to avoid re-fetch
   
   // Use the comments hook
   const {
