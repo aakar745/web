@@ -20,7 +20,6 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
     
     const response = await fetch(fullUrl, {
       cache: 'no-store',
-      signal: AbortSignal.timeout(5000),
       headers: {
         'Content-Type': 'application/json',
       }
