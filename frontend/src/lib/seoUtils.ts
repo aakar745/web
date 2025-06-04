@@ -38,45 +38,104 @@ function getValidOgType(ogType: string): OpenGraphType {
 
 // New function for server-side metadata generation
 export async function getServerSideMetadata(pagePath: string): Promise<Metadata> {
+  // Get API URL with improved environment variable handling
+  let apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  
+  // Attempt to get from server runtime config if available
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
-    const response = await fetch(`${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
-      next: { revalidate: 3600 } // Cache for 1 hour, can be adjusted
-    })
+    const getConfig = require('next/config').default;
+    const { serverRuntimeConfig } = getConfig();
+    if (serverRuntimeConfig && serverRuntimeConfig.apiUrl) {
+      apiUrl = serverRuntimeConfig.apiUrl;
+      console.log(`[SEO] Using serverRuntimeConfig API URL: ${apiUrl}`);
+    }
+  } catch (e) {
+    // If next/config is not available, continue with process.env
+  }
+  
+  if (!apiUrl) {
+    console.warn(`[SEO] No API URL configured. This will cause SEO to use fallbacks.`);
+    return generateMetadataFromFallback(pagePath);
+  }
+  
+  try {
+    // Fix any trailing slashes and ensure path is properly formed
+    if (apiUrl.endsWith('/')) {
+      apiUrl = apiUrl.slice(0, -1);
+    }
     
-    if (response.ok) {
-      const data = await response.json()
-      const seoData: SeoData = data.data
-      
-      // Convert to Next.js Metadata format
-      return {
+    // Ensure we have /api in the path if needed
+    const endpoint = apiUrl.endsWith('/api') 
+      ? `${apiUrl}/seo/page/${encodeURIComponent(pagePath.startsWith('/') ? pagePath.slice(1) : pagePath)}` 
+      : `${apiUrl}/api/seo/page/${encodeURIComponent(pagePath.startsWith('/') ? pagePath.slice(1) : pagePath)}`;
+    
+    console.log(`[SEO] Fetching metadata for ${pagePath} from ${endpoint}`);
+    
+    // Add timeout to prevent long-hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    const response = await fetch(endpoint, {
+      next: { revalidate: 60 }, // Reduce cache time to 1 minute for testing
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      console.warn(`[SEO] API returned status ${response.status} for ${pagePath}`);
+      return generateMetadataFromFallback(pagePath);
+    }
+    
+    const data = await response.json();
+    
+    if (!data || !data.data) {
+      console.warn(`[SEO] API returned invalid data structure for ${pagePath}`);
+      return generateMetadataFromFallback(pagePath);
+    }
+    
+    const seoData: SeoData = data.data;
+    console.log(`[SEO] Successfully fetched metadata for ${pagePath}: ${seoData.metaTitle}`);
+    
+    // Convert to Next.js Metadata format
+    return {
+      title: seoData.metaTitle,
+      description: seoData.metaDescription,
+      keywords: seoData.metaKeywords.join(', '),
+      openGraph: {
         title: seoData.metaTitle,
         description: seoData.metaDescription,
-        keywords: seoData.metaKeywords.join(', '),
-        openGraph: {
-          title: seoData.metaTitle,
-          description: seoData.metaDescription,
-          url: seoData.canonicalUrl || undefined,
-          images: seoData.ogImage ? [{ url: seoData.ogImage }] : undefined,
-          type: getValidOgType(seoData.ogType),
-        },
-        twitter: {
-          card: seoData.twitterCard as "summary" | "summary_large_image" | "app" | "player",
-          title: seoData.metaTitle,
-          description: seoData.metaDescription,
-          images: seoData.ogImage ? [seoData.ogImage] : undefined,
-        },
-        alternates: {
-          canonical: seoData.canonicalUrl || undefined,
-        }
+        url: seoData.canonicalUrl || undefined,
+        images: seoData.ogImage ? [{ url: seoData.ogImage }] : undefined,
+        type: getValidOgType(seoData.ogType),
+      },
+      twitter: {
+        card: seoData.twitterCard as "summary" | "summary_large_image" | "app" | "player",
+        title: seoData.metaTitle,
+        description: seoData.metaDescription,
+        images: seoData.ogImage ? [seoData.ogImage] : undefined,
+      },
+      alternates: {
+        canonical: seoData.canonicalUrl || undefined,
       }
     }
   } catch (error) {
-    console.error(`Error fetching server-side SEO data for ${pagePath}:`, error)
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error(`[SEO] Error fetching server-side SEO data for ${pagePath}: ${error.name}: ${error.message}`);
+      if (error.name === 'AbortError') {
+        console.error(`[SEO] Request timed out after 3 seconds`);
+      }
+    } else {
+      console.error(`[SEO] Unknown error fetching server-side SEO data for ${pagePath}`);
+    }
+    
+    console.warn(`[SEO] Using fallback data for ${pagePath}`);
+    return generateMetadataFromFallback(pagePath);
   }
-  
-  // Return fallback metadata if API call fails
-  return generateMetadataFromFallback(pagePath)
 }
 
 // Helper to generate fallback metadata from the existing fallback function
@@ -128,7 +187,9 @@ export async function fetchDynamicSeoData(pagePath: string): Promise<SeoData | n
   }
   
   try {
-    const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
+    // Remove leading slash if it exists
+    const normalizedPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
+    const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(normalizedPath)}`
     console.log('🔄 Fetching dynamic SEO data from:', fullUrl)
     
     const response = await fetch(fullUrl, {

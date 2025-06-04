@@ -16,6 +16,19 @@ const nextConfig = {
     // Increase pages buffer length
     pagesBufferLength: 8,
   },
+  // Ensure environment variables are available
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+  // Set production API URL if not already set
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
+  },
+  publicRuntimeConfig: {
+    // Will be available on both server and client
+    apiUrl: process.env.NEXT_PUBLIC_API_URL,
+  },
   // Optimize webpack for more stable builds
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {

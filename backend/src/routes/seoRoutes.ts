@@ -9,8 +9,19 @@ import {
   togglePageSeoStatus
 } from '../controllers/seoController';
 import { protect, restrictTo } from '../middleware/authMiddleware';
+import PageSeo from '../models/PageSeo';
 
 const router = express.Router();
+
+// Debug route to see all paths
+router.get('/debug/paths', async (req, res) => {
+  try {
+    const paths = await PageSeo.find({}).select('pagePath -_id');
+    res.status(200).json({ paths: paths.map(p => p.pagePath) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get paths' });
+  }
+});
 
 // Public route for getting SEO data (used by frontend pages)
 router.get('/page/:pagePath', getPageSeo);

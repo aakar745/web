@@ -28,18 +28,37 @@ export const getPageSeo = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { pagePath } = req.params;
     
-    const pageSeo = await PageSeo.findOne({ 
+    console.log(`[SEO Debug] Looking for pagePath: "${decodeURIComponent(pagePath)}"`);
+    
+    // First try with the exact path as provided
+    let pageSeo = await PageSeo.findOne({ 
       pagePath: decodeURIComponent(pagePath), 
       isActive: true 
     });
-
+    
+    // If not found, try with a leading slash added
+    if (!pageSeo && !decodeURIComponent(pagePath).startsWith('/')) {
+      console.log(`[SEO Debug] Not found, trying with leading slash: "/${decodeURIComponent(pagePath)}"`);
+      pageSeo = await PageSeo.findOne({ 
+        pagePath: `/${decodeURIComponent(pagePath)}`, 
+        isActive: true 
+      });
+    }
+    
+    // Log all available paths if not found
     if (!pageSeo) {
+      console.log('[SEO Debug] Still not found, listing all available paths:');
+      const allPaths = await PageSeo.find({}).select('pagePath isActive -_id');
+      console.log(allPaths.map(p => `${p.pagePath} (${p.isActive ? 'active' : 'inactive'})`));
+      
       return res.status(404).json({
         status: 'error',
         message: 'SEO settings not found for this page'
       });
     }
-
+    
+    console.log(`[SEO Debug] Found SEO data for: ${pageSeo.pagePath}`);
+    
     res.status(200).json({
       status: 'success',
       data: pageSeo
