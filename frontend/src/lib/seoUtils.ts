@@ -10,6 +10,104 @@ interface SeoData {
   twitterCard: string
 }
 
+// Define valid OpenGraph types
+type OpenGraphType = 
+  | 'website' 
+  | 'article' 
+  | 'book' 
+  | 'profile'
+  | 'music.song' 
+  | 'music.album' 
+  | 'music.playlist' 
+  | 'music.radio_station'
+  | 'video.movie' 
+  | 'video.episode' 
+  | 'video.tv_show' 
+  | 'video.other';
+
+// Helper to convert ogType from SeoData to valid OpenGraph type
+function getValidOgType(ogType: string): OpenGraphType {
+  const validTypes = [
+    'website', 'article', 'book', 'profile', 
+    'music.song', 'music.album', 'music.playlist', 'music.radio_station',
+    'video.movie', 'video.episode', 'video.tv_show', 'video.other'
+  ];
+  
+  return (validTypes.includes(ogType) ? ogType : 'website') as OpenGraphType;
+}
+
+// New function for server-side metadata generation
+export async function getServerSideMetadata(pagePath: string): Promise<Metadata> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    const response = await fetch(`${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
+      next: { revalidate: 3600 } // Cache for 1 hour, can be adjusted
+    })
+    
+    if (response.ok) {
+      const data = await response.json()
+      const seoData: SeoData = data.data
+      
+      // Convert to Next.js Metadata format
+      return {
+        title: seoData.metaTitle,
+        description: seoData.metaDescription,
+        keywords: seoData.metaKeywords.join(', '),
+        openGraph: {
+          title: seoData.metaTitle,
+          description: seoData.metaDescription,
+          url: seoData.canonicalUrl || undefined,
+          images: seoData.ogImage ? [{ url: seoData.ogImage }] : undefined,
+          type: getValidOgType(seoData.ogType),
+        },
+        twitter: {
+          card: seoData.twitterCard as "summary" | "summary_large_image" | "app" | "player",
+          title: seoData.metaTitle,
+          description: seoData.metaDescription,
+          images: seoData.ogImage ? [seoData.ogImage] : undefined,
+        },
+        alternates: {
+          canonical: seoData.canonicalUrl || undefined,
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`Error fetching server-side SEO data for ${pagePath}:`, error)
+  }
+  
+  // Return fallback metadata if API call fails
+  return generateMetadataFromFallback(pagePath)
+}
+
+// Helper to generate fallback metadata from the existing fallback function
+function generateMetadataFromFallback(pagePath: string): Metadata {
+  const fallbackData = getFallbackSeoData(pagePath)
+  
+  return {
+    title: fallbackData.metaTitle,
+    description: fallbackData.metaDescription,
+    keywords: fallbackData.metaKeywords.join(', '),
+    openGraph: {
+      title: fallbackData.metaTitle,
+      description: fallbackData.metaDescription,
+      type: getValidOgType(fallbackData.ogType),
+      ...(fallbackData.ogImage ? { images: [{ url: fallbackData.ogImage }] } : {}),
+      ...(fallbackData.canonicalUrl ? { url: fallbackData.canonicalUrl } : {}),
+    },
+    twitter: {
+      card: fallbackData.twitterCard as "summary" | "summary_large_image" | "app" | "player",
+      title: fallbackData.metaTitle,
+      description: fallbackData.metaDescription,
+      ...(fallbackData.ogImage ? { images: [fallbackData.ogImage] } : {}),
+    },
+    ...(fallbackData.canonicalUrl ? { 
+      alternates: { 
+        canonical: fallbackData.canonicalUrl 
+      } 
+    } : {})
+  }
+}
+
 // Function to fetch SEO data server-side (safe for builds)
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -283,7 +381,7 @@ export function generateMetadataFromSeo(seoData: SeoData): Metadata {
     openGraph: {
       title: seoData.metaTitle,
       description: seoData.metaDescription,
-      type: seoData.ogType as 'website',
+      type: getValidOgType(seoData.ogType) as 'website',
       images: seoData.ogImage ? [{ url: seoData.ogImage }] : [],
       url: seoData.canonicalUrl || undefined,
     },

@@ -1,3 +1,11 @@
+import { Metadata } from 'next'
+import { getServerSideMetadata } from '@/lib/seoUtils'
+
+// Add server-side metadata generation
+export async function generateMetadata(): Promise<Metadata> {
+  return getServerSideMetadata('/contact')
+}
+
 'use client'
 
 import React, { useState } from 'react'
