@@ -20,7 +20,14 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   console.log('apiUrl:', apiUrl)
   console.log('pagePath:', pagePath)
   
-  // Only use fallback if no API URL is set
+  // For now, always use fallback during builds to prevent clientModules error
+  // TODO: Implement dynamic SEO loading after page hydration
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`Using fallback SEO data for ${pagePath} (production build - preventing clientModules error)`)
+    return getFallbackSeoData(pagePath)
+  }
+  
+  // Only make API calls in development
   if (!apiUrl) {
     console.log(`Using fallback SEO data for ${pagePath} (no API URL configured)`)
     return getFallbackSeoData(pagePath)
