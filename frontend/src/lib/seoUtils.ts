@@ -56,6 +56,17 @@ export async function fetchDynamicSeoData(pagePath: string): Promise<SeoData | n
 export function updatePageSeo(seoData: SeoData) {
   if (typeof window === 'undefined') return // Only run in browser
   
+  // Check if server-rendered meta tags already exist
+  // If they do, skip client-side manipulation to prevent head→body movement
+  const hasServerRenderedMeta = document.querySelector('meta[name="description"]')?.getAttribute('content') && 
+                                document.title && 
+                                document.querySelector('meta[property="og:title"]')?.getAttribute('content')
+  
+  if (hasServerRenderedMeta) {
+    console.log('🔄 Server-rendered SEO detected, skipping client-side updates to prevent conflicts')
+    return
+  }
+  
   try {
     // Update document title
     document.title = seoData.metaTitle
