@@ -54,10 +54,9 @@ interface BlogPostClientProps {
 }
 
 export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
-  // Use the blog post data hook but pass initialPost to avoid re-fetching
+  // Use the blog post data hook
   const {
     post,
-    processedContent,
     relatedPosts,
     loading,
     error,
@@ -67,7 +66,7 @@ export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
     handleLike,
     categories,
     latestPosts
-  } = useBlogPostData(initialPost._id, initialPost) // Pass initialPost to avoid re-fetch
+  } = useBlogPostData(initialPost._id)
   
   // Use the comments hook
   const {
@@ -334,7 +333,7 @@ export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
         {/* Main article */}
         <article ref={articleRef} className="lg:col-span-8 prose prose-lg dark:prose-invert max-w-none">
           <div 
-            dangerouslySetInnerHTML={{ __html: processContentImages(processedContent || currentPost.content) }} 
+            dangerouslySetInnerHTML={{ __html: processContentImages(currentPost.content) }} 
             className="prose-img:rounded-xl prose-img:shadow-md prose-img:mx-auto prose-headings:scroll-mt-20 prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-p:leading-relaxed prose-headings:leading-tight prose-pre:bg-muted/50 prose-pre:backdrop-blur-sm prose-code:text-sm prose-code:bg-muted/80 prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-l-primary/50 prose-blockquote:bg-muted/30 prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:italic"
           />
           

@@ -1,237 +1,280 @@
+'use client'
+
 import React from 'react'
-import type { Metadata } from 'next'
-import { fetchDynamicSeoData, generateMetadataFromSeo, fetchSeoData } from '@/lib/seoUtils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { motion } from 'framer-motion'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
-  Users, 
   Target, 
-  Heart, 
-  Lightbulb, 
-  Shield, 
+  Users, 
   Zap, 
+  Shield, 
   Globe, 
   Award,
-  CheckCircle,
-  Star,
-  TrendingUp
+  Lightbulb,
+  Heart
 } from 'lucide-react'
-
-// Generate metadata server-side for About page
-export async function generateMetadata(): Promise<Metadata> {
-  // Try to fetch dynamic SEO data from admin settings
-  const dynamicSeoData = await fetchDynamicSeoData('/about')
-  
-  if (dynamicSeoData) {
-    return generateMetadataFromSeo(dynamicSeoData)
-  }
-  
-  // Fallback to static data if admin settings not available
-  const fallbackSeoData = await fetchSeoData('/about')
-  return generateMetadataFromSeo(fallbackSeoData)
-}
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 export default function AboutPage() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 }
+  }
+
   return (
     <div className="min-h-screen">
+      <DynamicSeoLoader pagePath="/about" />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-teal-500/5"></div>
         <div className="container mx-auto px-4 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block mb-6 px-6 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-600 dark:text-blue-400 font-medium text-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <div className="inline-block mb-6 px-6 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 dark:text-purple-400 font-medium text-sm">
               About ToolsCandy
             </div>
             
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               Making Image Processing 
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600"> Sweet & Simple</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600"> Sweet & Simple</span>
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              We believe powerful image processing tools should be free, fast, and respect your privacy. 
-              That's why we built ToolsCandy.
+              We believe powerful tools should be accessible to everyone. That's why we created ToolsCandy - 
+              a collection of free, fast, and privacy-focused image processing tools that work right in your browser.
             </p>
-            
-            <div className="flex justify-center">
-              <Badge variant="outline" className="text-sm px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
-                Trusted by thousands worldwide
-              </Badge>
-            </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Mission & Vision */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-              <Card className="p-8 border-2 border-blue-100 dark:border-blue-900/30">
-                <CardHeader className="pb-4">
-                  <div className="bg-blue-500/10 text-blue-600 dark:text-blue-400 p-3 rounded-xl mb-4 inline-block">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto"
+          >
+            <motion.div variants={itemVariants}>
+              <Card className="h-full border-2 border-purple-100 dark:border-purple-900/30 bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-900/10">
+                <CardContent className="p-8">
+                  <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-3 rounded-xl mb-6 inline-block">
                     <Target className="h-8 w-8" />
                   </div>
-                  <CardTitle className="text-2xl">Our Mission</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    To democratize image processing by providing powerful, free tools that work entirely in your browser. 
-                    We believe everyone should have access to professional-grade image optimization without compromising their privacy.
+                  <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
+                  <p className="text-muted-foreground text-lg leading-relaxed">
+                    To democratize professional image processing by providing free, powerful, and user-friendly tools 
+                    that respect your privacy and work seamlessly across all devices.
                   </p>
                 </CardContent>
               </Card>
+            </motion.div>
 
-              <Card className="p-8 border-2 border-purple-100 dark:border-purple-900/30">
-                <CardHeader className="pb-4">
-                  <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-3 rounded-xl mb-4 inline-block">
+            <motion.div variants={itemVariants}>
+              <Card className="h-full border-2 border-blue-100 dark:border-blue-900/30 bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-900/10">
+                <CardContent className="p-8">
+                  <div className="bg-blue-500/10 text-blue-600 dark:text-blue-400 p-3 rounded-xl mb-6 inline-block">
                     <Lightbulb className="h-8 w-8" />
                   </div>
-                  <CardTitle className="text-2xl">Our Vision</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    A world where anyone can optimize, edit, and transform their images instantly without uploads, 
-                    subscriptions, or privacy concerns. Technology should empower users, not exploit them.
+                  <h2 className="text-3xl font-bold mb-4">Our Vision</h2>
+                  <p className="text-muted-foreground text-lg leading-relaxed">
+                    A world where everyone has access to professional-grade image processing tools without 
+                    compromising on privacy, speed, or quality.
                   </p>
                 </CardContent>
               </Card>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Core Values */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Core Values</h2>
-              <p className="text-xl text-muted-foreground">The principles that guide everything we do</p>
-            </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">What Drives Us</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Our core values shape every tool we build and every decision we make
+            </p>
+          </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center p-6">
-                <CardContent className="pt-6">
-                  <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-4 rounded-xl mb-4 inline-block">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
+          >
+            <motion.div variants={itemVariants}>
+              <Card className="text-center p-6 h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-purple-200 dark:hover:border-purple-800">
+                <CardContent className="p-4">
+                  <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-4 rounded-xl mb-4 inline-block">
                     <Shield className="h-8 w-8" />
                   </div>
                   <h3 className="text-xl font-bold mb-3">Privacy First</h3>
                   <p className="text-muted-foreground">
-                    Your images never leave your device. All processing happens locally in your browser, 
-                    ensuring complete privacy and security.
+                    Your images never leave your device. All processing happens locally in your browser.
                   </p>
                 </CardContent>
               </Card>
+            </motion.div>
 
-              <Card className="text-center p-6">
-                <CardContent className="pt-6">
+            <motion.div variants={itemVariants}>
+              <Card className="text-center p-6 h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200 dark:hover:border-blue-800">
+                <CardContent className="p-4">
                   <div className="bg-blue-500/10 text-blue-600 dark:text-blue-400 p-4 rounded-xl mb-4 inline-block">
-                    <Heart className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">Always Free</h3>
-                  <p className="text-muted-foreground">
-                    No subscriptions, no premium tiers, no hidden costs. We believe powerful tools should be 
-                    accessible to everyone, regardless of budget.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center p-6">
-                <CardContent className="pt-6">
-                  <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-4 rounded-xl mb-4 inline-block">
                     <Zap className="h-8 w-8" />
                   </div>
                   <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
                   <p className="text-muted-foreground">
-                    No uploads, no waiting. Process images instantly with cutting-edge browser technology 
-                    for immediate results.
+                    Optimized algorithms and modern web technologies for instant results.
                   </p>
                 </CardContent>
               </Card>
-            </div>
-          </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Card className="text-center p-6 h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-teal-200 dark:hover:border-teal-800">
+                <CardContent className="p-4">
+                  <div className="bg-teal-500/10 text-teal-600 dark:text-teal-400 p-4 rounded-xl mb-4 inline-block">
+                    <Globe className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">Accessible</h3>
+                  <p className="text-muted-foreground">
+                    Free tools that work on any device, anywhere, without registration or downloads.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Card className="text-center p-6 h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-amber-200 dark:hover:border-amber-800">
+                <CardContent className="p-4">
+                  <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-4 rounded-xl mb-4 inline-block">
+                    <Award className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">Quality</h3>
+                  <p className="text-muted-foreground">
+                    Professional-grade results with advanced algorithms and quality preservation.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Our Story */}
+      {/* Story Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Story</h2>
-              <p className="text-xl text-muted-foreground">How ToolsCandy came to be</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
+            </motion.div>
 
-            <div className="space-y-8">
-              <Card className="p-8">
-                <CardContent>
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                    ToolsCandy was born from frustration. Tired of uploading sensitive images to unknown servers, 
-                    dealing with file size limits, and paying for basic image processing features, we decided to build something better.
-                  </p>
-                  
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                    We realized that modern browsers are incredibly powerful. They can handle complex image processing 
-                    without needing external servers. So we built tools that work entirely in your browser, giving you 
-                    professional results while keeping your files completely private.
-                  </p>
-                  
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    Today, ToolsCandy serves thousands of users worldwide who value privacy, speed, and simplicity. 
-                    We're constantly improving our tools and adding new features based on community feedback.
-                  </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="border-2 border-gray-100 dark:border-gray-800">
+                <CardContent className="p-8 md:p-12">
+                  <div className="prose prose-lg dark:prose-invert max-w-none">
+                    <p className="text-xl leading-relaxed mb-6">
+                      ToolsCandy was born from a simple frustration: why should you need to upload your personal images 
+                      to unknown servers just to resize, compress, or convert them?
+                    </p>
+                    
+                    <p className="text-lg leading-relaxed mb-6">
+                      As developers and content creators ourselves, we found ourselves constantly searching for reliable, 
+                      fast image processing tools that didn't compromise on privacy. Most solutions required file uploads, 
+                      registration, or had limitations that got in the way of productivity.
+                    </p>
+                    
+                    <p className="text-lg leading-relaxed mb-6">
+                      So we built what we wanted to use: a comprehensive suite of image tools that work entirely in your 
+                      browser, require no registration, and deliver professional results instantly. We call it ToolsCandy 
+                      because working with images should be sweet, not bitter.
+                    </p>
+                    
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-xl mt-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Heart className="h-6 w-6 text-red-500" />
+                        <span className="font-semibold text-lg">Made with passion</span>
+                      </div>
+                      <p className="text-muted-foreground">
+                        Every line of code, every algorithm, and every pixel of our interface is crafted with care 
+                        to give you the best possible experience.
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Stats Section */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="max-w-4xl mx-auto"
+          >
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">ToolsCandy by the Numbers</h2>
-              <p className="text-xl text-muted-foreground">The impact we're making together</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Trusted Worldwide</h2>
+              <p className="text-xl text-muted-foreground">
+                Join thousands of users who trust ToolsCandy for their image processing needs
+              </p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="bg-blue-500/10 text-blue-600 dark:text-blue-400 p-4 rounded-xl mb-4 inline-block">
-                  <Users className="h-8 w-8" />
-                </div>
-                <div className="text-3xl font-bold mb-2">50,000+</div>
-                <div className="text-muted-foreground">Happy Users</div>
+                <div className="text-4xl md:text-5xl font-bold text-purple-600 dark:text-purple-400 mb-2">100K+</div>
+                <div className="text-muted-foreground font-medium">Images Processed</div>
               </div>
-
               <div className="text-center">
-                <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-4 rounded-xl mb-4 inline-block">
-                  <TrendingUp className="h-8 w-8" />
-                </div>
-                <div className="text-3xl font-bold mb-2">1M+</div>
-                <div className="text-muted-foreground">Images Processed</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">50+</div>
+                <div className="text-muted-foreground font-medium">Countries</div>
               </div>
-
               <div className="text-center">
-                <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-4 rounded-xl mb-4 inline-block">
-                  <Globe className="h-8 w-8" />
-                </div>
-                <div className="text-3xl font-bold mb-2">150+</div>
-                <div className="text-muted-foreground">Countries Served</div>
+                <div className="text-4xl md:text-5xl font-bold text-teal-600 dark:text-teal-400 mb-2">0</div>
+                <div className="text-muted-foreground font-medium">Data Stored</div>
               </div>
-
               <div className="text-center">
-                <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-4 rounded-xl mb-4 inline-block">
-                  <Award className="h-8 w-8" />
-                </div>
-                <div className="text-3xl font-bold mb-2">99.9%</div>
-                <div className="text-muted-foreground">Uptime</div>
+                <div className="text-4xl md:text-5xl font-bold text-amber-600 dark:text-amber-400 mb-2">24/7</div>
+                <div className="text-muted-foreground font-medium">Available</div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

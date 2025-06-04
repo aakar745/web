@@ -5,67 +5,95 @@ import { toast } from '@/components/ui/use-toast'
 import { BlogPost, HeadingInfo } from './types'
 import { getRelatedPosts, extractHeadings } from './utils'
 
-export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
-  // Always use initialPost if provided, never update it
-  const [post, setPost] = useState<BlogPost | null>(initialPost || null)
-  const [processedContent, setProcessedContent] = useState<string>('')
+export function useBlogPostData(blogId: string) {
+  const router = useRouter()
+  
+  // State for blog post data
+  const [post, setPost] = useState<BlogPost | null>(null)
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(!initialPost) // Don't show loading if we have initial post
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [headings, setHeadings] = useState<HeadingInfo[]>([])
+  
+  // State for like functionality
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
-  const [isHydrated, setIsHydrated] = useState(false)
   
-  // Sidebar data
+  // State for sidebar data
   const [categories, setCategories] = useState<string[]>([])
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([])
-  
-  const router = useRouter()
 
-  // Track hydration to prevent server/client mismatches
-  useEffect(() => {
-    setIsHydrated(true)
-  }, [])
-
-  // Like functionality
+  // Handle liking a post with persistence
   const handleLike = async () => {
-    if (!post || liked) return
+    if (!post) return;
+    
+    // If already liked, don't allow unliking
+    if (liked) {
+      toast({
+        title: "Already liked",
+        description: "You've already liked this article!",
+        duration: 2000,
+      });
+      return;
+    }
+    
+    // Set new state to true (only allow liking, not unliking)
+    const newLikedState = true;
+    
+    // Optimistically update the UI
+    setLiked(newLikedState);
+    setLikeCount(prevCount => prevCount + 1);
     
     try {
-      await apiRequest(`/blogs/${post._id}/like`, {
+      // Make real API call to update like status
+      const response = await apiRequest<{
+        status: string;
+        data: { likes: number; hasLiked: boolean };
+      }>(`/blogs/${post._id}/like`, {
         method: 'POST',
-        noRedirect: true
-      })
+        body: { liked: newLikedState },
+      });
       
-      setLiked(true)
-      setLikeCount(prev => prev + 1)
+      if (response.status === 'success') {
+        // Update with the actual count from the server
+        setLikeCount(response.data.likes);
+        setLiked(response.data.hasLiked);
+        
+        toast({
+          title: "Thanks for your like!",
+          description: "We're glad you enjoyed this article!",
+          duration: 2000,
+        });
+      } else {
+        throw new Error('Failed to update like');
+      }
+    } catch (error) {
+      // If the API call fails, revert the optimistic update
+      console.error('Error updating like on server:', error);
+      setLiked(false);
+      setLikeCount(prevCount => prevCount - 1);
       
       toast({
-        title: 'Thank you!',
-        description: 'You liked this article.',
-        duration: 2000,
-      })
-    } catch (error) {
-      console.error('Error liking post:', error)
+        title: 'Error',
+        description: 'Failed to update like status. Please try again.',
+        variant: 'destructive',
+      });
     }
   }
 
-  // Fetch blog post (only if no initialPost is provided)
+  // Fetch blog post data
   useEffect(() => {
     const fetchBlogPost = async () => {
-      // Skip fetching if we have initialPost
-      if (initialPost) return
-      
       try {
         setLoading(true)
         setError(false)
         
-        // First try to fetch by slug (if it doesn't look like a MongoDB ID)
-        const isSlug = !blogId.match(/^[0-9a-fA-F]{24}$/)
-        
-        if (isSlug) {
-          try {
+        // First try to fetch by slug using the new endpoint
+        try {
+          // This is likely a slug if it doesn't look like a MongoDB ID
+          const isSlug = !blogId.match(/^[0-9a-fA-F]{24}$/);
+          
+          if (isSlug) {
             const response = await apiRequest<{
               status: string;
               data: BlogPost;
@@ -73,13 +101,13 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
               noRedirect: true 
             });
             
-            if (response.status === 'success') {
+            if (response.data) {
+              // Set the post data after processing
               setPost(response.data);
               
-              // Process headings and update separate processed content state
+              // Process headings and update content
               const { headingsData, updatedContent } = extractHeadings(response.data.content);
               setHeadings(headingsData);
-              setProcessedContent(updatedContent); // Use separate state for processed content
               
               // Set the actual like count from the database
               setLikeCount(response.data.likes || 0);
@@ -112,11 +140,15 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
                 }
               }
               
+              // Update the content with the heading IDs for the TOC to work
+              const contentWithIds = { ...response.data, content: updatedContent };
+              setPost(contentWithIds);
+              
               return; // Exit early if found by slug
             }
-          } catch (slugError) {
-            // Not found by slug, will try by ID
           }
+        } catch (slugError) {
+          // Not found by slug, will try by ID
         }
         
         // If not found by slug or it's a MongoDB ID, try to fetch by ID
@@ -129,10 +161,9 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
         
         setPost(response.data);
         
-        // Process headings and update separate processed content state
+        // Process headings and update content
         const { headingsData, updatedContent } = extractHeadings(response.data.content);
         setHeadings(headingsData);
-        setProcessedContent(updatedContent); // Use separate state for processed content
         
         // Set the actual like count from the database
         setLikeCount(response.data.likes || 0);
@@ -185,64 +216,10 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
       }
     };
     
-    // Only fetch if we don't have initial data and hydration is complete
-    if (blogId && !initialPost && isHydrated) {
+    if (blogId) {
       fetchBlogPost();
     }
-  }, [blogId, router, initialPost, isHydrated]);
-
-  // Process initial post data if provided (extract headings, fetch related posts, etc.)
-  useEffect(() => {
-    const processInitialData = async () => {
-      if (!initialPost) return;
-      
-      try {
-        // Process headings from initial post content
-        const { headingsData, updatedContent } = extractHeadings(initialPost.content);
-        setHeadings(headingsData);
-        setProcessedContent(updatedContent); // Use separate state for processed content
-        
-        // Set initial like count from the post data
-        setLikeCount(initialPost.likes || 0);
-        
-        // Check like status only after hydration to prevent hydration mismatch
-        if (isHydrated) {
-          const likeStatusResponse = await apiRequest<{
-            status: string;
-            data: { hasLiked: boolean; likes: number };
-          }>(`/blogs/${initialPost._id}/like`, {
-            method: 'GET',
-            noRedirect: true
-          });
-          
-          if (likeStatusResponse.status === 'success') {
-            setLiked(likeStatusResponse.data.hasLiked);
-            setLikeCount(likeStatusResponse.data.likes);
-          }
-        }
-        
-        // Fetch related posts only after hydration to prevent hydration mismatch
-        if (initialPost.tags && initialPost.tags.length > 0 && isHydrated) {
-          const allPostsResponse = await apiRequest<{
-            status: string;
-            data: BlogPost[];
-          }>('/blogs', { 
-            noRedirect: true 
-          });
-          
-          if (allPostsResponse.data) {
-            const related = getRelatedPosts(initialPost, allPostsResponse.data);
-            setRelatedPosts(related);
-          }
-        }
-      } catch (error) {
-        console.error('Error processing initial post data:', error);
-      }
-    };
-    
-    // Process initial data immediately when component mounts
-    processInitialData();
-  }, [initialPost, isHydrated]);
+  }, [blogId, router]);
 
   // Fetch categories and latest posts
   useEffect(() => {
@@ -280,7 +257,6 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
   return {
     // Blog post data
     post,
-    processedContent,
     relatedPosts,
     loading,
     error,
