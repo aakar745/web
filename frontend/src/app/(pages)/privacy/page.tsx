@@ -15,6 +15,7 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 export default function PrivacyPage() {
   const containerVariants = {
@@ -34,6 +35,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="min-h-screen">
+      <DynamicSeoLoader pagePath="/privacy" />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5"></div>

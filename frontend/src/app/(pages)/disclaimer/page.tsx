@@ -12,13 +12,31 @@ import {
   FileText, 
   Scale,
   Lightbulb,
-  CheckCircle
+  CheckCircle,
+  ExternalLink,
+  Clock
 } from 'lucide-react'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 export default function DisclaimerPage() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 }
+  }
 
   return (
     <div className="min-h-screen">
+      <DynamicSeoLoader pagePath="/disclaimer" />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-red-500/5 to-purple-500/5"></div>

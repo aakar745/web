@@ -25,6 +25,7 @@ import { apiRequest, getApiUrl } from '@/lib/apiClient'
 import { pollJobStatus } from '@/lib/api/statusApi'
 import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
 import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 // Add RateLimitIndicator component
 const RateLimitIndicator = ({ usage, limit, resetsIn, isLimitReached = false }: { 
@@ -756,6 +757,7 @@ export default function ConvertTool() {
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <DynamicSeoLoader pagePath="/image/convert" />
       <ToolHeader 
         title="Image Converter" 
         description="Convert your images between different formats while maintaining quality."

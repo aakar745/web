@@ -14,6 +14,7 @@ import {
   Lightbulb,
   Heart
 } from 'lucide-react'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 export default function AboutPage() {
   const containerVariants = {
@@ -33,6 +34,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen">
+      <DynamicSeoLoader pagePath="/about" />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-teal-500/5"></div>

@@ -18,6 +18,7 @@ import {
 import { apiRequest } from '@/lib/apiClient'
 import { toast } from '@/components/ui/use-toast'
 import { getProxiedImageUrl } from '@/lib/imageProxy'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 // Define blog post interface
 interface BlogPost {
@@ -292,6 +293,7 @@ export default function BlogPage() {
   
   return (
     <>
+      <DynamicSeoLoader pagePath="/blog" />
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Web Tools Blog</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

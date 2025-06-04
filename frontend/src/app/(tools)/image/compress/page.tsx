@@ -17,6 +17,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { apiRequest, getApiUrl } from '@/lib/apiClient'
 import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
 import { RateLimitIndicator } from '@/components/ui/RateLimitIndicator'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 // Define types for API responses
 interface CompressResponse {
@@ -713,6 +714,7 @@ export default function CompressTool() {
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <DynamicSeoLoader pagePath="/image/compress" />
       <ToolHeader 
         title="Image Compression" 
         description="Compress JPG, PNG, SVG, and GIFs while saving space and maintaining quality."

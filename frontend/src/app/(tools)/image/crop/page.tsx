@@ -18,6 +18,8 @@ import { getApiUrl } from '@/lib/apiClient'
 import { pollJobStatus } from '@/lib/api/statusApi'
 import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
 import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
+import { apiRequest } from '@/lib/apiClient'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 // Define response types for API calls
 interface CropResponse {
@@ -700,6 +702,7 @@ export default function CropTool() {
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <DynamicSeoLoader pagePath="/image/crop" />
       <ToolHeader 
         title="Image Cropper" 
         description="Crop your images with precision by selecting the exact area you want to keep."

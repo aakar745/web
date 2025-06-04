@@ -18,6 +18,7 @@ import {
   Globe
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -65,6 +66,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen">
+      <DynamicSeoLoader pagePath="/contact" />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-blue-500/5 to-purple-500/5"></div>

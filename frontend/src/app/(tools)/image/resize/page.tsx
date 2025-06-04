@@ -30,6 +30,7 @@ import { pollJobStatus } from '@/lib/api/statusApi'
 import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
 import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
 import { apiRequest } from '@/lib/apiClient'
+import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
 
 // Define response types for API calls
 interface ResizeResponse {
@@ -800,6 +801,7 @@ export default function ResizeTool() {
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <DynamicSeoLoader pagePath="/image/resize" />
       <ToolHeader 
         title="Image Resizer" 
         description="Resize your images with precision while maintaining optimal quality."
