@@ -17,14 +17,27 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   const isBuild = process.env.NODE_ENV === 'production' && !process.env.VERCEL
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   
+  // DEBUG: Log all values to understand what's happening
+  console.log('=== SEO Debug Info ===')
+  console.log('NODE_ENV:', process.env.NODE_ENV)
+  console.log('isDevelopment:', isDevelopment)
+  console.log('isBuild:', isBuild)
+  console.log('apiUrl:', apiUrl)
+  console.log('VERCEL:', process.env.VERCEL)
+  console.log('pagePath:', pagePath)
+  
   // If we're in build mode, or no API URL is set, or in development without backend, use fallback
   if (isBuild || !apiUrl) {
     console.log(`Using fallback SEO data for ${pagePath} (build mode or no API URL)`)
+    console.log('Reason: isBuild =', isBuild, ', !apiUrl =', !apiUrl)
     return getFallbackSeoData(pagePath)
   }
   
   try {
-    const response = await fetch(`${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`, {
+    const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
+    console.log('Attempting to fetch SEO data from:', fullUrl)
+    
+    const response = await fetch(fullUrl, {
       cache: 'no-store', // Always fetch fresh data
       // Add timeout to prevent hanging during builds
       signal: AbortSignal.timeout(5000)
@@ -32,16 +45,17 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
     
     if (response.ok) {
       const data = await response.json()
-      console.log(`Fetched SEO data for ${pagePath}`)
+      console.log(`✅ Successfully fetched SEO data for ${pagePath}:`, data.data.metaTitle)
       return data.data
     } else {
-      console.log(`API returned ${response.status} for ${pagePath}, using fallback`)
+      console.log(`❌ API returned ${response.status} for ${pagePath}, using fallback`)
     }
   } catch (error) {
-    console.log(`Failed to fetch SEO data for ${pagePath}, using fallback:`, error instanceof Error ? error.message : 'Unknown error')
+    console.log(`❌ Failed to fetch SEO data for ${pagePath}, using fallback:`, error instanceof Error ? error.message : 'Unknown error')
   }
   
   // Return fallback SEO data based on page path
+  console.log('🔄 Returning fallback data for:', pagePath)
   return getFallbackSeoData(pagePath)
 }
 
