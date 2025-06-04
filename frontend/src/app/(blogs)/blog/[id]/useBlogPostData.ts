@@ -8,12 +8,14 @@ import { getRelatedPosts, extractHeadings } from './utils'
 export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
   const router = useRouter()
   
-  // State for blog post data - initialize with initialPost if provided
+  // State for blog post data - keep original post unchanged for hydration consistency
   const [post, setPost] = useState<BlogPost | null>(initialPost || null)
+  const [processedContent, setProcessedContent] = useState<string>(initialPost?.content || '') // Initialize with original content
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(!initialPost) // Don't show loading if we have initial data
   const [error, setError] = useState(false)
   const [headings, setHeadings] = useState<HeadingInfo[]>([])
+  const [isHydrated, setIsHydrated] = useState(false) // Track hydration state
   
   // State for like functionality
   const [liked, setLiked] = useState(false)
@@ -22,6 +24,11 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
   // State for sidebar data
   const [categories, setCategories] = useState<string[]>([])
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([])
+
+  // Mark as hydrated after first render to prevent SSR/client mismatches
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   // Handle liking a post with persistence
   const handleLike = async () => {
@@ -102,12 +109,13 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
             });
             
             if (response.data) {
-              // Set the post data after processing
+              // Set the post data without modification for hydration consistency
               setPost(response.data);
               
-              // Process headings and update content
+              // Process headings and update separate processed content state
               const { headingsData, updatedContent } = extractHeadings(response.data.content);
               setHeadings(headingsData);
+              setProcessedContent(updatedContent); // Use separate state for processed content
               
               // Set the actual like count from the database
               setLikeCount(response.data.likes || 0);
@@ -140,10 +148,6 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
                 }
               }
               
-              // Update the content with the heading IDs for the TOC to work
-              const contentWithIds = { ...response.data, content: updatedContent };
-              setPost(contentWithIds);
-              
               return; // Exit early if found by slug
             }
           }
@@ -161,9 +165,10 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
         
         setPost(response.data);
         
-        // Process headings and update content
+        // Process headings and update separate processed content state
         const { headingsData, updatedContent } = extractHeadings(response.data.content);
         setHeadings(headingsData);
+        setProcessedContent(updatedContent); // Use separate state for processed content
         
         // Set the actual like count from the database
         setLikeCount(response.data.likes || 0);
@@ -216,11 +221,11 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
       }
     };
     
-    // Only fetch if we don't have initial data
-    if (blogId && !initialPost) {
+    // Only fetch if we don't have initial data and hydration is complete
+    if (blogId && !initialPost && isHydrated) {
       fetchBlogPost();
     }
-  }, [blogId, router, initialPost]);
+  }, [blogId, router, initialPost, isHydrated]);
 
   // Process initial post data if provided (extract headings, fetch related posts, etc.)
   useEffect(() => {
@@ -231,10 +236,7 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
         // Process headings from initial post content
         const { headingsData, updatedContent } = extractHeadings(initialPost.content);
         setHeadings(headingsData);
-        
-        // Update post with processed content for TOC
-        const contentWithIds = { ...initialPost, content: updatedContent };
-        setPost(contentWithIds);
+        setProcessedContent(updatedContent); // Use separate state for processed content
         
         // Check like status
         const likeStatusResponse = await apiRequest<{
@@ -269,10 +271,10 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
       }
     };
     
-    if (initialPost) {
+    if (initialPost && isHydrated) {
       processInitialData();
     }
-  }, [initialPost]);
+  }, [initialPost, isHydrated]);
 
   // Fetch categories and latest posts
   useEffect(() => {
@@ -310,6 +312,7 @@ export function useBlogPostData(blogId: string, initialPost?: BlogPost | null) {
   return {
     // Blog post data
     post,
+    processedContent,
     relatedPosts,
     loading,
     error,
