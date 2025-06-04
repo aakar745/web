@@ -10,53 +10,130 @@ interface SeoData {
   twitterCard: string
 }
 
-// Function to fetch SEO data server-side
+// Function to fetch SEO data server-side (safe for builds)
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   
-  // DEBUG: Log all values to understand what's happening
-  console.log('=== SEO Debug Info ===')
-  console.log('NODE_ENV:', process.env.NODE_ENV)
-  console.log('apiUrl:', apiUrl)
-  console.log('pagePath:', pagePath)
+  // For static generation, always use fallback to prevent build errors
+  // Dynamic SEO will be handled by updatePageSeo function after hydration
+  console.log(`Using static SEO data for ${pagePath} (build-safe approach)`)
+  return getFallbackSeoData(pagePath)
+}
+
+// Function to fetch dynamic SEO data at runtime (client-side)
+export async function fetchDynamicSeoData(pagePath: string): Promise<SeoData | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
   
-  // For now, always use fallback during builds to prevent clientModules error
-  // TODO: Implement dynamic SEO loading after page hydration
-  if (process.env.NODE_ENV === 'production') {
-    console.log(`Using fallback SEO data for ${pagePath} (production build - preventing clientModules error)`)
-    return getFallbackSeoData(pagePath)
-  }
-  
-  // Only make API calls in development
   if (!apiUrl) {
-    console.log(`Using fallback SEO data for ${pagePath} (no API URL configured)`)
-    return getFallbackSeoData(pagePath)
+    console.log('No API URL configured for dynamic SEO')
+    return null
   }
   
   try {
     const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
-    console.log('Attempting to fetch SEO data from:', fullUrl)
+    console.log('🔄 Fetching dynamic SEO data from:', fullUrl)
     
     const response = await fetch(fullUrl, {
-      cache: 'no-store', // Always fetch fresh data
-      // Add timeout to prevent hanging during builds
+      cache: 'no-store',
       signal: AbortSignal.timeout(5000)
     })
     
     if (response.ok) {
       const data = await response.json()
-      console.log(`✅ Successfully fetched SEO data for ${pagePath}:`, data.data.metaTitle)
+      console.log(`✅ Dynamic SEO data loaded for ${pagePath}:`, data.data.metaTitle)
       return data.data
     } else {
-      console.log(`❌ API returned ${response.status} for ${pagePath}, using fallback`)
+      console.log(`❌ Dynamic SEO API returned ${response.status} for ${pagePath}`)
+      return null
     }
   } catch (error) {
-    console.log(`❌ Failed to fetch SEO data for ${pagePath}, using fallback:`, error instanceof Error ? error.message : 'Unknown error')
+    console.log(`❌ Failed to fetch dynamic SEO for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
+    return null
   }
+}
+
+// Function to update page SEO dynamically after page load
+export function updatePageSeo(seoData: SeoData) {
+  if (typeof window === 'undefined') return // Only run in browser
   
-  // Return fallback SEO data based on page path
-  console.log('🔄 Returning fallback data for:', pagePath)
-  return getFallbackSeoData(pagePath)
+  try {
+    // Update document title
+    document.title = seoData.metaTitle
+    
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]')
+    if (metaDesc) {
+      metaDesc.setAttribute('content', seoData.metaDescription)
+    } else {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      metaDesc.setAttribute('content', seoData.metaDescription)
+      document.head.appendChild(metaDesc)
+    }
+    
+    // Update meta keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]')
+    if (metaKeywords) {
+      metaKeywords.setAttribute('content', seoData.metaKeywords.join(', '))
+    } else {
+      metaKeywords = document.createElement('meta')
+      metaKeywords.setAttribute('name', 'keywords')
+      metaKeywords.setAttribute('content', seoData.metaKeywords.join(', '))
+      document.head.appendChild(metaKeywords)
+    }
+    
+    // Update Open Graph tags
+    updateMetaProperty('og:title', seoData.metaTitle)
+    updateMetaProperty('og:description', seoData.metaDescription)
+    updateMetaProperty('og:type', seoData.ogType)
+    
+    if (seoData.ogImage) {
+      updateMetaProperty('og:image', seoData.ogImage)
+    }
+    
+    if (seoData.canonicalUrl) {
+      updateMetaProperty('og:url', seoData.canonicalUrl)
+      
+      // Update canonical link
+      let canonical = document.querySelector('link[rel="canonical"]')
+      if (canonical) {
+        canonical.setAttribute('href', seoData.canonicalUrl)
+      } else {
+        canonical = document.createElement('link')
+        canonical.setAttribute('rel', 'canonical')
+        canonical.setAttribute('href', seoData.canonicalUrl)
+        document.head.appendChild(canonical)
+      }
+    }
+    
+    // Update Twitter Card tags
+    updateMetaProperty('twitter:card', seoData.twitterCard)
+    updateMetaProperty('twitter:title', seoData.metaTitle)
+    updateMetaProperty('twitter:description', seoData.metaDescription)
+    
+    if (seoData.ogImage) {
+      updateMetaProperty('twitter:image', seoData.ogImage)
+    }
+    
+    console.log('✅ Page SEO updated successfully')
+  } catch (error) {
+    console.error('❌ Error updating page SEO:', error)
+  }
+}
+
+// Helper function to update meta property tags
+function updateMetaProperty(property: string, content: string) {
+  if (typeof window === 'undefined') return
+  
+  let meta = document.querySelector(`meta[property="${property}"]`)
+  if (meta) {
+    meta.setAttribute('content', content)
+  } else {
+    meta = document.createElement('meta')
+    meta.setAttribute('property', property)
+    meta.setAttribute('content', content)
+    document.head.appendChild(meta)
+  }
 }
 
 // Fallback SEO data based on page path
