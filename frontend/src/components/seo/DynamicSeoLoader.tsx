@@ -9,7 +9,18 @@ interface DynamicSeoLoaderProps {
 
 export function DynamicSeoLoader({ pagePath }: DynamicSeoLoaderProps) {
   useEffect(() => {
-    // Only run on client-side after hydration
+    // Check if server-rendered meta tags already exist
+    // If they do, skip entirely to prevent head→body movement
+    const hasServerRenderedMeta = document.querySelector('meta[name="description"]')?.getAttribute('content') && 
+                                  document.title && 
+                                  document.querySelector('meta[property="og:title"]')?.getAttribute('content')
+    
+    if (hasServerRenderedMeta) {
+      console.log(`🔄 Server-rendered SEO detected for ${pagePath}, skipping DynamicSeoLoader entirely`)
+      return
+    }
+
+    // Only run on client-side after hydration for pages without server-rendered SEO
     const loadDynamicSeo = async () => {
       try {
         console.log(`🔄 Loading dynamic SEO for: ${pagePath}`)
