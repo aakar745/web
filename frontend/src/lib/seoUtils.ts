@@ -12,32 +12,11 @@ interface SeoData {
 
 // Function to fetch SEO data server-side (safe for builds)
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
   
-  try {
-    const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
-    console.log('🔄 Fetching server-side SEO data from:', fullUrl)
-    
-    const response = await fetch(fullUrl, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-      console.log(`✅ Server-side SEO data loaded for ${pagePath}:`, data.data.metaTitle)
-      return data.data
-    } else {
-      console.log(`❌ Server-side SEO API returned ${response.status} for ${pagePath}, using fallback`)
-    }
-  } catch (error) {
-    console.log(`❌ Server-side SEO fetch failed for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
-  }
-  
-  // Fallback to static data if API fails
-  console.log(`Using static SEO data for ${pagePath} (fallback)`)
+  // For static generation, always use fallback to prevent build errors
+  // Dynamic SEO will be handled by updatePageSeo function after hydration
+  console.log(`Using static SEO data for ${pagePath} (build-safe approach)`)
   return getFallbackSeoData(pagePath)
 }
 
