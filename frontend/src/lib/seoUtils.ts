@@ -12,12 +12,34 @@ interface SeoData {
 
 // Function to fetch SEO data server-side (safe for builds)
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  // Use the same API URL that works client-side
+  const apiUrl = 'https://webtools-backend.a6zqlx.easypanel.host/api'
   
-  // For static generation, always use fallback to prevent build errors
-  // Dynamic SEO will be handled by updatePageSeo function after hydration
-  console.log(`Using static SEO data for ${pagePath} (build-safe approach)`)
-  return getFallbackSeoData(pagePath)
+  try {
+    const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(pagePath)}`
+    console.log('🔄 Server-side fetching SEO from:', fullUrl)
+    
+    const response = await fetch(fullUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    })
+    
+    if (!response.ok) {
+      throw new Error(`API responded with ${response.status}`)
+    }
+    
+    const data = await response.json()
+    console.log('✅ Server-side SEO data loaded:', data.data?.metaTitle)
+    
+    return data.data
+  } catch (error) {
+    console.log('❌ Server-side SEO fetch failed:', error instanceof Error ? error.message : 'Unknown error')
+    console.log('📋 Using fallback SEO data for:', pagePath)
+    return getFallbackSeoData(pagePath)
+  }
 }
 
 // Function to fetch dynamic SEO data at runtime (client-side)
