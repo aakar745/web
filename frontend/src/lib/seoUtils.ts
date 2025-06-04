@@ -12,24 +12,17 @@ interface SeoData {
 
 // Function to fetch SEO data server-side
 export async function fetchSeoData(pagePath: string): Promise<SeoData> {
-  // During build time or if no API URL is configured, return fallback data immediately
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isBuild = process.env.NODE_ENV === 'production' && !process.env.VERCEL
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   
   // DEBUG: Log all values to understand what's happening
   console.log('=== SEO Debug Info ===')
   console.log('NODE_ENV:', process.env.NODE_ENV)
-  console.log('isDevelopment:', isDevelopment)
-  console.log('isBuild:', isBuild)
   console.log('apiUrl:', apiUrl)
-  console.log('VERCEL:', process.env.VERCEL)
   console.log('pagePath:', pagePath)
   
-  // If we're in build mode, or no API URL is set, or in development without backend, use fallback
-  if (isBuild || !apiUrl) {
-    console.log(`Using fallback SEO data for ${pagePath} (build mode or no API URL)`)
-    console.log('Reason: isBuild =', isBuild, ', !apiUrl =', !apiUrl)
+  // Only use fallback if no API URL is set
+  if (!apiUrl) {
+    console.log(`Using fallback SEO data for ${pagePath} (no API URL configured)`)
     return getFallbackSeoData(pagePath)
   }
   
