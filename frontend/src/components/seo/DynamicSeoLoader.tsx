@@ -12,18 +12,13 @@ export function DynamicSeoLoader({ pagePath }: DynamicSeoLoaderProps) {
     // Only run on client-side after hydration
     const loadDynamicSeo = async () => {
       try {
-        console.log(`🔄 Loading dynamic SEO for: ${pagePath}`)
-        
         const seoData = await fetchDynamicSeoData(pagePath)
         
         if (seoData) {
           updatePageSeo(seoData)
-          console.log(`✅ Dynamic SEO applied for: ${pagePath}`)
-        } else {
-          console.log(`ℹ️ No dynamic SEO data found for: ${pagePath}, keeping fallback`)
         }
       } catch (error) {
-        console.error('❌ Error loading dynamic SEO:', error)
+        // Silent error handling - SEO fallbacks will be used
       }
     }
 

@@ -98,3 +98,24 @@
 {"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:48:33:4833"}
 {"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:48:33:4833"}
 {"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 12:51:40:5140"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:51:40:5140"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:51:40:5140"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 12:53:10:5310"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:53:10:5310"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:53:10:5310"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 12:54:12:5412"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:54:12:5412"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:54:12:5412"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 12:56:05:565"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:56:05:565"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:56:05:565"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-05 12:58:36:5836"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 12:58:50:5850"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:58:50:5850"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:58:50:5850"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-05 13:08:36:836"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-05 13:32:36:3236"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 13:36:07:367"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 13:36:07:367"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 13:36:07:367"}

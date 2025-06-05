@@ -53,14 +53,12 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
     const { serverRuntimeConfig } = getConfig();
     if (serverRuntimeConfig && serverRuntimeConfig.apiUrl) {
       apiUrl = serverRuntimeConfig.apiUrl;
-      console.log(`[SEO] Using serverRuntimeConfig API URL: ${apiUrl}`);
     }
   } catch (e) {
     // If next/config is not available, continue with process.env
   }
   
   if (!apiUrl) {
-    console.warn(`[SEO] No API URL configured. This will cause SEO to use fallbacks.`);
     return generateMetadataFromFallback(pagePath);
   }
   
@@ -78,8 +76,6 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
       ? `${apiUrl}/seo/page/${encodeURIComponent(normalizedPath)}` 
       : `${apiUrl}/api/seo/page/${encodeURIComponent(normalizedPath)}`;
     
-    console.log(`[SEO] Fetching metadata for ${pagePath} from ${endpoint}`);
-    
     // Add timeout to prevent long-hanging requests
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -95,19 +91,16 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      console.warn(`[SEO] API returned status ${response.status} for ${pagePath}`);
       return generateMetadataFromFallback(pagePath);
     }
     
     const data = await response.json();
     
     if (!data || !data.data) {
-      console.warn(`[SEO] API returned invalid data structure for ${pagePath}`);
       return generateMetadataFromFallback(pagePath);
     }
     
     const seoData: SeoData = data.data;
-    console.log(`[SEO] Successfully fetched metadata for ${pagePath}: ${seoData.metaTitle}`);
     
     // Convert to Next.js Metadata format
     return {
@@ -149,15 +142,11 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
   } catch (error) {
     // Log detailed error information
     if (error instanceof Error) {
-      console.error(`[SEO] Error fetching server-side SEO data for ${pagePath}: ${error.name}: ${error.message}`);
       if (error.name === 'AbortError') {
-        console.error(`[SEO] Request timed out after 3 seconds`);
+        // Request timeout
       }
-    } else {
-      console.error(`[SEO] Unknown error fetching server-side SEO data for ${pagePath}`);
     }
     
-    console.warn(`[SEO] Using fallback data for ${pagePath}`);
     return generateMetadataFromFallback(pagePath);
   }
 }
@@ -197,7 +186,6 @@ export async function fetchSeoData(pagePath: string): Promise<SeoData> {
   
   // For static generation, always use fallback to prevent build errors
   // Dynamic SEO will be handled by updatePageSeo function after hydration
-  console.log(`Using static SEO data for ${pagePath} (build-safe approach)`)
   return getFallbackSeoData(pagePath)
 }
 
@@ -206,7 +194,6 @@ export async function fetchDynamicSeoData(pagePath: string): Promise<SeoData | n
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
   
   if (!apiUrl) {
-    console.log('No API URL configured for dynamic SEO')
     return null
   }
   
@@ -214,7 +201,6 @@ export async function fetchDynamicSeoData(pagePath: string): Promise<SeoData | n
     // Remove leading slash if it exists
     const normalizedPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
     const fullUrl = `${apiUrl}/seo/page/${encodeURIComponent(normalizedPath)}`
-    console.log('🔄 Fetching dynamic SEO data from:', fullUrl)
     
     const response = await fetch(fullUrl, {
       cache: 'no-store',
@@ -223,14 +209,11 @@ export async function fetchDynamicSeoData(pagePath: string): Promise<SeoData | n
     
     if (response.ok) {
       const data = await response.json()
-      console.log(`✅ Dynamic SEO data loaded for ${pagePath}:`, data.data.metaTitle)
       return data.data
     } else {
-      console.log(`❌ Dynamic SEO API returned ${response.status} for ${pagePath}`)
       return null
     }
   } catch (error) {
-    console.log(`❌ Failed to fetch dynamic SEO for ${pagePath}:`, error instanceof Error ? error.message : 'Unknown error')
     return null
   }
 }
@@ -319,9 +302,8 @@ export function updatePageSeo(seoData: SeoData) {
       updateMetaProperty('article:tag', seoData.articleTags.join(', '))
     }
     
-    console.log('✅ Page SEO updated successfully')
   } catch (error) {
-    console.error('❌ Error updating page SEO:', error)
+    // Error handling
   }
 }
 
