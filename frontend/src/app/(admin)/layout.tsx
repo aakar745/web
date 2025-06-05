@@ -15,7 +15,8 @@ import {
   Users, 
   BarChart3, 
   ShieldAlert,
-  LogOut
+  LogOut,
+  Database
 } from 'lucide-react'
 
 export default function AdminLayout({
@@ -112,6 +113,11 @@ export default function AdminLayout({
         title: "Users",
         href: "/dashboard/users",
         icon: <Users className="h-5 w-5" />,
+      },
+      {
+        title: "Backup",
+        href: "/dashboard/backup",
+        icon: <Database className="h-5 w-5" />,
       },
       {
         title: "Monitoring",

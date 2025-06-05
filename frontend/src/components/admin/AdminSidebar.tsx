@@ -19,7 +19,8 @@ import {
   MessageSquare,
   Search,
   Code,
-  X
+  X,
+  Database
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -94,6 +95,12 @@ export function AdminSidebar({ onToggle, isMobile = false, isOpen = true }: Admi
       href: '/dashboard/users',
       icon: <Users className="h-5 w-5" />,
       color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+    },
+    {
+      title: 'Backup',
+      href: '/dashboard/backup',
+      icon: <Database className="h-5 w-5" />,
+      color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400'
     },
     {
       title: 'Monitoring',

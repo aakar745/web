@@ -630,7 +630,7 @@ function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
               <Link href="/dashboard/blogs/new">
                 <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-primary/5">
                   <FilePlus2 className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -641,6 +641,12 @@ function AdminDashboard() {
                 <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-primary/5">
                   <Users className="h-5 w-5 sm:h-6 sm:w-6" />
                   <span className="text-xs sm:text-sm">Manage Users</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/backup">
+                <Button variant="outline" className="w-full h-auto p-3 sm:p-4 flex-col gap-2 hover:bg-gradient-to-r hover:from-pink-50 hover:via-purple-50 hover:to-violet-50 hover:border-pink-200">
+                  <Database className="h-5 w-5 sm:h-6 sm:w-6 text-gradient bg-gradient-to-r from-pink-500 via-purple-500 to-violet-500 bg-clip-text text-transparent" />
+                  <span className="text-xs sm:text-sm font-medium">Database Backup</span>
                 </Button>
               </Link>
               <Link href="/dashboard/monitoring">

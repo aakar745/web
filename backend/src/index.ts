@@ -11,6 +11,7 @@ import authRoutes from './routes/authRoutes';
 import blogRoutes from './routes/blogRoutes';
 import mediaRoutes from './routes/mediaRoutes';
 import adminRoutes from './routes/adminRoutes';
+import backupRoutes from './routes/backupRoutes';
 import { upload, validateImageDimensions } from './middleware/upload';
 import { config } from './config/env';
 import { loadBalancer } from './middleware/loadBalancer';
@@ -155,6 +156,7 @@ domain.run(async () => {
     app.use('/api/health', healthCacheAPI, healthRoutes); // Health checks can cache briefly
     app.use('/api/monitoring', monitoringRoutes);
     app.use('/api/admin', adminRoutes);
+    app.use('/api/backup', backupRoutes);
     app.use('/api/comments', commentRoutes);
     app.use('/api/seo', seoRoutes);
     app.use('/api/scripts', scriptsRoutes);
