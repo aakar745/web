@@ -28,16 +28,20 @@ export const getPageSeo = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { pagePath } = req.params;
     
+    // Handle special case for home page
+    const isHomePage = pagePath === 'home';
+    const pathToFind = isHomePage ? '/' : decodeURIComponent(pagePath);
+    
     // First try with the exact path as provided
     let pageSeo = await PageSeo.findOne({ 
-      pagePath: decodeURIComponent(pagePath), 
+      pagePath: pathToFind, 
       isActive: true 
     });
     
     // If not found, try with a leading slash added
-    if (!pageSeo && !decodeURIComponent(pagePath).startsWith('/')) {
+    if (!pageSeo && !pathToFind.startsWith('/') && !isHomePage) {
       pageSeo = await PageSeo.findOne({ 
-        pagePath: `/${decodeURIComponent(pagePath)}`, 
+        pagePath: `/${pathToFind}`, 
         isActive: true 
       });
     }

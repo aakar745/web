@@ -62,6 +62,11 @@ domain.run(async () => {
         app.use('/uploads', express_1.default.static(uploadsPath));
         // Ensure blogs subdirectory is also accessible
         app.use('/uploads/blogs', express_1.default.static(path_1.default.join(uploadsPath, 'blogs')));
+        // Serve frontend public files (favicon, manifest, etc.)
+        const frontendPublicPath = path_1.default.join(__dirname, '../../frontend/public');
+        app.use(express_1.default.static(frontendPublicPath, {
+            maxAge: '1d'
+        }));
         // Serve Next.js static files
         app.use('/_next', express_1.default.static(path_1.default.join(__dirname, '../public/static')));
         app.use('/static', express_1.default.static(path_1.default.join(__dirname, '../public/static')));

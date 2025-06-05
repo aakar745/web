@@ -64,10 +64,13 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
       apiUrl = apiUrl.slice(0, -1);
     }
     
+    // Special handling for root path - use 'home' instead of empty string
+    const normalizedPath = pagePath === '/' ? 'home' : (pagePath.startsWith('/') ? pagePath.slice(1) : pagePath);
+    
     // Ensure we have /api in the path if needed
     const endpoint = apiUrl.endsWith('/api') 
-      ? `${apiUrl}/seo/page/${encodeURIComponent(pagePath.startsWith('/') ? pagePath.slice(1) : pagePath)}` 
-      : `${apiUrl}/api/seo/page/${encodeURIComponent(pagePath.startsWith('/') ? pagePath.slice(1) : pagePath)}`;
+      ? `${apiUrl}/seo/page/${encodeURIComponent(normalizedPath)}` 
+      : `${apiUrl}/api/seo/page/${encodeURIComponent(normalizedPath)}`;
     
     console.log(`[SEO] Fetching metadata for ${pagePath} from ${endpoint}`);
     
