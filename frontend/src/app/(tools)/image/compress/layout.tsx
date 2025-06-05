@@ -1,9 +1,8 @@
 import { Metadata } from 'next'
-import { fetchSeoData, generateMetadataFromSeo } from '@/lib/seoUtils'
+import { getServerSideMetadata } from '@/lib/seoUtils'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seoData = await fetchSeoData('/image/compress')
-  return generateMetadataFromSeo(seoData)
+  return getServerSideMetadata('/image/compress')
 }
 
 export default function CompressLayout({
@@ -11,5 +10,5 @@ export default function CompressLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return <>{children}</>
 } 
