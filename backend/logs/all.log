@@ -56,3 +56,45 @@
 {"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f","timestamp":"2025-06-05 12:28:12:2812"}
 {"level":"info","message":"Found blog post for SEO: whats is B To B marketing F (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:28:12:2812"}
 {"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:28:12:2812"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-05 12:37:00:370"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:39:29:3929"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:46:23:4623"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f","timestamp":"2025-06-05 12:47:07:477"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:47:07:477"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:47:07:477"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-05 12:48:04:484"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:48:04:484"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:48:04:484"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:48:33:4833"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:48:33:4833"}

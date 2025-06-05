@@ -80,7 +80,8 @@ function NewBlogPage() {
         .replace(/[^\w\s-]/g, '') // Remove special characters
         .replace(/\s+/g, '-')     // Replace spaces with hyphens
         .replace(/-+/g, '-')      // Replace multiple hyphens with single hyphen
-        .trim();                  // Trim any whitespace
+        .replace(/^-+|-+$/g, '')   // Remove leading/trailing hyphens
+        .substring(0, 100);        // Limit to 100 characters for reasonable URL length
       
       // Update the formData with the new slug
       setFormData(prev => ({ ...prev, slug: slug }));
@@ -206,7 +207,8 @@ function NewBlogPage() {
         .replace(/[^\w\s-]/g, '')  // Remove special characters
         .replace(/\s+/g, '-')      // Replace spaces with hyphens
         .replace(/-+/g, '-')       // Replace multiple hyphens with single hyphen
-        .trim();
+        .replace(/^-+|-+$/g, '')   // Remove leading/trailing hyphens
+        .substring(0, 100);        // Limit to 100 characters for reasonable URL length
       
       const payload = {
         ...formData,

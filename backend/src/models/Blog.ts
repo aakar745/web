@@ -158,7 +158,9 @@ BlogSchema.pre('validate', function(this: any, next) {
       // Remove any consecutive hyphens
       .replace(/-+/g, '-')
       // Remove leading and trailing hyphens
-      .replace(/^-+|-+$/g, '');
+      .replace(/^-+|-+$/g, '')
+      // Limit to 100 characters for reasonable URL length
+      .substring(0, 100);
     
     this.slug = baseSlug;
   } else if (this.slug) {
@@ -173,7 +175,9 @@ BlogSchema.pre('validate', function(this: any, next) {
       // Remove any consecutive hyphens that might be left
       .replace(/-+/g, '-')
       // Remove trailing hyphens
-      .replace(/-+$/g, '');
+      .replace(/-+$/g, '')
+      // Limit to 100 characters for reasonable URL length
+      .substring(0, 100);
     
     this.slug = baseSlug;
   }
