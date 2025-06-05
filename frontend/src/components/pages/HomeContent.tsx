@@ -19,7 +19,12 @@ import {
   Check,
   MoveRight,
   FileText,
-  ArrowUpRight
+  ArrowUpRight,
+  Star,
+  Users,
+  Download,
+  Globe,
+  Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -59,6 +64,18 @@ const container = {
 const item = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 }
+}
+
+const sparkleVariants = {
+  animate: {
+    scale: [0, 1, 0],
+    rotate: [0, 180, 360],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  }
 }
 
 export default function HomeContent() {
@@ -118,95 +135,213 @@ export default function HomeContent() {
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
-      <section className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 mb-12 sm:mb-16 md:mb-20 overflow-hidden">
-        {/* Decorative background elements */}
+      <section className="relative w-full py-16 sm:py-20 md:py-24 lg:py-32 xl:py-40 mb-16 sm:mb-20 md:mb-24 overflow-hidden">
+        {/* Animated Background with Logo Colors */}
         <div className="absolute inset-0 overflow-hidden -z-10">
-          <div className="absolute -top-[30%] -left-[20%] sm:-left-[10%] w-[60%] sm:w-[50%] h-[50%] rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/30 blur-3xl"></div>
-          <div className="absolute top-[20%] -right-[20%] sm:-right-[10%] w-[50%] sm:w-[40%] h-[40%] rounded-full bg-gradient-to-l from-blue-500/20 to-cyan-500/30 blur-3xl"></div>
-          <div className="absolute -bottom-[10%] left-[10%] sm:left-[20%] w-[70%] sm:w-[60%] h-[30%] rounded-full bg-gradient-to-tr from-green-500/20 to-teal-500/30 blur-3xl"></div>
+          {/* Main gradient background matching logo colors */}
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-violet-50 dark:from-pink-950/20 dark:via-purple-950/20 dark:to-violet-950/20"></div>
+          
+          {/* Floating candy-colored orbs */}
+          <motion.div 
+            className="absolute top-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 blur-2xl"
+            animate={{ 
+              y: [-20, 20, -20],
+              x: [-10, 10, -10]
+            }}
+            transition={{ 
+              duration: 6, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+          />
+          <motion.div 
+            className="absolute top-40 right-20 w-40 h-40 rounded-full bg-gradient-to-br from-purple-400/30 to-violet-500/30 blur-2xl"
+            animate={{ 
+              y: [20, -20, 20],
+              x: [10, -10, 10]
+            }}
+            transition={{ 
+              duration: 8, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 1
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-20 left-1/4 w-24 h-24 rounded-full bg-gradient-to-br from-orange-400/20 to-pink-400/20 blur-xl"
+            animate={{ 
+              scale: [0.8, 1.2, 0.8],
+              rotate: [0, 180, 360]
+            }}
+            transition={{ 
+              duration: 10, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 2
+            }}
+          />
+          
+          {/* Floating sparkles */}
+          <motion.div 
+            className="absolute top-32 left-1/3 text-2xl"
+            variants={sparkleVariants}
+            animate="animate"
+          >
+            ✨
+          </motion.div>
+          <motion.div 
+            className="absolute top-64 right-1/4 text-xl"
+            variants={sparkleVariants}
+            animate="animate"
+            transition={{ delay: 0.5 }}
+          >
+            ⭐
+          </motion.div>
+          <motion.div 
+            className="absolute bottom-40 right-1/3 text-lg"
+            variants={sparkleVariants}
+            animate="animate"
+            transition={{ delay: 1 }}
+          >
+            💫
+          </motion.div>
         </div>
         
-        <div className="max-w-[2000px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="max-w-5xl mx-auto text-center"
           >
-            <div className="inline-block mb-4 sm:mb-6 px-4 sm:px-6 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 dark:text-purple-400 font-medium text-xs sm:text-sm">
-              Simple • Fast • Powerful
-            </div>
+            {/* Brand Badge */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="inline-flex items-center gap-2 mb-6 sm:mb-8 px-6 py-3 rounded-full bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-violet-500/10 border border-pink-200/50 dark:border-pink-800/50 backdrop-blur-sm"
+            >
+              <Sparkles className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+              <span className="text-sm font-semibold bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                Sweet • Simple • Powerful
+              </span>
+              <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+            </motion.div>
             
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
-                ToolsCandy
-              </span> for Everyone
+            {/* Main Heading */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-8 sm:mb-10 leading-tight">
+              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                Tools
+              </span>
+              <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-rose-500 bg-clip-text text-transparent">
+                Candy
+              </span>
+              <br />
+              <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal text-muted-foreground">
+                for Everyone
+              </span>
             </h1>
             
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 sm:mb-10 leading-relaxed max-w-3xl mx-auto px-4 sm:px-0">
-              Fast, free, and easy-to-use online tools for all your image editing needs.
-              No login required. Process files directly in your browser.
+            {/* Subtitle */}
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground mb-10 sm:mb-12 leading-relaxed max-w-4xl mx-auto px-4 sm:px-0">
+              Sweeten your workflow with our deliciously simple image tools.
+              <br className="hidden sm:block" />
+              <span className="text-base sm:text-lg md:text-xl lg:text-2xl">
+                Free, fast, and privacy-focused – no registration required.
+              </span>
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 sm:px-0 mb-12 sm:mb-16">
               <Link href="/image/compress">
-                <Button size="lg" className="w-full sm:w-auto rounded-full px-6 sm:px-8 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 h-12 sm:h-14 text-sm sm:text-base">
-                  Get Started <MoveRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto rounded-full px-8 py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 hover:from-pink-700 hover:via-purple-700 hover:to-violet-700 text-white shadow-2xl shadow-purple-600/25 flex items-center justify-center gap-3 h-14 sm:h-16 text-base sm:text-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-3xl"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  Start Creating 
+                  <MoveRight className="h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/blog">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-full px-6 sm:px-8 border-2 h-12 sm:h-14 text-sm sm:text-base">
-                  Browse Tutorials
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full sm:w-auto rounded-full px-8 py-4 border-2 border-pink-200 dark:border-pink-800 hover:border-pink-300 dark:hover:border-pink-700 h-14 sm:h-16 text-base sm:text-lg font-semibold bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm hover:bg-pink-50 dark:hover:bg-pink-950/50 transition-all duration-300"
+                >
+                  <FileText className="h-5 w-5 mr-2" />
+                  Explore Guides
                 </Button>
               </Link>
             </div>
             
-            {/* Featured brands/stats */}
-            <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-800">
-              <p className="text-muted-foreground mb-4 sm:mb-6 text-xs sm:text-sm font-medium px-4 sm:px-0">TRUSTED BY THOUSANDS OF USERS WORLDWIDE</p>
-              <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 items-center px-4 sm:px-0">
-                <div className="flex items-center justify-center sm:justify-start">
-                  <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-2 rounded-full">
-                    <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+            {/* Trust Indicators */}
+            <div className="pt-8 sm:pt-12 border-t border-pink-100 dark:border-pink-900/50">
+              <p className="text-muted-foreground mb-6 sm:mb-8 text-sm sm:text-base font-medium">
+                TRUSTED BY THOUSANDS OF CREATORS WORLDWIDE
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 items-center">
+                <motion.div 
+                  className="flex flex-col sm:flex-row items-center justify-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 text-green-600 dark:text-green-400 p-3 rounded-full border border-green-200/50 dark:border-green-800/50">
+                    <Check className="h-4 w-4" />
                   </div>
-                  <span className="ml-2 font-semibold text-xs sm:text-sm">100% Free</span>
-                </div>
-                <div className="flex items-center justify-center sm:justify-start">
-                  <div className="bg-blue-500/10 text-blue-600 dark:text-blue-400 p-2 rounded-full">
-                    <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="font-semibold text-sm sm:text-base">100% Free</span>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex flex-col sm:flex-row items-center justify-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 text-blue-600 dark:text-blue-400 p-3 rounded-full border border-blue-200/50 dark:border-blue-800/50">
+                    <Shield className="h-4 w-4" />
                   </div>
-                  <span className="ml-2 font-semibold text-xs sm:text-sm">Privacy First</span>
-                </div>
-                <div className="flex items-center justify-center sm:justify-start">
-                  <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-2 rounded-full">
-                    <Award className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="font-semibold text-sm sm:text-base">Privacy First</span>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex flex-col sm:flex-row items-center justify-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 text-purple-600 dark:text-purple-400 p-3 rounded-full border border-purple-200/50 dark:border-purple-800/50">
+                    <Zap className="h-4 w-4" />
                   </div>
-                  <span className="ml-2 font-semibold text-xs sm:text-sm">High Quality</span>
-                </div>
-                <div className="flex items-center justify-center sm:justify-start">
-                  <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-2 rounded-full">
-                    <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="font-semibold text-sm sm:text-base">Lightning Fast</span>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex flex-col sm:flex-row items-center justify-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="bg-gradient-to-br from-orange-500/10 to-pink-500/10 text-orange-600 dark:text-orange-400 p-3 rounded-full border border-orange-200/50 dark:border-orange-800/50">
+                    <Award className="h-4 w-4" />
                   </div>
-                  <span className="ml-2 font-semibold text-xs sm:text-sm">Lightning Fast</span>
-                </div>
+                  <span className="font-semibold text-sm sm:text-base">Pro Quality</span>
+                </motion.div>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
       
-      {/* Tools Section with color cards */}
-      <section className="w-full mb-20 sm:mb-24 md:mb-32">
-        <div className="container mx-auto px-4 sm:px-6 md:px-8">
+      {/* Tools Section */}
+      <section className="w-full mb-24 sm:mb-28 md:mb-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-16 sm:mb-20"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Powerful Image Tools</h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4 sm:px-0">
-              Everything you need to optimize and transform your images in one place
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8">
+              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                Sweet Image Tools
+              </span>
+            </h2>
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+              Transform your images with our delightfully simple tools – each one crafted for perfection
             </p>
           </motion.div>
           
@@ -214,79 +349,156 @@ export default function HomeContent() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
           >
+            {/* Image Compression Tool */}
             <Link href="/image/compress" className="group">
               <motion.div variants={item}>
-                <div className="h-full rounded-xl border-2 border-transparent bg-gradient-to-b from-purple-500/10 via-purple-500/5 to-transparent p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-500/20 hover:-translate-y-1">
-                  <div className="mb-4 sm:mb-5 inline-flex p-2.5 sm:p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                    <Image size={20} className="sm:w-6 sm:h-6" />
+                <div className="relative h-full rounded-2xl border-2 border-transparent bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 dark:from-pink-950/30 dark:via-rose-950/30 dark:to-pink-900/30 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-pink-500/20 hover:border-pink-300/50 hover:-translate-y-2 hover:scale-105 overflow-hidden">
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  {/* Icon */}
+                  <div className="relative mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-lg group-hover:shadow-xl group-hover:shadow-pink-500/30 transition-all duration-300">
+                    <Image size={28} />
+                    <motion.div 
+                      className="absolute -top-1 -right-1 text-yellow-300"
+                      animate={{ 
+                        scale: [0, 1, 0],
+                        rotate: [0, 180, 360]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        ease: "easeInOut" 
+                      }}
+                    >
+                      ✨
+                    </motion.div>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    Image Compression
+                  
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                    Compress
                   </h3>
-                  <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
-                    Compress JPG, PNG, SVG, and GIFs while maintaining quality. Save bandwidth and storage space.
+                  <p className="text-muted-foreground mb-6 text-sm sm:text-base leading-relaxed">
+                    Reduce file sizes without compromising quality. Perfect for web optimization and faster loading.
                   </p>
-                  <div className="flex items-center font-medium text-xs sm:text-sm text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Try it now <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 ml-1" />
+                  <div className="flex items-center font-semibold text-sm text-pink-600 dark:text-pink-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    Try it now <ArrowRight size={16} className="ml-2" />
                   </div>
                 </div>
               </motion.div>
             </Link>
 
+            {/* Image Resize Tool */}
             <Link href="/image/resize" className="group">
               <motion.div variants={item}>
-                <div className="h-full rounded-xl border-2 border-transparent bg-gradient-to-b from-blue-500/10 via-blue-500/5 to-transparent p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-500/20 hover:-translate-y-1">
-                  <div className="mb-4 sm:mb-5 inline-flex p-2.5 sm:p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                    <ZoomIn size={20} className="sm:w-6 sm:h-6" />
+                <div className="relative h-full rounded-2xl border-2 border-transparent bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-purple-950/30 dark:via-violet-950/30 dark:to-purple-900/30 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:border-purple-300/50 hover:-translate-y-2 hover:scale-105 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-500 text-white shadow-lg group-hover:shadow-xl group-hover:shadow-purple-500/30 transition-all duration-300">
+                    <ZoomIn size={28} />
+                    <motion.div 
+                      className="absolute -top-1 -right-1 text-pink-300"
+                      animate={{ 
+                        scale: [0, 1, 0],
+                        rotate: [0, -180, -360]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: 0.5
+                      }}
+                    >
+                      💫
+                    </motion.div>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    Image Resize
+                  
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                    Resize
                   </h3>
-                  <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
-                    Resize your images by dimensions or percentage. Perfect for social media, websites, and print.
+                  <p className="text-muted-foreground mb-6 text-sm sm:text-base leading-relaxed">
+                    Scale images to any dimension or percentage. Ideal for social media, websites, and presentations.
                   </p>
-                  <div className="flex items-center font-medium text-xs sm:text-sm text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Try it now <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 ml-1" />
+                  <div className="flex items-center font-semibold text-sm text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    Resize now <ArrowRight size={16} className="ml-2" />
                   </div>
                 </div>
               </motion.div>
             </Link>
 
-            <Link href="/image/crop" className="group">
-              <motion.div variants={item}>
-                <div className="h-full rounded-xl border-2 border-transparent bg-gradient-to-b from-green-500/10 via-green-500/5 to-transparent p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10 hover:border-green-500/20 hover:-translate-y-1">
-                  <div className="mb-4 sm:mb-5 inline-flex p-2.5 sm:p-3 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400">
-                    <Crop size={20} className="sm:w-6 sm:h-6" />
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                    Image Cropping
-                  </h3>
-                  <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
-                    Crop images with precision to exact dimensions or aspect ratios. Focus on what matters.
-                  </p>
-                  <div className="flex items-center font-medium text-xs sm:text-sm text-green-600 dark:text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Try it now <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 ml-1" />
-                  </div>
-                </div>
-              </motion.div>
-            </Link>
-
+            {/* Image Convert Tool */}
             <Link href="/image/convert" className="group">
               <motion.div variants={item}>
-                <div className="h-full rounded-xl border-2 border-transparent bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-500/20 hover:-translate-y-1">
-                  <div className="mb-4 sm:mb-5 inline-flex p-2.5 sm:p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                    <RefreshCw size={20} className="sm:w-6 sm:h-6" />
+                <div className="relative h-full rounded-2xl border-2 border-transparent bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 dark:from-orange-950/30 dark:via-amber-950/30 dark:to-orange-900/30 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/20 hover:border-orange-300/50 hover:-translate-y-2 hover:scale-105 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg group-hover:shadow-xl group-hover:shadow-orange-500/30 transition-all duration-300">
+                    <RefreshCw size={28} />
+                    <motion.div 
+                      className="absolute -top-1 -right-1 text-purple-300"
+                      animate={{ 
+                        scale: [0, 1, 0],
+                        rotate: [0, 180, 360]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: 1
+                      }}
+                    >
+                      ⭐
+                    </motion.div>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                    Format Conversion
+                  
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                    Convert
                   </h3>
-                  <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
-                    Convert between PNG, JPG, WEBP, and more. Choose the best format for your needs.
+                  <p className="text-muted-foreground mb-6 text-sm sm:text-base leading-relaxed">
+                    Transform between formats like JPG, PNG, WebP, and more. Optimize for any platform or use case.
                   </p>
-                  <div className="flex items-center font-medium text-xs sm:text-sm text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Try it now <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 ml-1" />
+                  <div className="flex items-center font-semibold text-sm text-orange-600 dark:text-orange-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    Convert now <ArrowRight size={16} className="ml-2" />
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* Image Crop Tool */}
+            <Link href="/image/crop" className="group">
+              <motion.div variants={item}>
+                <div className="relative h-full rounded-2xl border-2 border-transparent bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-emerald-900/30 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/20 hover:border-emerald-300/50 hover:-translate-y-2 hover:scale-105 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg group-hover:shadow-xl group-hover:shadow-emerald-500/30 transition-all duration-300">
+                    <Crop size={28} />
+                    <motion.div 
+                      className="absolute -top-1 -right-1 text-yellow-300"
+                      animate={{ 
+                        scale: [0, 1, 0],
+                        rotate: [0, -180, -360]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: 1.5
+                      }}
+                    >
+                      ✨
+                    </motion.div>
+                  </div>
+                  
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                    Crop
+                  </h3>
+                  <p className="text-muted-foreground mb-6 text-sm sm:text-base leading-relaxed">
+                    Trim and focus on what matters. Precise cropping tools for perfect composition every time.
+                  </p>
+                  <div className="flex items-center font-semibold text-sm text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    Crop now <ArrowRight size={16} className="ml-2" />
                   </div>
                 </div>
               </motion.div>
@@ -294,157 +506,288 @@ export default function HomeContent() {
           </motion.div>
         </div>
       </section>
-      
-      {/* How it works section */}
-      <section className="w-full py-20 sm:py-24 md:py-32 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6 md:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16 md:mb-20">
-            <Badge variant="outline" className="mb-4 px-3 py-1.5 text-xs font-medium bg-primary/5 border-primary/20">
-              How It Works
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Simple Process, Powerful Results</h2>
-            <p className="text-lg text-muted-foreground">
-              Our tools work directly in your browser. No account needed, no data harvesting - just powerful functionality without the hassle.
+
+      {/* Why Choose Section */}
+      <section className="w-full mb-24 sm:mb-28 md:mb-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-center mb-16 sm:mb-20"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8">
+              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                Why Choose ToolsCandy?
+              </span>
+            </h2>
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+              We make image editing as sweet and simple as candy
             </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 sm:gap-12">
-            <div className="bg-background rounded-xl p-6 shadow-sm border border-muted">
-              <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mb-6">
-                <span className="text-2xl font-bold">1</span>
+          </motion.div>
+
+          <motion.div 
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10"
+          >
+            <motion.div variants={item} className="text-center group">
+              <div className="mb-6 mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-lg group-hover:shadow-xl group-hover:shadow-pink-500/30 transition-all duration-300 group-hover:scale-110">
+                <Globe size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Upload Your Image</h3>
-              <p className="text-muted-foreground mb-4">
-                Drag & drop your files directly into the browser or use the file picker. Your files never leave your device.
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                Browser-Based
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                No downloads or installations required. Works directly in your browser with complete privacy protection.
               </p>
-            </div>
-            
-            <div className="bg-background rounded-xl p-6 shadow-sm border border-muted">
-              <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mb-6">
-                <span className="text-2xl font-bold">2</span>
+            </motion.div>
+
+            <motion.div variants={item} className="text-center group">
+              <div className="mb-6 mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center text-white shadow-lg group-hover:shadow-xl group-hover:shadow-purple-500/30 transition-all duration-300 group-hover:scale-110">
+                <Zap size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Customize Settings</h3>
-              <p className="text-muted-foreground mb-4">
-                Adjust the quality, resize dimensions, format options, or other settings specific to your chosen tool.
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                Lightning Speed
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Optimized processing algorithms ensure your images are ready in seconds, not minutes.
               </p>
-            </div>
-            
-            <div className="bg-background rounded-xl p-6 shadow-sm border border-muted">
-              <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mb-6">
-                <span className="text-2xl font-bold">3</span>
+            </motion.div>
+
+            <motion.div variants={item} className="text-center group">
+              <div className="mb-6 mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-lg group-hover:shadow-xl group-hover:shadow-orange-500/30 transition-all duration-300 group-hover:scale-110">
+                <Users size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Download Result</h3>
-              <p className="text-muted-foreground mb-4">
-                Process your image and download the result directly to your device. Then use it however you need.
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                User-Friendly
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Intuitive interface designed for everyone – from beginners to professionals.
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
-      
-      {/* Latest Blog Posts */}
-      <section className="w-full py-20">
-        <div className="container mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-12">
-            <div>
-              <Badge variant="outline" className="mb-4 px-3 py-1.5 text-xs font-medium bg-primary/5 border-primary/20">
-                Resources
-              </Badge>
-              <h2 className="text-3xl font-bold">Latest From the Blog</h2>
-            </div>
-            <Link href="/blog" className="flex items-center gap-2 text-primary hover:underline">
-              View all posts <ArrowUpRight size={14} />
-            </Link>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {loading ? (
-              // Show skeletons while loading
-              Array(3).fill(0).map((_, index) => (
-                <div key={`skeleton-${index}`} className="flex flex-col bg-card rounded-xl overflow-hidden border shadow-sm">
-                  <div className="bg-muted h-48 animate-pulse"></div>
-                  <div className="p-6 space-y-4">
-                    <div className="h-4 w-1/4 bg-muted rounded animate-pulse"></div>
-                    <div className="h-6 bg-muted rounded animate-pulse"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-muted rounded animate-pulse"></div>
-                      <div className="h-4 bg-muted rounded animate-pulse"></div>
-                    </div>
-                    <div className="flex items-center justify-between pt-4">
-                      <div className="flex items-center space-x-2">
-                        <Skeleton className="w-8 h-8 rounded-full" />
-                        <Skeleton className="w-20 h-4" />
-                      </div>
-                      <Skeleton className="w-16 h-4" />
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : latestPosts.length > 0 ? (
-              // Show actual posts if available
-              latestPosts.map((post) => (
-                <Link href={`/blog/${post.slug || post._id}`} key={post._id} className="group">
-                  <div className="flex flex-col h-full bg-card rounded-xl overflow-hidden border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                    <div className="h-48 overflow-hidden bg-muted">
-                      {post.featuredImage ? (
-                        <img 
-                          src={getProxiedFeaturedImage(post.featuredImage)}
-                          alt={post.title}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 ease-in-out"
-                          loading="lazy"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder.jpg'
-                          }}
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-muted">
-                          <FileText className="h-12 w-12 text-muted-foreground opacity-20" />
+
+      {/* Latest Blog Posts Section */}
+      {latestPosts.length > 0 && (
+        <section className="w-full mb-24 sm:mb-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-center mb-16 sm:mb-20"
+            >
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8">
+                <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                  Latest Sweet Tips
+                </span>
+              </h2>
+              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+                Fresh tutorials and insights to sweeten your creative workflow
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {latestPosts.map((post, index) => (
+                <motion.div key={post._id} variants={item}>
+                  <Link href={`/blog/${post.slug}`}>
+                    <div className="group h-full rounded-2xl border-2 border-transparent bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/10 hover:border-purple-300/30 hover:-translate-y-2">
+                      {post.featuredImage && (
+                        <div className="aspect-video overflow-hidden">
+                          <img
+                            src={getProxiedFeaturedImage(post.featuredImage)}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
                         </div>
                       )}
-                    </div>
-                    <div className="p-6 flex flex-col flex-1">
-                      <div>
-                        <span className="text-xs font-medium text-primary bg-primary/10 rounded-full px-2.5 py-0.5 mb-3 inline-block">
-                          {post.category}
-                        </span>
-                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                          {post.title}
-                        </h3>
-                        <p className="text-muted-foreground mb-4 text-sm line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t">
-                        <div className="flex items-center space-x-2">
-                          <Avatar className="h-7 w-7">
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                      
+                      <div className="p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-xs font-medium bg-gradient-to-br from-pink-500 to-purple-500 text-white">
                               {getAuthorInitials(post.author)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-xs">{getAuthorName(post.author)}</span>
+                          <div className="text-sm text-muted-foreground">
+                            <div className="font-medium">{getAuthorName(post.author)}</div>
+                            <div>{new Date(post.date).toLocaleDateString()}</div>
+                          </div>
                         </div>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <CalendarIcon className="mr-1 h-3 w-3" />
-                          {new Date(post.date).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                        
+                        <h3 className="text-xl font-bold mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+                        
+                        <p className="text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
+                          {post.excerpt}
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-2">
+                            {post.tags.slice(0, 2).map((tag) => (
+                              <Badge 
+                                key={tag} 
+                                variant="secondary" 
+                                className="text-xs bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 border-0"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <div className="flex items-center text-sm text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                            Read more <ArrowUpRight size={14} className="ml-1" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              // Fallback when no posts are available
-              <div className="col-span-3 py-12 text-center">
-                <p className="text-muted-foreground">No blog posts available at the moment.</p>
-                <Button variant="outline" className="mt-4" asChild>
-                  <Link href="/blog">Check blog section</Link>
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-center mt-12"
+            >
+              <Link href="/blog">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="rounded-full px-8 py-4 border-2 border-pink-200 dark:border-pink-800 hover:border-pink-300 dark:hover:border-pink-700 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm hover:bg-pink-50 dark:hover:bg-pink-950/50 transition-all duration-300"
+                >
+                  <FileText className="h-5 w-5 mr-2" />
+                  View All Articles
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
-              </div>
-            )}
+              </Link>
+            </motion.div>
           </div>
+        </section>
+      )}
+
+      {/* Loading state for blog posts */}
+      {loading && (
+        <section className="w-full mb-24 sm:mb-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                  Latest Sweet Tips
+                </span>
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-2xl border bg-card overflow-hidden">
+                  <Skeleton className="aspect-video w-full" />
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <div className="space-y-1">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section */}
+      <section className="w-full mb-16 sm:mb-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6 }}
+            className="relative rounded-3xl bg-gradient-to-br from-pink-500 via-purple-500 to-violet-500 p-12 sm:p-16 text-center text-white overflow-hidden"
+          >
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50"></div>
+            <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white/10 blur-xl"></div>
+            <div className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-white/5 blur-2xl"></div>
+            
+            {/* Floating Sparkles */}
+            <motion.div 
+              className="absolute top-8 right-20 text-2xl"
+              animate={{ 
+                y: [-10, 10, -10],
+                rotate: [0, 180, 360]
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+            >
+              ✨
+            </motion.div>
+            <motion.div 
+              className="absolute bottom-8 left-20 text-xl"
+              animate={{ 
+                y: [10, -10, 10],
+                rotate: [0, -180, -360]
+              }}
+              transition={{ 
+                duration: 5, 
+                repeat: Infinity, 
+                ease: "easeInOut",
+                delay: 1
+              }}
+            >
+              🍭
+            </motion.div>
+            
+            <div className="relative z-10">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
+                Ready to Sweeten Your Workflow?
+              </h2>
+              <p className="text-lg sm:text-xl md:text-2xl opacity-90 mb-8 max-w-3xl mx-auto">
+                Join thousands of creators who trust ToolsCandy for their image editing needs
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link href="/image/compress">
+                  <Button 
+                    size="lg" 
+                    className="w-full sm:w-auto rounded-full px-8 py-4 bg-white text-purple-600 hover:bg-gray-100 shadow-xl flex items-center justify-center gap-3 h-14 sm:h-16 text-base sm:text-lg font-semibold transition-all duration-300 hover:scale-105"
+                  >
+                    <Download className="h-5 w-5" />
+                    Start Now - It's Free!
+                  </Button>
+                </Link>
+                <Link href="/blog">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full sm:w-auto rounded-full px-8 py-4 border-2 border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm hover:bg-white/20 h-14 sm:h-16 text-base sm:text-lg font-semibold transition-all duration-300"
+                  >
+                    Learn More
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
