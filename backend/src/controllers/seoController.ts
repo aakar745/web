@@ -32,6 +32,67 @@ export const getPageSeo = asyncHandler(async (req: Request, res: Response) => {
     const isHomePage = pagePath === 'home';
     const pathToFind = isHomePage ? '/' : decodeURIComponent(pagePath);
     
+    // Check if this is a blog post request
+    const blogPostMatch = pathToFind.match(/^blog\/(.+)$/);
+    
+    if (blogPostMatch) {
+      try {
+        // This is a blog post request, fetch the blog data for SEO
+        const blogId = blogPostMatch[1];
+        
+        // Import Blog model properly
+        const mongoose = require('mongoose');
+        const Blog = mongoose.model('Blog');
+        
+        logger.info(`Looking up blog SEO data for: ${blogId}`);
+        
+        // Try to find by slug first (if it's not a MongoDB ID)
+        const isMongoId = /^[0-9a-fA-F]{24}$/.test(blogId);
+        
+        let blog;
+        if (!isMongoId) {
+          // Try to find by slug
+          blog = await Blog.findOne({ slug: blogId });
+        }
+        
+        // If not found by slug or if it's a MongoDB ID, try by ID
+        if (!blog && isMongoId) {
+          blog = await Blog.findById(blogId);
+        }
+        
+        if (blog) {
+          logger.info(`Found blog post for SEO: ${blog.title} (ID: ${blog._id})`);
+          logger.debug(`Blog SEO data: title=${blog.metaTitle}, desc=${blog.metaDescription?.substring(0, 30)}...`);
+          
+          // Return blog post SEO data - prioritize the admin-set fields
+          return res.status(200).json({
+            status: 'success',
+            data: {
+              metaTitle: blog.metaTitle || `${blog.title} | Web Tools Blog`,
+              metaDescription: blog.metaDescription || blog.excerpt,
+              metaKeywords: blog.metaKeywords || blog.tags || [],
+              canonicalUrl: blog.canonicalUrl || `https://toolscandy.com/blog/${blog.slug}`,
+              ogImage: blog.ogImage || blog.featuredImage || '',
+              ogType: 'article',
+              twitterCard: 'summary_large_image',
+              // Include article-specific metadata
+              articlePublishedTime: blog.date,
+              articleModifiedTime: blog.updatedAt,
+              articleAuthor: typeof blog.author === 'string' ? blog.author : blog.author?.name || 'Web Tools Team',
+              articleSection: blog.category,
+              articleTags: blog.tags
+            }
+          });
+        } else {
+          logger.warn(`Blog post not found for SEO: ${blogId}`);
+        }
+      } catch (error) {
+        logger.error('Error fetching blog post for SEO:', error);
+        // Continue to normal page SEO lookup if blog fetch fails
+      }
+    }
+    
+    // Standard page SEO lookup
     // First try with the exact path as provided
     let pageSeo = await PageSeo.findOne({ 
       pagePath: pathToFind, 

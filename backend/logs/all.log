@@ -1,0 +1,58 @@
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:22:27:2227"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:23:02:232"}
+{"level":"error","message":"Error fetching blog post for SEO: Blog.findOne is not a function","stack":"TypeError: Blog.findOne is not a function\n    at E:\\Project\\web-tools\\backend\\src\\controllers\\seoController.ts:50:29\n    at E:\\Project\\web-tools\\backend\\src\\utils\\asyncHandler.ts:12:21\n    at Layer.handle [as handle_request] (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","timestamp":"2025-06-05 12:23:45:2345"}
+{"level":"error","message":"Error fetching blog post for SEO: Blog.findOne is not a function","stack":"TypeError: Blog.findOne is not a function\n    at E:\\Project\\web-tools\\backend\\src\\controllers\\seoController.ts:50:29\n    at E:\\Project\\web-tools\\backend\\src\\utils\\asyncHandler.ts:12:21\n    at Layer.handle [as handle_request] (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","timestamp":"2025-06-05 12:23:54:2354"}
+{"level":"error","message":"Error fetching blog post for SEO: Blog.findOne is not a function","stack":"TypeError: Blog.findOne is not a function\n    at E:\\Project\\web-tools\\backend\\src\\controllers\\seoController.ts:50:29\n    at E:\\Project\\web-tools\\backend\\src\\utils\\asyncHandler.ts:12:21\n    at Layer.handle [as handle_request] (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (E:\\Project\\web-tools\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","timestamp":"2025-06-05 12:24:09:249"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:25:48:2548"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f","timestamp":"2025-06-05 12:26:01:261"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:26:01:261"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:26:01:261"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-05 12:26:57:2657"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f","timestamp":"2025-06-05 12:27:09:279"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:27:09:279"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:27:09:279"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f","timestamp":"2025-06-05 12:28:12:2812"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-05 12:28:12:2812"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-05 12:28:12:2812"}

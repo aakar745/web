@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getProxiedImageUrl } from '@/lib/imageProxy'
 import { BlogPostClient } from './BlogPostClient'
+import { getServerSideMetadata } from '@/lib/seoUtils'
 
 // Server-side blog data fetching
 async function getBlogPost(id: string) {
@@ -94,72 +95,7 @@ async function getBlogPost(id: string) {
 // Generate dynamic metadata for SEO (this appears in View Page Source)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const post = await getBlogPost(id)
-  
-  if (!post) {
-    return {
-      title: 'Post Not Found | Web Tools Blog',
-      description: 'The blog post you are looking for could not be found.',
-    }
-  }
-
-  // Use proxied image URLs for public meta tags
-  const ogImageUrl = post.ogImage 
-    ? getProxiedImageUrl(post.ogImage) 
-    : post.featuredImage 
-      ? getProxiedImageUrl(post.featuredImage)
-      : null
-
-  const canonicalUrl = post.canonicalUrl || (post.slug ? `https://toolscandy.com/blog/${post.slug}` : undefined)
-
-  return {
-    title: post.metaTitle || `${post.title} | Web Tools Blog`,
-    description: post.metaDescription || post.excerpt,
-    keywords: post.metaKeywords ? post.metaKeywords.join(', ') : post.tags.join(', '),
-    authors: [{ name: typeof post.author === 'string' ? post.author : post.author?.name || 'Web Tools Team' }],
-    category: post.category,
-    
-    // Open Graph tags
-    openGraph: {
-      title: post.metaTitle || post.title,
-      description: post.metaDescription || post.excerpt,
-      type: 'article',
-      url: canonicalUrl,
-      images: ogImageUrl ? [{
-        url: ogImageUrl,
-        width: 1200,
-        height: 630,
-        alt: post.title,
-      }] : [],
-      publishedTime: post.date,
-      modifiedTime: post.updatedAt,
-      authors: [typeof post.author === 'string' ? post.author : post.author?.name || 'Web Tools Team'],
-      section: post.category,
-      tags: post.tags,
-    },
-    
-    // Twitter Card tags
-    twitter: {
-      card: 'summary_large_image',
-      title: post.metaTitle || post.title,
-      description: post.metaDescription || post.excerpt,
-      images: ogImageUrl ? [ogImageUrl] : [],
-    },
-    
-    // Additional meta tags
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    
-    // Article-specific meta
-    other: {
-      'article:published_time': post.date,
-      'article:modified_time': post.updatedAt,
-      'article:author': typeof post.author === 'string' ? post.author : post.author?.name || 'Web Tools Team',
-      'article:section': post.category,
-      'article:tag': post.tags.join(', '),
-    },
-  }
+  return getServerSideMetadata(`/blog/${id}`)
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ id: string }> }) {

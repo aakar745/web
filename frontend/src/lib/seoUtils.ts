@@ -8,6 +8,12 @@ interface SeoData {
   ogImage?: string
   ogType: string
   twitterCard: string
+  // Blog-specific fields
+  articlePublishedTime?: string
+  articleModifiedTime?: string
+  articleAuthor?: string
+  articleSection?: string
+  articleTags?: string[]
 }
 
 // Define valid OpenGraph types
@@ -114,6 +120,11 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
         url: seoData.canonicalUrl || undefined,
         images: seoData.ogImage ? [{ url: seoData.ogImage }] : undefined,
         type: getValidOgType(seoData.ogType),
+        ...(seoData.articlePublishedTime ? { publishedTime: seoData.articlePublishedTime } : {}),
+        ...(seoData.articleModifiedTime ? { modifiedTime: seoData.articleModifiedTime } : {}),
+        ...(seoData.articleAuthor ? { authors: [seoData.articleAuthor] } : {}),
+        ...(seoData.articleSection ? { section: seoData.articleSection } : {}),
+        ...(seoData.articleTags ? { tags: seoData.articleTags } : {})
       },
       twitter: {
         card: seoData.twitterCard as "summary" | "summary_large_image" | "app" | "player",
@@ -123,7 +134,17 @@ export async function getServerSideMetadata(pagePath: string): Promise<Metadata>
       },
       alternates: {
         canonical: seoData.canonicalUrl || undefined,
-      }
+      },
+      // Add article metadata
+      ...(seoData.articlePublishedTime || seoData.articleModifiedTime || seoData.articleAuthor || seoData.articleSection || seoData.articleTags ? {
+        other: {
+          ...(seoData.articlePublishedTime ? { 'article:published_time': seoData.articlePublishedTime } : {}),
+          ...(seoData.articleModifiedTime ? { 'article:modified_time': seoData.articleModifiedTime } : {}),
+          ...(seoData.articleAuthor ? { 'article:author': seoData.articleAuthor } : {}),
+          ...(seoData.articleSection ? { 'article:section': seoData.articleSection } : {}),
+          ...(seoData.articleTags ? { 'article:tag': seoData.articleTags.join(', ') } : {})
+        }
+      } : {})
     }
   } catch (error) {
     // Log detailed error information
@@ -275,6 +296,27 @@ export function updatePageSeo(seoData: SeoData) {
     
     if (seoData.ogImage) {
       updateMetaProperty('twitter:image', seoData.ogImage)
+    }
+    
+    // Handle blog-specific article metadata
+    if (seoData.articlePublishedTime) {
+      updateMetaProperty('article:published_time', seoData.articlePublishedTime)
+    }
+    
+    if (seoData.articleModifiedTime) {
+      updateMetaProperty('article:modified_time', seoData.articleModifiedTime)
+    }
+    
+    if (seoData.articleAuthor) {
+      updateMetaProperty('article:author', seoData.articleAuthor)
+    }
+    
+    if (seoData.articleSection) {
+      updateMetaProperty('article:section', seoData.articleSection)
+    }
+    
+    if (seoData.articleTags && seoData.articleTags.length > 0) {
+      updateMetaProperty('article:tag', seoData.articleTags.join(', '))
     }
     
     console.log('✅ Page SEO updated successfully')
