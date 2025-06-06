@@ -48,6 +48,11 @@ import { WhatsAppIcon } from './WhatsAppIcon'
 import { useBlogPostData } from './useBlogPostData'
 import { useComments } from './useComments'
 import { useScrollTracking } from './useScrollTracking'
+// Import editor styles for proper content rendering
+import { EditorStyles } from '@/components/editor/styles/EditorStyles'
+// Import syntax highlighting
+import { common, createLowlight } from 'lowlight'
+import { toHtml } from 'hast-util-to-html'
 
 interface BlogPostClientProps {
   post: BlogPost
@@ -101,6 +106,195 @@ export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
 
   // Use the post from the hook if available, fallback to initial post
   const currentPost = post || initialPost
+
+  // Add code block copy functionality and syntax highlighting
+  React.useEffect(() => {
+    // Initialize lowlight with common languages
+    const lowlight = createLowlight(common)
+
+    const addCopyButtonsToCodeBlocks = () => {
+      const codeBlocks = document.querySelectorAll('pre:not([data-copy-processed])')
+      
+      codeBlocks.forEach((pre) => {
+        // Mark as processed to avoid duplicate processing
+        pre.setAttribute('data-copy-processed', 'true')
+
+        // Apply syntax highlighting if lowlight is available
+        const codeElement = pre.querySelector('code')
+        if (codeElement && lowlight) {
+          const language = pre.getAttribute('data-language')
+          if (language && language !== 'text' && language !== '') {
+            try {
+              const originalText = codeElement.textContent || ''
+              const highlighted = lowlight.highlight(language, originalText)
+              const highlightedHtml = toHtml(highlighted)
+              
+              // Create a temporary div to parse the HTML and extract just the content
+              const tempDiv = document.createElement('div')
+              tempDiv.innerHTML = highlightedHtml
+              
+              // Clear the code element and add the highlighted content
+              codeElement.innerHTML = ''
+              while (tempDiv.firstChild) {
+                codeElement.appendChild(tempDiv.firstChild)
+              }
+            } catch (error) {
+              // If highlighting fails, keep the original text
+              console.warn(`Failed to highlight code with language "${language}":`, error)
+            }
+          }
+        }
+        
+        // Create copy button container
+        const copyButtonContainer = document.createElement('div')
+        copyButtonContainer.className = 'absolute top-3 right-3 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300 ease-in-out z-20'
+        
+        // Create copy button
+        const copyButton = document.createElement('button')
+        copyButton.className = 'flex items-center justify-center h-8 w-8 rounded-lg bg-background/80 backdrop-blur-sm border border-border/50 text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border transition-all duration-200 ease-in-out shadow-lg hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
+        copyButton.setAttribute('aria-label', 'Copy code to clipboard')
+        copyButton.setAttribute('title', 'Copy code')
+        
+        // Modern copy icon
+        const copyIcon = `
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+          </svg>
+        `
+        
+        // Success checkmark icon
+        const copiedIcon = `
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+        `
+        
+        copyButton.innerHTML = copyIcon
+        
+        // Add click handler
+        copyButton.addEventListener('click', async (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          
+          const code = pre.querySelector('code')
+          if (code) {
+            try {
+              // Add loading state
+              copyButton.disabled = true
+              copyButton.style.transform = 'scale(0.95)'
+              
+              await navigator.clipboard.writeText(code.textContent || '')
+              
+              // Success state with smooth animation
+              copyButton.innerHTML = copiedIcon
+              copyButton.className = copyButton.className.replace('text-muted-foreground', 'text-green-600')
+              copyButton.setAttribute('aria-label', 'Code copied!')
+              copyButton.setAttribute('title', 'Copied!')
+              copyButton.style.transform = 'scale(1)'
+              
+              toast({
+                title: 'Copied!',
+                description: 'Code block content copied to clipboard.',
+              })
+              
+              // Reset button after 1.5 seconds
+              setTimeout(() => {
+                copyButton.innerHTML = copyIcon
+                copyButton.className = copyButton.className.replace('text-green-600', 'text-muted-foreground')
+                copyButton.setAttribute('aria-label', 'Copy code to clipboard')
+                copyButton.setAttribute('title', 'Copy code')
+                copyButton.disabled = false
+              }, 1500)
+              
+            } catch (err) {
+              // Error state
+              copyButton.innerHTML = `
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="m15 9-6 6"/>
+                  <path d="m9 9 6 6"/>
+                </svg>
+              `
+              copyButton.className = copyButton.className.replace('text-muted-foreground', 'text-red-500')
+              copyButton.style.transform = 'scale(1)'
+              
+              toast({
+                title: 'Copy failed',
+                description: 'Could not copy code to clipboard.',
+                variant: 'destructive',
+              })
+              
+              // Reset after error
+              setTimeout(() => {
+                copyButton.innerHTML = copyIcon
+                copyButton.className = copyButton.className.replace('text-red-500', 'text-muted-foreground')
+                copyButton.disabled = false
+              }, 1500)
+            }
+          }
+        })
+        
+        copyButtonContainer.appendChild(copyButton)
+        
+        // Make pre relative and add group class for hover effects
+        const preElement = pre as HTMLElement
+        preElement.style.position = 'relative'
+        preElement.classList.add('group')
+        
+        // Add the copy button to the pre element
+        preElement.appendChild(copyButtonContainer)
+      })
+    }
+
+    // Initial processing with small delay to ensure DOM is ready
+    const timeoutId = setTimeout(addCopyButtonsToCodeBlocks, 100)
+    
+    // Create a MutationObserver to handle dynamically added content
+    const observer = new MutationObserver((mutations) => {
+      let shouldProcess = false
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          // Check if any added nodes contain pre elements
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as Element
+              if (element.tagName === 'PRE' || element.querySelector('pre')) {
+                shouldProcess = true
+              }
+            }
+          })
+        }
+      })
+      
+      if (shouldProcess) {
+        setTimeout(addCopyButtonsToCodeBlocks, 50)
+      }
+    })
+    
+    // Start observing
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+    
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId)
+      observer.disconnect()
+      // Remove all copy buttons and reset pre elements
+      const processedPres = document.querySelectorAll('pre[data-copy-processed]')
+      processedPres.forEach(pre => {
+        pre.removeAttribute('data-copy-processed')
+        pre.classList.remove('group')
+        const copyButton = pre.querySelector('div.absolute')
+        if (copyButton) {
+          copyButton.remove()
+        }
+      })
+    }
+  }, [])
 
   return (
     <>
@@ -331,10 +525,10 @@ export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
         </div>
         
         {/* Main article */}
-        <article ref={articleRef} className="lg:col-span-8 prose prose-lg dark:prose-invert max-w-none">
+        <article ref={articleRef} className="lg:col-span-8 prose prose-lg dark:prose-invert max-w-none prose-table:mx-auto prose-table:border-collapse prose-pre:!bg-transparent prose-pre:!p-0 prose-pre:!border-0 prose-pre:!overflow-visible">
           <div 
             dangerouslySetInnerHTML={{ __html: processContentImages(currentPost.content) }} 
-            className="prose-img:rounded-xl prose-img:shadow-md prose-img:mx-auto prose-headings:scroll-mt-20 prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-p:leading-relaxed prose-headings:leading-tight prose-pre:bg-muted/50 prose-pre:backdrop-blur-sm prose-code:text-sm prose-code:bg-muted/80 prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-l-primary/50 prose-blockquote:bg-muted/30 prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:italic"
+            className="prose-img:rounded-xl prose-img:shadow-md prose-img:mx-auto prose-headings:scroll-mt-20 prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-p:leading-relaxed prose-headings:leading-tight prose-blockquote:border-l-primary/50 prose-blockquote:bg-muted/30 prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:italic prose-code:text-sm prose-code:bg-muted/80 prose-code:rounded prose-code:px-1 prose-code:py-0.5"
           />
           
           {/* Tags below article */}
@@ -857,6 +1051,9 @@ export function BlogPostClient({ post: initialPost }: BlogPostClientProps) {
           </svg>
         </div>
       )}
+
+      {/* Global styles for editor content */}
+      <EditorStyles />
     </>
   )
 } 

@@ -8,6 +8,12 @@ import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableHeader from '@tiptap/extension-table-header'
+import TableCell from '@tiptap/extension-table-cell'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { common, createLowlight } from 'lowlight'
 import { 
   Bold, 
   Italic, 
@@ -26,10 +32,8 @@ import {
   AlignRight, 
   AlignJustify,
   Image as ImageIcon,
-  Trash,
-  MinusCircle,
-  PlusCircle,
-  Columns as ColumnsIcon
+  Columns as ColumnsIcon,
+  ChevronDown
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
@@ -47,9 +51,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
 import { ColumnLayout, ColumnBlock } from './columns'
 import { MediaLibrary } from '@/components/media/MediaLibrary'
+
+// Import our modular components
+import { useAutoSave } from './hooks/useAutoSave'
+import { TableControls } from './controls/TableControls'
+import { CodeBlockControls } from './controls/CodeBlockControls'
+import { ImageControls } from './controls/ImageControls'
+import { AutoSaveStatus } from './controls/AutoSaveStatus'
+import { EditorStyles } from './styles/EditorStyles'
+import { RichTextEditorProps, SelectedImage } from './types/editor'
+
+// Create lowlight instance with common languages
+const lowlight = createLowlight(common)
 
 // Extended Image extension with custom attributes for alignment
 const CustomImage = Image.extend({
@@ -72,20 +87,18 @@ const CustomImage = Image.extend({
   },
 })
 
-interface RichTextEditorProps {
-  value: string
-  onChange: (content: string) => void
-  placeholder?: string
-}
-
-export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ 
+  value, 
+  onChange, 
+  placeholder,
+  enableAutoSave = false,
+  autoSaveInterval = 30000,
+  onAutoSave,
+  autoSaveKey 
+}: RichTextEditorProps) {
   const [linkUrl, setLinkUrl] = useState<string>('')
   const [imageUrl, setImageUrl] = useState<string>('')
-  const [selectedImage, setSelectedImage] = useState<{
-    node: any;
-    pos: number;
-    getPos: () => number;
-  } | null>(null)
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null)
   
   const editor = useEditor({
     extensions: [
@@ -111,6 +124,31 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         types: ['heading', 'paragraph'],
       }),
       Underline,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      CodeBlockLowlight.extend({
+        renderHTML({ node, HTMLAttributes }) {
+          const language = node.attrs.language || 'text'
+          return [
+            'pre',
+            {
+              ...HTMLAttributes,
+              'data-language': language,
+              class: `${HTMLAttributes.class || 'hljs'}`.trim(),
+            },
+            ['code', { class: `language-${language}` }, 0]
+          ]
+        },
+      }).configure({
+        lowlight: lowlight,
+        HTMLAttributes: {
+          class: 'hljs',
+        },
+      }),
       ColumnLayout,
       ColumnBlock,
     ],
@@ -158,9 +196,14 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     },
     onBlur: () => {
       // Keep selected image state to allow interaction with controls
-      // setTimeout(() => setSelectedImage(null), 250)
     }
   })
+
+  // Auto-save functionality
+  const { autoSaveStatus, lastSaved, manualSave, loadAutoSavedContent } = useAutoSave(
+    editor, 
+    { enableAutoSave, autoSaveInterval, onAutoSave, autoSaveKey }
+  )
 
   // Sync outside value to editor
   useEffect(() => {
@@ -168,6 +211,11 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       editor.commands.setContent(value)
     }
   }, [editor, value])
+
+  // Load auto-saved content on mount
+  useEffect(() => {
+    loadAutoSavedContent(onChange, value)
+  }, [loadAutoSavedContent, onChange, value])
 
   const addImage = useCallback(() => {
     if (!imageUrl || !editor) return
@@ -290,91 +338,24 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     }
   }
 
-  // Image control functions
-  const deleteImage = useCallback(() => {
-    if (!editor || !selectedImage) return
-    
-    const pos = selectedImage.getPos()
-    editor.chain().focus().deleteRange({ from: pos, to: pos + 1 }).run()
-    setSelectedImage(null)
-  }, [editor, selectedImage])
-
-  const alignImageLeft = useCallback(() => {
-    if (!editor || !selectedImage) return
-    
-    editor.chain().focus().updateAttributes('image', { 
-      float: 'left',
-      display: 'block',
-      style: 'float: left; margin-right: 1rem; margin-bottom: 0.5rem;' 
-    }).run()
-  }, [editor, selectedImage])
-
-  const alignImageCenter = useCallback(() => {
-    if (!editor || !selectedImage) return
-    
-    editor.chain().focus().updateAttributes('image', { 
-      float: 'none',
-      display: 'block',
-      style: 'display: block; margin-left: auto; margin-right: auto;' 
-    }).run()
-  }, [editor, selectedImage])
-
-  const alignImageRight = useCallback(() => {
-    if (!editor || !selectedImage) return
-    
-    editor.chain().focus().updateAttributes('image', { 
-      float: 'right',
-      display: 'block',
-      style: 'float: right; margin-left: 1rem; margin-bottom: 0.5rem;' 
-    }).run()
-  }, [editor, selectedImage])
-
-  const increaseImageSize = useCallback(() => {
-    if (!editor || !selectedImage) return
-    
-    const attrs = selectedImage.node.attrs
-    const width = attrs.width ? parseInt(attrs.width) : 300
-    const newWidth = width + 50
-    
-    editor.chain().focus().updateAttributes('image', { 
-      width: newWidth,
-      style: `${attrs.style?.replace(/width:\s*\d+px/, '') || ''}width: ${newWidth}px;` 
-    }).run()
-  }, [editor, selectedImage])
-
-  const decreaseImageSize = useCallback(() => {
-    if (!editor || !selectedImage) return
-    
-    const attrs = selectedImage.node.attrs
-    const width = attrs.width ? parseInt(attrs.width) : 300
-    const newWidth = Math.max(50, width - 50)
-    
-    editor.chain().focus().updateAttributes('image', { 
-      width: newWidth,
-      style: `${attrs.style?.replace(/width:\s*\d+px/, '') || ''}width: ${newWidth}px;` 
-    }).run()
-  }, [editor, selectedImage])
-
-  // Add column layout buttons
+    // Column layout functions
   const addTwoColumnLayout = useCallback(() => {
     if (!editor) return
     editor.chain().focus().insertColumnLayout().run()
   }, [editor])
-
+  
   const addThreeColumnLayout = useCallback(() => {
     if (!editor) return
     editor.chain().focus().insertThreeColumnLayout().run()
   }, [editor])
-
-  const deleteColumnLayout = useCallback(() => {
+  
+  const toggleColumnCount = useCallback(() => {
     if (!editor) return
-    editor.chain().focus().deleteColumnLayout().run()
-    
-    toast({
-      title: 'Column layout deleted',
-      description: 'The column layout has been removed.'
-    })
+    editor.chain().focus().toggleColumnCount().run()
   }, [editor])
+  
+  // Check if cursor is inside a column layout
+  const isInColumnLayout = editor?.isActive('columnLayout') || false
 
   const handleMediaSelect = useCallback((media: any) => {
     if (!editor) return
@@ -656,6 +637,25 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           </PopoverContent>
         </Popover>
         
+        <div className="w-px h-6 bg-border mx-1 self-center" />
+        
+        {/* New modular controls */}
+        <TableControls editor={editor} />
+        
+        <div className="w-px h-6 bg-border mx-1 self-center" />
+        
+        <CodeBlockControls editor={editor} />
+        
+        <div className="w-px h-6 bg-border mx-1 self-center" />
+        
+        {/* Show image controls when an image is selected */}
+        {selectedImage && (
+          <>
+            <div className="w-px h-6 bg-border mx-1 self-center" />
+            <ImageControls editor={editor} selectedImage={selectedImage} />
+          </>
+        )}
+        
         {/* Add a new section for layout controls */}
         <div className="w-full mt-2 pt-2 border-t flex items-center">
           <span className="text-xs text-muted-foreground mr-2">Layout:</span>
@@ -679,34 +679,50 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                   <p className="text-xs text-muted-foreground">Add a multi-column layout to organize your content</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-col h-auto py-4 gap-2"
-                    onClick={addTwoColumnLayout}
-                  >
-                    <div className="flex justify-center w-full space-x-1">
-                      <div className="w-8 h-12 bg-muted/50 rounded"></div>
-                      <div className="w-8 h-12 bg-muted/50 rounded"></div>
-                    </div>
-                    <span className="text-xs">Two Columns</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-col h-auto py-4 gap-2"
-                    onClick={addThreeColumnLayout}
-                  >
-                    <div className="flex justify-center w-full space-x-1">
-                      <div className="w-5 h-12 bg-muted/50 rounded"></div>
-                      <div className="w-5 h-12 bg-muted/50 rounded"></div>
-                      <div className="w-5 h-12 bg-muted/50 rounded"></div>
-                    </div>
-                    <span className="text-xs">Three Columns</span>
-                  </Button>
-                </div>
+                {isInColumnLayout ? (
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full"
+                      onClick={toggleColumnCount}
+                    >
+                      Toggle Column Count
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Switch between 2 and 3 columns for the current layout
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-col h-auto py-4 gap-2"
+                      onClick={addTwoColumnLayout}
+                    >
+                      <div className="flex justify-center w-full space-x-1">
+                        <div className="w-8 h-12 bg-muted/50 rounded"></div>
+                        <div className="w-8 h-12 bg-muted/50 rounded"></div>
+                      </div>
+                      <span className="text-xs">Two Columns</span>
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-col h-auto py-4 gap-2"
+                      onClick={addThreeColumnLayout}
+                    >
+                      <div className="flex justify-center w-full space-x-1">
+                        <div className="w-5 h-12 bg-muted/50 rounded"></div>
+                        <div className="w-5 h-12 bg-muted/50 rounded"></div>
+                        <div className="w-5 h-12 bg-muted/50 rounded"></div>
+                      </div>
+                      <span className="text-xs">Three Columns</span>
+                    </Button>
+                  </div>
+                )}
                 
                 <div className="text-xs p-2 bg-muted/20 rounded border border-muted">
                   <p className="font-medium">How to use columns:</p>
@@ -721,68 +737,6 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
             </PopoverContent>
           </Popover>
         </div>
-        
-        {/* Show image controls when an image is selected */}
-        {selectedImage && (
-          <>
-            <div className="w-px h-6 bg-border mx-1 self-center" />
-            
-            {/* Image control buttons */}
-            <Toggle
-              pressed={false}
-              onPressedChange={deleteImage}
-              aria-label="Delete Image"
-              size="sm"
-            >
-              <Trash className="h-4 w-4" />
-            </Toggle>
-            
-            <Toggle
-              pressed={selectedImage.node.attrs.float === 'left'}
-              onPressedChange={alignImageLeft}
-              aria-label="Align Image Left"
-              size="sm"
-            >
-              <AlignLeft className="h-4 w-4" />
-            </Toggle>
-            
-            <Toggle
-              pressed={selectedImage.node.attrs.float === 'none' && selectedImage.node.attrs.display === 'block'}
-              onPressedChange={alignImageCenter}
-              aria-label="Align Image Center"
-              size="sm"
-            >
-              <AlignCenter className="h-4 w-4" />
-            </Toggle>
-            
-            <Toggle
-              pressed={selectedImage.node.attrs.float === 'right'}
-              onPressedChange={alignImageRight}
-              aria-label="Align Image Right"
-              size="sm"
-            >
-              <AlignRight className="h-4 w-4" />
-            </Toggle>
-            
-            <Toggle
-              pressed={false}
-              onPressedChange={decreaseImageSize}
-              aria-label="Decrease Image Size"
-              size="sm"
-            >
-              <MinusCircle className="h-4 w-4" />
-            </Toggle>
-            
-            <Toggle
-              pressed={false}
-              onPressedChange={increaseImageSize}
-              aria-label="Increase Image Size"
-              size="sm"
-            >
-              <PlusCircle className="h-4 w-4" />
-            </Toggle>
-          </>
-        )}
         
         <div className="w-px h-6 bg-border mx-1 self-center" />
         
@@ -805,6 +759,14 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         >
           <Redo className="h-4 w-4" />
         </Button>
+        
+        {/* Auto-save status */}
+        <AutoSaveStatus 
+          autoSaveStatus={autoSaveStatus}
+          lastSaved={lastSaved}
+          onManualSave={manualSave}
+          enableAutoSave={enableAutoSave}
+        />
       </div>
       
       <div className="relative">
@@ -813,71 +775,8 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           className="prose prose-sm dark:prose-invert max-w-none p-4 min-h-[300px] focus-visible:outline-none"
         />
         
-        {/* Add global CSS for columns and existing image styles */}
-        <style jsx global>{`
-          .ProseMirror {
-            position: relative;
-          }
-          
-          .ProseMirror img {
-            max-width: 100%;
-            height: auto;
-            cursor: pointer;
-            border-radius: 0.5rem;
-          }
-          
-          .ProseMirror img.ProseMirror-selectednode {
-            outline: 2px solid hsl(var(--primary));
-            border-radius: 0.5rem;
-          }
-          
-          /* Column layout styles */
-          .column-layout-container {
-            margin: 2rem 0;
-            min-height: 100px;
-            background-color: hsl(var(--muted)/15%);
-            display: flex !important;
-            flex-direction: row !important;
-          }
-          
-          .column-layout-container > * {
-            flex: 1;
-            min-width: 0;
-          }
-          
-          .column-layout-container::before {
-            content: "Column Layout";
-            display: block;
-            position: absolute;
-            top: -2.5rem;
-            left: 0;
-            font-size: 0.75rem;
-            color: hsl(var(--muted-foreground));
-            background: hsl(var(--background));
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem 0.25rem 0 0;
-            border: 1px solid hsl(var(--border));
-            border-bottom: none;
-          }
-          
-          .column-block-wrapper {
-            padding: 0.5rem;
-            margin-top: 1.5rem;
-            flex: 1;
-            min-width: 0;
-            width: 100%;
-          }
-          
-          .column-block:hover {
-            border-color: hsl(var(--muted-foreground)/40%);
-            background-color: hsl(var(--background));
-          }
-          
-          .ProseMirror-focused .column-block:focus-within {
-            border-color: hsl(var(--primary));
-            border-style: solid;
-          }
-        `}</style>
+        {/* Global CSS styles */}
+        <EditorStyles />
       </div>
     </div>
   )

@@ -353,6 +353,9 @@ function NewBlogPage() {
                     value={formData.content}
                     onChange={handleContentChange}
                     placeholder="Write your blog post content here (supports formatting)"
+                    enableAutoSave={true}
+                    autoSaveKey={`new-blog-${Date.now()}`}
+                    autoSaveInterval={30000}
                   />
                 </div>
                 

@@ -18,6 +18,10 @@ declare module '@tiptap/core' {
        * Delete a column layout
        */
       deleteColumnLayout: () => ReturnType,
+      /**
+       * Convert column layout between 2 and 3 columns
+       */
+      toggleColumnCount: () => ReturnType,
     }
   }
 }
@@ -59,8 +63,8 @@ export const ColumnLayout = Node.create({
         HTMLAttributes,
         {
           'data-type': 'column-layout',
-          class: 'column-layout-container flex gap-4 p-4 my-6 bg-muted/10 rounded-lg border border-muted',
-          style: `display: flex; flex-direction: row;`,
+          class: 'column-layout-container',
+          style: `display: flex; flex-direction: row; gap: 1rem;`,
         },
       ),
       0, // Content placeholder
@@ -133,6 +137,53 @@ export const ColumnLayout = Node.create({
         
         if (foundColumnLayout) {
           return commands.deleteRange({ from: pos, to: pos + $from.node(depth + 1).nodeSize })
+        }
+        
+        return false
+      },
+      
+      toggleColumnCount: () => ({ chain, commands, state }) => {
+        const { selection } = state
+        const { $from } = selection
+        
+        // Find the closest column layout node
+        let depth = $from.depth
+        let foundColumnLayout = false
+        let pos = 0
+        let layoutNode = null
+        
+        // Look through the ancestor nodes to find a columnLayout
+        while (depth > 0 && !foundColumnLayout) {
+          const node = $from.node(depth)
+          if (node.type.name === 'columnLayout') {
+            foundColumnLayout = true
+            pos = $from.before(depth)
+            layoutNode = node
+          }
+          depth--
+        }
+        
+        if (foundColumnLayout && layoutNode) {
+          const currentColumns = layoutNode.attrs.columns || 2
+          const newColumns = currentColumns === 2 ? 3 : 2
+          
+          // Create new content with appropriate number of columns
+          const content = []
+          for (let i = 0; i < newColumns; i++) {
+            content.push({
+              type: 'columnBlock',
+              content: [{ type: 'paragraph' }],
+            })
+          }
+          
+          return chain()
+            .deleteRange({ from: pos, to: pos + layoutNode.nodeSize })
+            .insertContentAt(pos, {
+              type: 'columnLayout',
+              attrs: { columns: newColumns },
+              content: content,
+            })
+            .run()
         }
         
         return false

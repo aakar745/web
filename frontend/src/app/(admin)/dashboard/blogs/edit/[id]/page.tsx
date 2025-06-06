@@ -467,6 +467,9 @@ function EditBlogPage() {
                     value={formData.content}
                     onChange={handleContentChange}
                     placeholder="Write your blog post content here (supports formatting)"
+                    enableAutoSave={true}
+                    autoSaveKey={`edit-blog-${params.id}`}
+                    autoSaveInterval={30000}
                   />
                 </div>
                 
