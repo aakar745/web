@@ -87,6 +87,33 @@ export const getBackupHistory = asyncHandler(async (req: Request, res: Response)
 });
 
 /**
+ * Get restore history
+ */
+export const getRestoreHistory = asyncHandler(async (req: Request, res: Response) => {
+  const { limit = 20 } = req.query;
+
+  try {
+    const restoreService = new RestoreService();
+    const history = await restoreService.getRestoreHistory(Number(limit));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        restores: history,
+        total: history.length
+      }
+    });
+  } catch (error: any) {
+    logger.error('Failed to get restore history:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get restore history',
+      error: error.message
+    });
+  }
+});
+
+/**
  * Get backup by ID
  */
 export const getBackupById = asyncHandler(async (req: Request, res: Response) => {
@@ -231,7 +258,7 @@ export const restoreFromBackup = asyncHandler(async (req: Request, res: Response
     let safetyBackupId: string | null = null;
     if (createSafetyBackup && overwrite) {
       logger.info('Creating safety backup before restore');
-      const collectionsToBackup = collections || [
+      const collectionsToBackup = (collections && collections.length > 0) ? collections : [
         'blogs', 'users', 'comments', 'media', 'systemsettings',
         'scripts', 'pageseo', 'schedulerconfigs'
       ];
@@ -450,21 +477,40 @@ export const cleanupOldBackups = asyncHandler(async (req: Request, res: Response
   const { retentionDays = 30 } = req.body;
 
   try {
+    logger.info('Starting backup cleanup operation', {
+      retentionDays: Number(retentionDays),
+      requestedBy: req.user?.email || 'admin'
+    });
+
     const backupService = new BackupService();
     const result = await backupService.cleanupOldBackups(Number(retentionDays));
 
-    logger.info('Backup cleanup completed', {
-      retentionDays,
+    logger.info('Backup cleanup completed successfully', {
+      retentionDays: Number(retentionDays),
       deletedCount: result.deletedCount,
+      message: result.message,
       cleanedBy: req.user?.email || 'admin'
     });
 
-    res.status(200).json({
+    // Ensure consistent response format
+    const response = {
       status: 'success',
-      data: result
-    });
+      data: {
+        deletedCount: result.deletedCount || 0,
+        message: result.message || `Cleanup completed. ${result.deletedCount || 0} old backups removed.`
+      }
+    };
+
+    res.status(200).json(response);
+    
   } catch (error: any) {
-    logger.error('Backup cleanup failed:', error);
+    logger.error('Backup cleanup failed:', {
+      error: error.message,
+      stack: error.stack,
+      retentionDays: Number(retentionDays),
+      requestedBy: req.user?.email || 'admin'
+    });
+    
     res.status(500).json({
       status: 'error',
       message: 'Backup cleanup failed',

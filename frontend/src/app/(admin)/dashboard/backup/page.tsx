@@ -61,6 +61,43 @@ interface BackupHistory {
   updatedAt: string;
 }
 
+interface RestoreHistory {
+  _id: string;
+  sourceBackupId?: {
+    _id: string;
+    filename: string;
+    originalName: string;
+    type: string;
+  };
+  sourceBackupName?: string;
+  sourceType: 'existing_backup' | 'uploaded_file';
+  uploadedFileName?: string;
+  restoreType: 'full' | 'selective';
+  collectionsRestored: string[];
+  collectionsSkipped: string[];
+  overwriteMode: boolean;
+  safetyBackupId?: {
+    _id: string;
+    filename: string;
+    originalName: string;
+  };
+  totalDocumentsRestored: number;
+  status: 'in_progress' | 'completed' | 'failed' | 'cancelled';
+  startedAt: string;
+  completedAt?: string;
+  restoredBy: string;
+  description?: string;
+  errorMessage?: string;
+  details?: {
+    backupType?: string;
+    backupTimestamp?: string;
+    estimatedSize?: string;
+    errors?: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface BackupStatus {
   recentBackups: BackupHistory[];
   storage: {
@@ -95,6 +132,7 @@ const AVAILABLE_COLLECTIONS = [
 
 function BackupManagement() {
   const [backupHistory, setBackupHistory] = useState<BackupHistory[]>([])
+  const [restoreHistory, setRestoreHistory] = useState<RestoreHistory[]>([])
   const [backupStatus, setBackupStatus] = useState<BackupStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeOperation, setActiveOperation] = useState<string | null>(null)
@@ -130,20 +168,38 @@ function BackupManagement() {
   }
 
   // Fetch backup data
-  const fetchBackupData = async () => {
+  const fetchBackupData = async (forceRefresh = false) => {
     try {
       setLoading(true)
-      const [historyResponse, statusResponse] = await Promise.allSettled([
-        apiRequest<{ status: string; data: { backups: BackupHistory[] } }>('/backup/history', { requireAuth: true }),
-        apiRequest<{ status: string; data: BackupStatus }>('/backup/status', { requireAuth: true })
+      
+      // Add timestamp to prevent caching if force refresh
+      const cacheBuster = forceRefresh ? `?_t=${Date.now()}` : ''
+      
+      const [historyResponse, restoreHistoryResponse, statusResponse] = await Promise.allSettled([
+        apiRequest<{ status: string; data: { backups: BackupHistory[] } }>(`/backup/history${cacheBuster}`, { requireAuth: true }),
+        apiRequest<{ status: string; data: { restores: RestoreHistory[] } }>(`/backup/restore-history${cacheBuster}`, { requireAuth: true }),
+        apiRequest<{ status: string; data: BackupStatus }>(`/backup/status${cacheBuster}`, { requireAuth: true })
       ])
 
-      if (historyResponse.status === 'fulfilled') {
+      if (historyResponse.status === 'fulfilled' && historyResponse.value.status === 'success') {
+        console.log('Backup history fetched:', historyResponse.value.data.backups)
         setBackupHistory(historyResponse.value.data.backups || [])
+      } else if (historyResponse.status === 'rejected') {
+        console.error('Failed to fetch backup history:', historyResponse.reason)
       }
 
-      if (statusResponse.status === 'fulfilled') {
+      if (restoreHistoryResponse.status === 'fulfilled' && restoreHistoryResponse.value.status === 'success') {
+        console.log('Restore history fetched:', restoreHistoryResponse.value.data.restores)
+        setRestoreHistory(restoreHistoryResponse.value.data.restores || [])
+      } else if (restoreHistoryResponse.status === 'rejected') {
+        console.error('Failed to fetch restore history:', restoreHistoryResponse.reason)
+      }
+
+      if (statusResponse.status === 'fulfilled' && statusResponse.value.status === 'success') {
+        console.log('Backup status fetched:', statusResponse.value.data)
         setBackupStatus(statusResponse.value.data)
+      } else if (statusResponse.status === 'rejected') {
+        console.error('Failed to fetch backup status:', statusResponse.reason)
       }
     } catch (error) {
       console.error('Failed to fetch backup data:', error)
@@ -187,7 +243,7 @@ function BackupManagement() {
         })
         
         // Refresh data
-        fetchBackupData()
+        fetchBackupData(true)
       }
     } catch (error) {
       console.error('Backup creation failed:', error)
@@ -216,7 +272,7 @@ function BackupManagement() {
           title: "🗑️ Backup Deleted",
           description: "Backup deleted successfully",
         })
-        fetchBackupData()
+        fetchBackupData(true)
       }
     } catch (error) {
       console.error('Delete failed:', error)
@@ -305,7 +361,7 @@ function BackupManagement() {
           description: `Database restored successfully!`,
         })
         
-        // Reset form
+        // Reset form and refresh data
         setRestoreForm({
           backupId: '',
           collections: [],
@@ -313,6 +369,8 @@ function BackupManagement() {
           createSafetyBackup: true
         })
         setRestorePreview(null)
+        // Small delay to ensure database updates are complete
+        setTimeout(() => fetchBackupData(true), 500)
       }
     } catch (error) {
       console.error('Restore failed:', error)
@@ -365,6 +423,8 @@ function BackupManagement() {
           overwrite: false,
           createSafetyBackup: true
         })
+        // Small delay to ensure database updates are complete
+        setTimeout(() => fetchBackupData(true), 500)
       } else {
         throw new Error(result.message)
       }
@@ -385,24 +445,37 @@ function BackupManagement() {
     try {
       setActiveOperation('cleaning')
       
-      const response = await apiRequest<{ status: string; data: { deletedCount: number } }>('/backup/cleanup', {
+      console.log('Starting cleanup operation...')
+      
+      const response = await apiRequest<{ status: string; data: { deletedCount: number; message: string } }>('/backup/cleanup', {
         method: 'POST',
         body: { retentionDays: 30 },
         requireAuth: true
       })
 
+      console.log('Cleanup response:', response)
+
       if (response.status === 'success') {
         toast({
           title: "🧹 Cleanup Completed",
-          description: `Removed ${response.data.deletedCount} old backups`,
+          description: response.data.message || `Removed ${response.data.deletedCount} old backups`,
         })
-        fetchBackupData()
+        await fetchBackupData(true)
+      } else {
+        console.error('Cleanup failed - non-success status:', response)
+        throw new Error(response.data?.message || 'Cleanup failed')
       }
-    } catch (error) {
-      console.error('Cleanup failed:', error)
+    } catch (error: any) {
+      console.error('Cleanup failed with error:', error)
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response,
+        stack: error.stack
+      })
+      
       toast({
         title: "Error",
-        description: "Cleanup failed",
+        description: error.message || "Cleanup failed. Please check console for details.",
         variant: "destructive"
       })
     } finally {
@@ -447,6 +520,32 @@ function BackupManagement() {
     )
   }
 
+  // Get restore status badge
+  const getRestoreStatusBadge = (status: string) => {
+    const variants: Record<string, "default" | "destructive" | "secondary" | "outline"> = {
+      completed: 'default',
+      in_progress: 'secondary',
+      failed: 'destructive',
+      cancelled: 'outline'
+    }
+    
+    const icons = {
+      completed: <CheckCircle className="w-3 h-3" />,
+      in_progress: <RefreshCw className="w-3 h-3 animate-spin" />,
+      failed: <XCircle className="w-3 h-3" />,
+      cancelled: <XCircle className="w-3 h-3" />
+    }
+
+    const displayStatus = status === 'in_progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1)
+
+    return (
+      <Badge variant={variants[status as keyof typeof variants] || 'outline'} className="gap-1">
+        {icons[status as keyof typeof icons]}
+        {displayStatus}
+      </Badge>
+    )
+  }
+
   if (loading) {
     return <BackupSkeleton />
   }
@@ -471,7 +570,7 @@ function BackupManagement() {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={fetchBackupData} 
+              onClick={() => fetchBackupData(true)} 
               variant="outline" 
               size="sm"
               disabled={loading}
@@ -738,7 +837,7 @@ function BackupManagement() {
                       <AlertDescription>
                         <div className="space-y-1">
                           <div><strong>Type:</strong> {restorePreview.backupInfo.type}</div>
-                          <div><strong>Collections:</strong> {restorePreview.collectionsToRestore.length}</div>
+                          <div><strong>Collections:</strong> {restorePreview.collectionsToRestore.length} (all available collections will be restored)</div>
                           <div><strong>Documents:</strong> {restorePreview.totalDocuments.toLocaleString()}</div>
                           <div><strong>Size:</strong> {restorePreview.estimatedSize}</div>
                         </div>
@@ -815,7 +914,7 @@ function BackupManagement() {
                     Upload & Restore
                   </CardTitle>
                   <CardDescription>
-                    Upload a backup file and restore from it
+                    Upload a backup file and restore from it (all collections in backup will be restored)
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -886,11 +985,12 @@ function BackupManagement() {
           </TabsContent>
 
           {/* History Tab */}
-          <TabsContent value="history" className="space-y-4">
+          <TabsContent value="history" className="space-y-6">
+            {/* Backup History Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+                  <Database className="w-5 h-5" />
                   Backup History
                 </CardTitle>
                 <CardDescription>
@@ -968,6 +1068,109 @@ function BackupManagement() {
                               <Trash2 className="w-4 h-4" />
                             )}
                           </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Restore History Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5" />
+                  Restore History
+                </CardTitle>
+                <CardDescription>
+                  View previous database restore operations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {restoreHistory.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <RefreshCw className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No restore operations found</p>
+                      <p className="text-sm">Restore operations will appear here</p>
+                    </div>
+                  ) : (
+                    restoreHistory.map((restore) => (
+                      <div
+                        key={restore._id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {restore.sourceType === 'existing_backup' 
+                                ? (restore.sourceBackupId?.originalName || restore.sourceBackupName || 'Unknown Backup')
+                                : (restore.uploadedFileName || 'Uploaded File')
+                              }
+                            </span>
+                            {getRestoreStatusBadge(restore.status)}
+                            <Badge variant="outline" className="text-xs">
+                              {restore.restoreType}
+                            </Badge>
+                            {restore.overwriteMode && (
+                              <Badge variant="destructive" className="text-xs">
+                                Overwrite
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            <div>
+                              Restored: {formatDate(restore.createdAt)} by {restore.restoredBy}
+                            </div>
+                            <div>
+                              Collections: {restore.collectionsRestored.length > 0 
+                                ? restore.collectionsRestored.join(', ')
+                                : 'None'
+                              } • 
+                              Documents: {(restore.totalDocumentsRestored || 0).toLocaleString()}
+                              {restore.collectionsSkipped.length > 0 && 
+                                ` • Skipped: ${restore.collectionsSkipped.length}`
+                              }
+                            </div>
+                            <div>
+                              Source: {restore.sourceType === 'existing_backup' ? 'Database Backup' : 'Uploaded File'}
+                              {restore.sourceBackupId?.type && ` (${restore.sourceBackupId.type})`}
+                              {restore.safetyBackupId && ' • Safety backup created'}
+                            </div>
+                            {restore.errorMessage && (
+                              <div className="text-red-600 italic">Error: {restore.errorMessage}</div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {restore.status === 'completed' && restore.safetyBackupId && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setRestoreForm(prev => ({ ...prev, backupId: restore.safetyBackupId!._id }))
+                                handleGetRestorePreview(restore.safetyBackupId!._id)
+                              }}
+                              title="View safety backup created before this restore"
+                            >
+                              <Shield className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {restore.sourceType === 'existing_backup' && restore.sourceBackupId && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setRestoreForm(prev => ({ ...prev, backupId: restore.sourceBackupId!._id }))
+                                handleGetRestorePreview(restore.sourceBackupId!._id)
+                              }}
+                              title="View source backup"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))

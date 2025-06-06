@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import mongoose from 'mongoose';
 import BackupHistory, { IBackupHistory } from '../models/BackupHistory';
+import RestoreHistory, { IRestoreHistory } from '../models/RestoreHistory';
 import logger from '../utils/logger';
 import { execSync } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
@@ -54,6 +55,7 @@ export class RestoreService {
   
   /**
    * Get mongoose model by collection name
+   * Note: BackupHistory is included for restore operations but is protected from being overwritten
    */
   private getModelByCollection(collectionName: string): mongoose.Model<any> {
     const modelMap: { [key: string]: mongoose.Model<any> } = {
@@ -65,7 +67,8 @@ export class RestoreService {
       'scripts': Script,
       'pageseo': PageSeo,
       'schedulerconfigs': SchedulerConfig,
-      'backuphistory': BackupHistory
+      'backuphistory': BackupHistory,
+      'restorehistory': RestoreHistory
     };
     
     const model = modelMap[collectionName];
@@ -184,6 +187,7 @@ export class RestoreService {
   async restoreFromBackup(options: RestoreOptions): Promise<RestoreResult> {
     let backupFilePath: string;
     let backupData: BackupData;
+    let restoreRecord: IRestoreHistory | null = null;
     
     try {
       // Determine backup file path
@@ -193,6 +197,13 @@ export class RestoreService {
           return {
             success: false,
             message: 'Backup not found'
+          };
+        }
+        
+        if (backup.status === 'deleted') {
+          return {
+            success: false,
+            message: 'Cannot restore from deleted backup'
           };
         }
         
@@ -233,16 +244,84 @@ export class RestoreService {
       // Validate and parse backup file
       backupData = await this.validateBackupFile(backupFilePath);
       
+      // Create restore history record
+      try {
+        let sourceBackupId: mongoose.Types.ObjectId | undefined;
+        let sourceBackupName: string | undefined;
+        let sourceType: 'existing_backup' | 'uploaded_file';
+        let uploadedFileName: string | undefined;
+
+        if (options.backupId) {
+          const backup = await BackupHistory.findById(options.backupId);
+          sourceBackupId = backup?._id;
+          sourceBackupName = backup?.filename;
+          sourceType = 'existing_backup';
+        } else {
+          sourceType = 'uploaded_file';
+          uploadedFileName = path.basename(backupFilePath);
+        }
+
+        restoreRecord = await RestoreHistory.create({
+          sourceBackupId,
+          sourceBackupName,
+          sourceType,
+          uploadedFileName,
+          restoreType: options.collections && options.collections.length > 0 ? 'selective' : 'full',
+          collectionsRestored: [],
+          collectionsSkipped: [],
+          overwriteMode: options.overwrite,
+          totalDocumentsRestored: 0,
+          status: 'in_progress',
+          restoredBy: options.createdBy
+        });
+
+        logger.info('Restore record created', { restoreId: restoreRecord?._id });
+      } catch (error: any) {
+        logger.error('Failed to create restore record:', error);
+        restoreRecord = null; // Explicitly set to null on error
+        // Continue with restore even if history tracking fails
+      }
+      
       // Determine which collections to restore
-      const collectionsToRestore = options.collections || backupData.metadata.collections;
-      const validCollections = collectionsToRestore.filter(col => 
-        backupData.metadata.collections.includes(col) && backupData.data[col]
-      );
+      const collectionsToRestore = (options.collections && options.collections.length > 0) 
+        ? options.collections 
+        : backupData.metadata.collections;
+      
+      logger.info('Collections analysis', {
+        requested: options.collections,
+        fromBackup: backupData.metadata.collections,
+        toRestore: collectionsToRestore,
+        availableInData: Object.keys(backupData.data)
+      });
+      
+      const validCollections = collectionsToRestore.filter(col => {
+        const isInMetadata = backupData.metadata.collections.includes(col);
+        const hasData = backupData.data[col];
+        const isValid = isInMetadata && hasData;
+        
+        logger.info(`Collection ${col}`, {
+          inMetadata: isInMetadata,
+          hasData: !!hasData,
+          dataCount: hasData ? hasData.count : 0,
+          isValid
+        });
+        
+        return isValid;
+      });
       
       if (validCollections.length === 0) {
+        logger.error('No valid collections found', {
+          collectionsToRestore,
+          backupMetadataCollections: backupData.metadata.collections,
+          backupDataKeys: Object.keys(backupData.data),
+          collectionsWithData: Object.keys(backupData.data).filter(key => 
+            backupData.data[key] && backupData.data[key].count > 0
+          )
+        });
+        
         return {
           success: false,
-          message: 'No valid collections found to restore'
+          message: `No valid collections found to restore. Available collections in backup: ${backupData.metadata.collections.join(', ')}`
         };
       }
       
@@ -263,6 +342,13 @@ export class RestoreService {
           
           if (collectionData.count === 0) {
             logger.info(`Skipping empty collection: ${collectionName}`);
+            skippedCollections.push(collectionName);
+            continue;
+          }
+
+          // Check if this is a system collection that should be skipped
+          if (collectionName === 'backuphistory' || collectionName === 'restorehistory') {
+            logger.info(`Skipping system collection: ${collectionName} (${collectionData.count} documents) - System collections are protected from restoration to prevent data corruption`);
             skippedCollections.push(collectionName);
             continue;
           }
@@ -290,6 +376,32 @@ export class RestoreService {
         skippedCollections: skippedCollections.length,
         errors: errors.length
       });
+
+      // Update restore history record
+      const totalDocuments = restoredCollections.reduce((sum, col) => 
+        sum + (backupData.data[col]?.count || 0), 0
+      );
+
+      if (restoreRecord) {
+        try {
+          if (success) {
+            await restoreRecord.markCompleted({
+              collectionsRestored: restoredCollections,
+              collectionsSkipped: skippedCollections,
+              totalDocumentsRestored: totalDocuments,
+              details: {
+                backupType: backupData.metadata.type,
+                backupTimestamp: backupData.metadata.timestamp,
+                errors: errors.length > 0 ? errors : undefined
+              }
+            });
+          } else {
+            await restoreRecord.markFailed(message);
+          }
+        } catch (error: any) {
+          logger.error('Failed to update restore record:', error);
+        }
+      }
       
       return {
         success,
@@ -299,15 +411,23 @@ export class RestoreService {
         details: {
           backupType: backupData.metadata.type,
           backupTimestamp: backupData.metadata.timestamp,
-          totalDocuments: restoredCollections.reduce((sum, col) => 
-            sum + (backupData.data[col]?.count || 0), 0
-          ),
+          totalDocuments,
           errors: errors.length > 0 ? errors : undefined
         }
       };
       
     } catch (error: any) {
       logger.error('Database restore failed:', error);
+      
+      // Update restore history record on error
+      if (restoreRecord) {
+        try {
+          await restoreRecord.markFailed(error.message || 'Restore operation failed');
+        } catch (historyError: any) {
+          logger.error('Failed to update restore record on error:', historyError);
+        }
+      }
+      
       return {
         success: false,
         message: 'Restore operation failed',
@@ -317,35 +437,45 @@ export class RestoreService {
   }
   
   /**
-   * Restore a specific collection from backup data
+   * Restore a single collection from backup
    */
   private async restoreCollection(
     collectionName: string, 
     documents: any[], 
     overwrite: boolean
   ): Promise<void> {
-    const Model = this.getModelByCollection(collectionName);
     
-    if (overwrite) {
-      // Clear existing data
-      logger.info(`Clearing existing data from collection: ${collectionName}`);
-      await Model.deleteMany({});
+    // CRITICAL: Prevent restoration of system collections to avoid data corruption
+    // Restoring backup/restore history would overwrite current records with old data from backup files
+    if (collectionName === 'backuphistory' || collectionName === 'restorehistory') {
+      logger.warn(`Skipping restoration of ${collectionName} collection to prevent data corruption`);
+      return;
     }
+    
+    logger.info(`Restoring collection: ${collectionName}, documents: ${documents.length}, overwrite: ${overwrite}`);
     
     if (documents.length === 0) {
       logger.info(`No documents to restore for collection: ${collectionName}`);
       return;
     }
     
-    // Process documents in batches to avoid memory issues
-    const batchSize = 1000;
+    const Model = this.getModelByCollection(collectionName);
+    
+    if (overwrite) {
+      // Clear existing collection first
+      await Model.deleteMany({});
+      logger.info(`Cleared existing data for collection: ${collectionName}`);
+    }
+    
+    // Process in batches to avoid memory issues
+    const batchSize = 100;
     let insertedCount = 0;
     
     for (let i = 0; i < documents.length; i += batchSize) {
       const batch = documents.slice(i, i + batchSize);
       
       try {
-        // Clean up documents for insertion
+        // Clean the documents (remove version keys, etc.)
         const cleanedBatch = batch.map(doc => {
           // Remove version key if it exists
           const { __v, ...cleanDoc } = doc;
@@ -456,6 +586,14 @@ export class RestoreService {
             message: 'Backup not found'
           };
         }
+        
+        if (backup.status === 'deleted') {
+          logger.warn('Attempted to preview deleted backup', { backupId: options.backupId });
+          return {
+            success: false,
+            message: 'Cannot preview deleted backup'
+          };
+        }
         backupFilePath = backup.filePath;
         logger.info('Using backup file path', { backupFilePath });
       } else if (options.backupFilePath) {
@@ -491,10 +629,31 @@ export class RestoreService {
       });
       
       // Calculate what would be restored
-      const collectionsToRestore = options.collections || backupData.metadata.collections;
-      const validCollections = collectionsToRestore.filter(col => 
-        backupData.metadata.collections.includes(col) && backupData.data[col]
-      );
+      const collectionsToRestore = (options.collections && options.collections.length > 0) 
+        ? options.collections 
+        : backupData.metadata.collections;
+      
+      logger.info('Preview collections analysis', {
+        requested: options.collections,
+        fromBackup: backupData.metadata.collections,
+        toRestore: collectionsToRestore,
+        availableInData: Object.keys(backupData.data)
+      });
+      
+      const validCollections = collectionsToRestore.filter(col => {
+        const isInMetadata = backupData.metadata.collections.includes(col);
+        const hasData = backupData.data[col];
+        const isValid = isInMetadata && hasData;
+        
+        logger.info(`Preview collection ${col}`, {
+          inMetadata: isInMetadata,
+          hasData: !!hasData,
+          dataCount: hasData ? hasData.count : 0,
+          isValid
+        });
+        
+        return isValid;
+      });
       
       logger.info('Collections to restore', { collectionsToRestore, validCollections });
       
@@ -544,5 +703,17 @@ export class RestoreService {
     if (bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  /**
+   * Get restore history
+   */
+  async getRestoreHistory(limit: number = 20): Promise<IRestoreHistory[]> {
+    return await RestoreHistory.find()
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate('sourceBackupId', 'filename originalName type')
+      .populate('safetyBackupId', 'filename originalName')
+      .lean();
   }
 } 

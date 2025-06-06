@@ -22,6 +22,7 @@ export interface IBackupHistory extends mongoose.Document {
   createdBy: string; // admin user email
   description?: string;
   errorMessage?: string;
+  deletedAt?: Date; // When the backup was deleted
   
   // File info
   compression: boolean;
@@ -95,6 +96,9 @@ const BackupHistorySchema = new mongoose.Schema<IBackupHistory>({
   errorMessage: {
     type: String,
     trim: true
+  },
+  deletedAt: {
+    type: Date
   },
   
   compression: {

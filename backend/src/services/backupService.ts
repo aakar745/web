@@ -52,6 +52,10 @@ export class BackupService {
   /**
    * Get all available collection names
    */
+  /**
+   * Get available collections for backup
+   * Excludes system collections like backup history and restore history to prevent circular dependencies
+   */
   private getAvailableCollections(): string[] {
     return [
       'blogs',
@@ -61,8 +65,8 @@ export class BackupService {
       'systemsettings',
       'scripts',
       'pageseo',
-      'schedulerconfigs',
-      'backuphistory'
+      'schedulerconfigs'
+      // Excluded: 'backuphistory', 'restorehistory' - System collections that shouldn't be backed up
     ];
   }
   
@@ -78,8 +82,7 @@ export class BackupService {
       'systemsettings': SystemSettings,
       'scripts': Script,
       'pageseo': PageSeo,
-      'schedulerconfigs': SchedulerConfig,
-      'backuphistory': BackupHistory
+      'schedulerconfigs': SchedulerConfig
     };
     
     const model = modelMap[collectionName];
@@ -372,8 +375,10 @@ export class BackupService {
   /**
    * Get backup history
    */
-  async getBackupHistory(limit: number = 20): Promise<IBackupHistory[]> {
-    return await BackupHistory.find({})
+  async getBackupHistory(limit: number = 20, includeDeleted: boolean = false): Promise<IBackupHistory[]> {
+    const query = includeDeleted ? {} : { status: { $ne: 'deleted' } };
+    
+    return await BackupHistory.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
@@ -382,8 +387,15 @@ export class BackupService {
   /**
    * Get backup by ID
    */
-  async getBackupById(backupId: string): Promise<IBackupHistory | null> {
-    return await BackupHistory.findById(backupId).lean();
+  async getBackupById(backupId: string, includeDeleted: boolean = false): Promise<IBackupHistory | null> {
+    const backup = await BackupHistory.findById(backupId).lean();
+    
+    // If backup is deleted and we don't want to include deleted ones, return null
+    if (backup && backup.status === 'deleted' && !includeDeleted) {
+      return null;
+    }
+    
+    return backup;
   }
   
   /**
@@ -394,32 +406,77 @@ export class BackupService {
       const backup = await BackupHistory.findById(backupId);
       
       if (!backup) {
+        logger.warn(`Backup deletion failed: backup not found`, { backupId });
         return {
           success: false,
           message: 'Backup not found'
         };
       }
       
-      // Delete physical file
+      logger.info(`Starting backup deletion`, {
+        backupId,
+        filename: backup.filename,
+        filePath: backup.filePath,
+        size: backup.size,
+        type: backup.type
+      });
+      
+      let fileDeleted = false;
+      
+      // Delete physical file if it exists
       try {
+        // Check if file exists first
+        await fs.access(backup.filePath);
         await fs.unlink(backup.filePath);
-      } catch (fileError) {
-        logger.warn(`Failed to delete backup file: ${backup.filePath}`, fileError);
-        // Continue anyway to clean up the database record
+        fileDeleted = true;
+        logger.info(`Backup file deleted successfully`, { 
+          filePath: backup.filePath,
+          filename: backup.filename
+        });
+      } catch (fileError: any) {
+        if (fileError.code === 'ENOENT') {
+          logger.warn(`Backup file not found (already deleted?): ${backup.filePath}`, { backupId });
+          fileDeleted = true; // Consider it deleted if it doesn't exist
+        } else {
+          logger.error(`Failed to delete backup file: ${backup.filePath}`, {
+            backupId,
+            error: fileError.message,
+            code: fileError.code
+          });
+          // Don't fail the operation - we'll still clean up the database record
+        }
       }
       
-      // Delete database record
-      await BackupHistory.findByIdAndDelete(backupId);
+      // Update database record to mark as deleted (for audit trail) 
+      // instead of completely removing it
+      await BackupHistory.findByIdAndUpdate(backupId, {
+        status: 'deleted',
+        deletedAt: new Date(),
+        size: 0 // Reset size since file is gone
+      });
       
-      logger.info(`Backup deleted: ${backupId}`);
+      logger.info(`Backup marked as deleted in database`, {
+        backupId,
+        filename: backup.filename,
+        fileDeleted,
+        originalSize: backup.size
+      });
       
       return {
         success: true,
-        message: 'Backup deleted successfully'
+        message: fileDeleted 
+          ? 'Backup file and record deleted successfully'
+          : 'Backup record deleted (file was already missing)',
+        filename: backup.filename,
+        size: backup.size
       };
       
     } catch (error: any) {
-      logger.error('Failed to delete backup:', error);
+      logger.error('Failed to delete backup:', {
+        backupId,
+        error: error.message,
+        stack: error.stack
+      });
       return {
         success: false,
         message: 'Failed to delete backup',
@@ -436,35 +493,63 @@ export class BackupService {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
       
-      // Find old backups
+      logger.info(`Starting backup cleanup`, {
+        retentionDays,
+        cutoffDate: cutoffDate.toISOString()
+      });
+      
+      // Find old backups that haven't been deleted yet
       const oldBackups = await BackupHistory.find({
         createdAt: { $lt: cutoffDate },
-        status: { $in: ['completed', 'failed'] }
+        status: { $in: ['completed', 'failed'] } // Don't clean up already deleted ones
       });
       
-      let deletedCount = 0;
+      logger.info(`Found ${oldBackups.length} old backups to clean up`);
       
-      // Delete each backup
-      for (const backup of oldBackups) {
-        try {
-          await fs.unlink(backup.filePath);
-        } catch (fileError) {
-          logger.warn(`Failed to delete old backup file: ${backup.filePath}`, fileError);
-        }
-        deletedCount++;
+      // Handle case when no old backups found
+      if (oldBackups.length === 0) {
+        const message = `No backups older than ${retentionDays} days found. Nothing to clean up.`;
+        logger.info(message);
+        return {
+          deletedCount: 0,
+          message
+        };
       }
       
-      // Delete database records
-      await BackupHistory.deleteMany({
-        createdAt: { $lt: cutoffDate },
-        status: { $in: ['completed', 'failed'] }
+      let deletedCount = 0;
+      let fileDeletedCount = 0;
+      
+      // Delete each backup using the proper delete method
+      for (const backup of oldBackups) {
+        try {
+          const result = await this.deleteBackup(backup._id.toString());
+          if (result.success) {
+            deletedCount++;
+            if (result.message.includes('file')) {
+              fileDeletedCount++;
+            }
+          } else {
+            logger.warn(`Failed to cleanup backup ${backup._id}: ${result.message}`);
+          }
+        } catch (error: any) {
+          logger.error(`Error during cleanup of backup ${backup._id}:`, error);
+        }
+      }
+      
+      logger.info(`Cleanup completed`, {
+        totalProcessed: oldBackups.length,
+        deletedCount,
+        fileDeletedCount,
+        retentionDays
       });
       
-      logger.info(`Cleanup completed: ${deletedCount} old backups removed`);
+      const message = deletedCount > 0 
+        ? `Successfully cleaned up ${deletedCount} old backups (${fileDeletedCount} files deleted)`
+        : `Processed ${oldBackups.length} old backups but none were successfully deleted`;
       
       return {
         deletedCount,
-        message: `Successfully cleaned up ${deletedCount} old backups`
+        message
       };
       
     } catch (error: any) {

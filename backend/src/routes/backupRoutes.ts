@@ -6,6 +6,7 @@ import { protect, adminOnly } from '../middleware/authMiddleware';
 import {
   createBackup,
   getBackupHistory,
+  getRestoreHistory,
   getBackupById,
   downloadBackup,
   deleteBackup,
@@ -65,6 +66,7 @@ router.use(adminOnly);
 // Backup Management Routes
 router.post('/create', createBackup);
 router.get('/history', getBackupHistory);
+router.get('/restore-history', getRestoreHistory);
 router.get('/status', getBackupStatus);
 router.get('/:id', getBackupById);
 router.get('/:id/download', downloadBackup);
