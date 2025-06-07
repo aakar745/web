@@ -1,5 +1,19 @@
 import sharp from 'sharp';
 
+/*
+ * Face Detection and Color Analysis Service
+ * 
+ * Current Implementation: Pure Sharp-based analysis with skin tone estimation
+ * - Uses Sharp for image processing (no Python dependencies)
+ * - Analyzes colors: skin tones, hair, clothing, background, environmental
+ * - Estimates face regions based on skin tone analysis
+ * 
+ * Future Enhancement: Can be upgraded to TensorFlow.js for real face detection
+ * - @tensorflow-models/face-detection (client-side, no server deps)
+ * - MediaPipe FaceDetection models
+ * - Real bounding boxes and facial landmarks
+ */
+
 interface FaceColorAnalysis {
   faceCount: number;
   faceRegions: Array<{
@@ -11,7 +25,7 @@ interface FaceColorAnalysis {
   }>;
   averageSkinTone: string;
   skinToneVariety: string[];
-  // Expanded color analysis
+  // Comprehensive color analysis
   clothingColors: string[];
   hairColors: string[];
   backgroundColors: string[];
@@ -22,12 +36,17 @@ interface FaceColorAnalysis {
   analysisType: 'face-detection' | 'skin-tone-estimation';
 }
 
+/**
+ * Analyzes face colors and comprehensive image color information
+ * Currently uses skin-tone estimation approach - works without external dependencies
+ * 
+ * @param imagePath Path to the image file
+ * @returns Promise<FaceColorAnalysis | null> - Complete color analysis results
+ */
 export async function analyzeFaceColors(imagePath: string): Promise<FaceColorAnalysis | null> {
   try {
-  
-    
-    // For now, use skin tone estimation approach
-    // This can be upgraded to full face detection later
+    // Using pure Sharp-based skin tone estimation
+    // This approach is reliable and has no external dependencies
     return await estimateSkinTonesFromImage(imagePath);
 
   } catch (error) {
@@ -36,23 +55,26 @@ export async function analyzeFaceColors(imagePath: string): Promise<FaceColorAna
   }
 }
 
+/**
+ * Estimates skin tones and performs comprehensive color analysis using Sharp
+ * This is the current implementation that works without any ML dependencies
+ */
 async function estimateSkinTonesFromImage(imagePath: string): Promise<FaceColorAnalysis> {
-  // Get image data
+  // Get image data using Sharp (fast, reliable, no Python needed)
   const { data: imageData, info } = await sharp(imagePath)
     .resize(400, 400, { fit: 'inside', withoutEnlargement: true })
     .raw()
     .toBuffer({ resolveWithObject: true });
 
+  // Extract comprehensive color analysis
   const skinTones = extractSkinTones(imageData, info);
   const averageSkinTone = calculateAverageSkinTone(skinTones);
-
-  // Comprehensive color analysis for different image regions
   const clothingColors = extractClothingColors(imageData, info);
   const hairColors = extractHairColors(imageData, info);
   const backgroundColors = extractBackgroundColors(imageData, info);
   const environmentalColors = extractEnvironmentalColors(imageData, info);
 
-  // Estimate potential face regions (center and upper portions of image)
+  // Create estimated face regions based on skin tone analysis
   const estimatedFaceRegions: Array<{
     id: number;
     skinTones: string[];
@@ -62,13 +84,13 @@ async function estimateSkinTonesFromImage(imagePath: string): Promise<FaceColorA
   }> = [];
   
   if (skinTones.length > 0) {
-    // Create estimated face regions based on skin tone distribution
+    // Estimate face region based on skin tone distribution
     const centerRegion = {
       id: 1,
       skinTones: skinTones.slice(0, 5),
       dominantSkinColor: skinTones[0] || 'rgb(200,170,140)',
       regionColors: skinTones.slice(0, 3),
-      confidence: 0.7 // Estimated confidence
+      confidence: 0.7 // Estimated confidence for skin-tone approach
     };
     
     estimatedFaceRegions.push(centerRegion);
@@ -79,7 +101,7 @@ async function estimateSkinTonesFromImage(imagePath: string): Promise<FaceColorA
     faceRegions: estimatedFaceRegions,
     averageSkinTone,
     skinToneVariety: [...new Set(skinTones)].slice(0, 8),
-    // Expanded color analysis
+    // Comprehensive color analysis (the main value of this service)
     clothingColors: clothingColors.slice(0, 8),
     hairColors: hairColors.slice(0, 6),
     backgroundColors: backgroundColors.slice(0, 6),

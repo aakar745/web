@@ -700,7 +700,7 @@ export default function MetadataAnalysisTool() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-blue-950/20 dark:via-gray-900 dark:to-indigo-950/20">
+    <div className="min-h-screen">
       <ToolHeader
         title="Image Metadata Analyzer"
         description="Extract comprehensive EXIF data, analyze image properties, and get detailed insights about your images with professional-grade analysis tools."
