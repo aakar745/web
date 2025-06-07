@@ -24,7 +24,8 @@ import {
   Users,
   Download,
   Globe,
-  Sparkles
+  Sparkles,
+  Info
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -349,7 +350,7 @@ export default function HomeContent() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 sm:gap-8"
           >
             {/* Image Compression Tool */}
             <Link href="/image/compress" className="group">
@@ -499,6 +500,44 @@ export default function HomeContent() {
                   </p>
                   <div className="flex items-center font-semibold text-sm text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                     Crop now <ArrowRight size={16} className="ml-2" />
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* Image Metadata Tool */}
+            <Link href="/image/metadata" className="group">
+              <motion.div variants={item}>
+                <div className="relative h-full rounded-2xl border-2 border-transparent bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-900/30 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-300/50 hover:-translate-y-2 hover:scale-105 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-lg group-hover:shadow-xl group-hover:shadow-blue-500/30 transition-all duration-300">
+                    <Info size={28} />
+                    <motion.div 
+                      className="absolute -top-1 -right-1 text-cyan-300"
+                      animate={{ 
+                        scale: [0, 1, 0],
+                        rotate: [0, 180, 360]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: 2
+                      }}
+                    >
+                      💎
+                    </motion.div>
+                  </div>
+                  
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    Metadata
+                  </h3>
+                  <p className="text-muted-foreground mb-6 text-sm sm:text-base leading-relaxed">
+                    Analyze EXIF data, colors, and image properties. Extract camera settings and technical details.
+                  </p>
+                  <div className="flex items-center font-semibold text-sm text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    Analyze now <ArrowRight size={16} className="ml-2" />
                   </div>
                 </div>
               </motion.div>

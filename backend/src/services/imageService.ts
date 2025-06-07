@@ -34,7 +34,7 @@ createUploadDirs();
 export async function compressImageService(filePath: string, quality: number = 80): Promise<ProcessedImage> {
   const startTime = Date.now();
   try {
-    console.log('Starting compression service with quality:', quality);
+  
     
     // Ensure quality is in valid range
     const validQuality = Math.max(1, Math.min(100, quality));

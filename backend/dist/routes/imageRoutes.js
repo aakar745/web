@@ -47,6 +47,11 @@ router.post('/crop', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single(
  */
 router.post('/optimize-blog', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.optimizeBlogImage);
 /**
+ * @route POST /api/images/metadata
+ * @desc Extract comprehensive metadata from an image
+ */
+router.post('/metadata', rateLimiter_1.imageProcessingLimiter, dynamicUpload.single('image'), upload_1.validateDynamicFileSize, imageController_1.extractMetadata);
+/**
  * @route GET /api/images/download/:filename
  * @desc Download a processed image with proper headers for forcing download
  */

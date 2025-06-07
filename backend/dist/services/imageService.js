@@ -32,7 +32,6 @@ createUploadDirs();
 async function compressImageService(filePath, quality = 80) {
     const startTime = Date.now();
     try {
-        console.log('Starting compression service with quality:', quality);
         // Ensure quality is in valid range
         const validQuality = Math.max(1, Math.min(100, quality));
         if (validQuality !== quality) {

@@ -34,6 +34,45 @@ export const IMAGE_LIMITS = {
     'image/svg+xml',
     'image/heic',
     'image/heif'
+  ],
+  // Extended MIME types for metadata analysis (more permissive)
+  METADATA_ALLOWED_MIME_TYPES: [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'image/heic',
+    'image/heif',
+    'image/tiff',
+    'image/tif',
+    'image/bmp',
+    'image/x-bmp',
+    'image/x-ms-bmp',
+    'image/vnd.microsoft.icon',
+    'image/x-icon',
+    'image/icon',
+    'image/ico',
+    'image/avif',
+    'image/jxl',
+    'image/jp2',
+    'image/jpx',
+    'image/jpm',
+    'image/mj2',
+    // Common RAW camera formats - metadata extraction only
+    'image/x-canon-cr2',
+    'image/x-canon-cr3',
+    'image/x-canon-crw',
+    'image/x-nikon-nef',
+    'image/x-sony-arw',
+    'image/x-adobe-dng',
+    'image/x-panasonic-raw',
+    'image/x-olympus-orf',
+    'image/x-fuji-raf',
+    'image/x-pentax-pef',
+    'image/x-samsung-srw',
+    'image/x-sigma-x3f'
   ]
 };
 
@@ -47,7 +86,7 @@ const archivesDir = path.join(uploadDir, 'archives');
 [uploadDir, blogsDir, processedDir, archivesDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(`Created directory: ${dir}`);
+    
   }
 });
 
@@ -97,6 +136,58 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   }
 };
 
+// Create a more permissive filter for metadata analysis
+const metadataFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  // Check if the file type is allowed for metadata analysis
+  if (IMAGE_LIMITS.METADATA_ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    // Fallback: Check file extension for common cases where MIME detection fails
+    let actualMimeType = file.mimetype;
+    
+    if (file.mimetype === 'application/octet-stream') {
+      const ext = file.originalname.toLowerCase().split('.').pop();
+      const extensionToMimeMap: {[key: string]: string} = {
+        'heic': 'image/heic',
+        'heif': 'image/heif',
+        'cr2': 'image/x-canon-cr2',
+        'cr3': 'image/x-canon-cr3',
+        'nef': 'image/x-nikon-nef',
+        'arw': 'image/x-sony-arw',
+        'dng': 'image/x-adobe-dng',
+        'orf': 'image/x-olympus-orf',
+        'raf': 'image/x-fuji-raf',
+        'pef': 'image/x-pentax-pef',
+        'srw': 'image/x-samsung-srw',
+        'x3f': 'image/x-sigma-x3f',
+        'tiff': 'image/tiff',
+        'tif': 'image/tiff',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'webp': 'image/webp',
+        'bmp': 'image/bmp',
+        'gif': 'image/gif',
+        'avif': 'image/avif'
+      };
+      
+      if (ext && extensionToMimeMap[ext]) {
+        actualMimeType = extensionToMimeMap[ext];
+  
+      }
+    }
+    
+    // Check again with corrected MIME type
+    if (IMAGE_LIMITS.METADATA_ALLOWED_MIME_TYPES.includes(actualMimeType)) {
+      file.mimetype = actualMimeType;
+      cb(null, true);
+    } else {
+
+      cb(new Error(`Invalid file type "${file.mimetype}". Allowed types: ${IMAGE_LIMITS.METADATA_ALLOWED_MIME_TYPES.join(', ')}`));
+    }
+  }
+};
+
 // Create the multer upload middleware
 export const upload = multer({
   storage,
@@ -105,6 +196,17 @@ export const upload = multer({
     fileSize: IMAGE_LIMITS.MAX_FILE_SIZE
   }
 });
+
+// Create metadata-specific upload middleware with extended file type support
+export const createMetadataUpload = () => {
+  return multer({
+    storage,
+    fileFilter: metadataFileFilter,
+    limits: {
+      fileSize: IMAGE_LIMITS.MAX_FILE_SIZE
+    }
+  });
+};
 
 // Dynamic upload middleware factory that uses current database settings
 export const createDynamicUpload = () => {
@@ -115,9 +217,57 @@ export const createDynamicUpload = () => {
         // Get current file upload settings
         const settings = await getFileUploadSettings();
         
+        // Check if this is a metadata analysis request
+        const isMetadataRequest = req.path.includes('/metadata');
+        const allowedTypes = isMetadataRequest ? 
+          IMAGE_LIMITS.METADATA_ALLOWED_MIME_TYPES : 
+          IMAGE_LIMITS.ALLOWED_MIME_TYPES;
+        
         // Check file type
-        if (!IMAGE_LIMITS.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-          return cb(new Error(`Invalid file type. Allowed types: ${IMAGE_LIMITS.ALLOWED_MIME_TYPES.join(', ')}`));
+        if (!allowedTypes.includes(file.mimetype)) {
+          // Fallback: Check file extension for common cases where MIME detection fails
+          let actualMimeType = file.mimetype;
+          
+          if (file.mimetype === 'application/octet-stream') {
+            const ext = file.originalname.toLowerCase().split('.').pop();
+            const extensionToMimeMap: {[key: string]: string} = {
+              'heic': 'image/heic',
+              'heif': 'image/heif',
+              'cr2': 'image/x-canon-cr2',
+              'cr3': 'image/x-canon-cr3',
+              'nef': 'image/x-nikon-nef',
+              'arw': 'image/x-sony-arw',
+              'dng': 'image/x-adobe-dng',
+              'orf': 'image/x-olympus-orf',
+              'raf': 'image/x-fuji-raf',
+              'pef': 'image/x-pentax-pef',
+              'srw': 'image/x-samsung-srw',
+              'x3f': 'image/x-sigma-x3f',
+              'tiff': 'image/tiff',
+              'tif': 'image/tiff',
+              'jpg': 'image/jpeg',
+              'jpeg': 'image/jpeg',
+              'png': 'image/png',
+              'webp': 'image/webp',
+              'bmp': 'image/bmp',
+              'gif': 'image/gif',
+              'avif': 'image/avif'
+            };
+            
+            if (ext && extensionToMimeMap[ext]) {
+              actualMimeType = extensionToMimeMap[ext];
+        
+            }
+          }
+          
+          // Check again with corrected MIME type
+          if (!allowedTypes.includes(actualMimeType)) {
+    
+            return cb(new Error(`Invalid file type "${file.mimetype}". Allowed types: ${allowedTypes.join(', ')}`));
+          } else {
+            // Update the file object with corrected MIME type
+            file.mimetype = actualMimeType;
+          }
         }
         
         // Attach settings to request for later use
@@ -127,10 +277,16 @@ export const createDynamicUpload = () => {
       } catch (error) {
         logger.error('Error getting upload settings:', error);
         // Fall back to static file filter
-        if (IMAGE_LIMITS.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+        const isMetadataRequest = req.path.includes('/metadata');
+        const allowedTypes = isMetadataRequest ? 
+          IMAGE_LIMITS.METADATA_ALLOWED_MIME_TYPES : 
+          IMAGE_LIMITS.ALLOWED_MIME_TYPES;
+          
+        if (allowedTypes.includes(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(new Error(`Invalid file type. Allowed types: ${IMAGE_LIMITS.ALLOWED_MIME_TYPES.join(', ')}`));
+  
+          cb(new Error(`Invalid file type "${file.mimetype}". Allowed types: ${allowedTypes.join(', ')}`));
         }
       }
     },

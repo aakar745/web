@@ -16,6 +16,7 @@ const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const blogRoutes_1 = __importDefault(require("./routes/blogRoutes"));
 const mediaRoutes_1 = __importDefault(require("./routes/mediaRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
+const backupRoutes_1 = __importDefault(require("./routes/backupRoutes"));
 const upload_1 = require("./middleware/upload");
 const loadBalancer_1 = require("./middleware/loadBalancer");
 const imageQueue_1 = require("./queues/imageQueue");
@@ -134,6 +135,7 @@ domain.run(async () => {
         app.use('/api/health', cacheControl_1.healthCacheAPI, healthRoutes_1.default); // Health checks can cache briefly
         app.use('/api/monitoring', monitoringRoutes_1.default);
         app.use('/api/admin', adminRoutes_1.default);
+        app.use('/api/backup', backupRoutes_1.default);
         app.use('/api/comments', commentRoutes_1.default);
         app.use('/api/seo', seoRoutes_1.default);
         app.use('/api/scripts', scripts_1.default);

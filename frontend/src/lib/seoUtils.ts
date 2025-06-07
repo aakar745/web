@@ -446,6 +446,17 @@ function getFallbackSeoData(pagePath: string): SeoData {
         ogImage: ''
       }
     
+    case '/image/metadata':
+      return {
+        metaTitle: 'Free Image Metadata Analyzer - Extract EXIF & Image Data | ToolsCandy',
+        metaDescription: 'Analyze image metadata, extract EXIF data, and view technical specifications. Free online image metadata analyzer with comprehensive insights. Privacy-focused.',
+        metaKeywords: ['image metadata', 'EXIF data', 'image analyzer', 'image properties', 'metadata extractor', 'image information', 'technical specifications', 'ToolsCandy'],
+        ogType: 'website',
+        twitterCard: 'summary_large_image',
+        canonicalUrl: '',
+        ogImage: ''
+      }
+    
     default:
       // Generic fallback
       return {

@@ -8,7 +8,8 @@ import {
   convertImage,
   cropImage,
   getJobStatus,
-  optimizeBlogImage
+  optimizeBlogImage,
+  extractMetadata
 } from '../controllers/imageController';
 import { imageProcessingLimiter, batchOperationLimiter } from '../middleware/rateLimiter';
 import path from 'path';
@@ -56,6 +57,12 @@ router.post('/crop', imageProcessingLimiter, dynamicUpload.single('image'), vali
  * @desc Optimize an image for blog usage
  */
 router.post('/optimize-blog', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, optimizeBlogImage);
+
+/**
+ * @route POST /api/images/metadata
+ * @desc Extract comprehensive metadata from an image
+ */
+router.post('/metadata', imageProcessingLimiter, dynamicUpload.single('image'), validateDynamicFileSize, extractMetadata);
 
 /**
  * @route GET /api/images/download/:filename

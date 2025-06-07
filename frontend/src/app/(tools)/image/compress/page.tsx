@@ -12,12 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { processHeicFiles } from '@/lib/heicConverter'
 import { useProcessingMode } from '@/lib/context/ProcessingModeContext'
-import { pollJobStatus } from '@/lib/api/statusApi'
+
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { apiRequest, getApiUrl } from '@/lib/apiClient'
 import { QueueStatusIndicator } from '@/components/ui/QueueStatusIndicator'
-import { RateLimitIndicator } from '@/components/ui/RateLimitIndicator'
 import { DynamicSeoLoader } from '@/components/seo/DynamicSeoLoader'
+import { LocalRateLimitIndicator, useRateLimitTracking, useVisualProgress, useFileManagement, useApiWithRateLimit, useJobManagement, useArchiveDownload, useProgressBadges, useProgressDisplay, useHeicDetection } from '../shared'
 
 // Define types for API responses
 interface CompressResponse {
@@ -41,42 +41,80 @@ interface ArchiveResponse {
 
 export default function CompressTool() {
   const [quality, setQuality] = useState(80)
-  const [files, setFiles] = useState<File[]>([])
-  const [previews, setPreviews] = useState<string[]>([])
-  const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null)
+
   const [isLoading, setIsLoading] = useState(false)
-  const [isArchiveLoading, setIsArchiveLoading] = useState(false)
   const [results, setResults] = useState<any[]>([])
-  const [jobIds, setJobIds] = useState<string[]>([])
-  const [jobProgress, setJobProgress] = useState<Record<string, number>>({})
-  const [queueStatus, setQueueStatus] = useState<Record<string, {
-    position?: number | null;
-    waitTime?: string | null;
-    isProcessing?: boolean;
-  }>>({})
-  const [fileJobMapping, setFileJobMapping] = useState<Record<number, string>>({}) // Map file index to job ID
-  
-  // Add visual progress states
-  const [visualProgress, setVisualProgress] = useState<Record<number, number>>({}) // file index -> progress percentage
-  const [processingFiles, setProcessingFiles] = useState<Set<number>>(new Set()) // track which files are being processed
   const [pendingResults, setPendingResults] = useState<any[]>([]) // store results until progress reaches 100%
   
-  // Add dropzone control state
-  const [shouldClearDropzone, setShouldClearDropzone] = useState(false)
+
   
   const { toast } = useToast()
   const { processingMode, isConnected, isInitializing, serverState, errorDetails, nextRetryTime, retryConnection } = useProcessingMode()
   const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
-  const [rateLimitUsage, setRateLimitUsage] = useState<{
-    used: number;
-    limit: number;
-    resetsIn: number | null;
-    isLimitReached: boolean;
-  }>({
-    used: 0,
-    limit: 10,  // Default value from the backend
-    resetsIn: null,
-    isLimitReached: false
+  const { rateLimitUsage, setRateLimitUsage, updateRateLimitFromError } = useRateLimitTracking();
+  const { 
+    visualProgress, 
+    processingFiles, 
+    setVisualProgress,
+    setProcessingFiles,
+    simulateProgress, 
+    showResultsAfterProgress: sharedShowResultsAfterProgress, 
+    clearAllProgress, 
+    adjustProgressIndices 
+  } = useVisualProgress();
+  
+  const {
+    files,
+    previews,
+    selectedFileIndex,
+    shouldClearDropzone,
+    setFiles,
+    setPreviews,
+    setSelectedFileIndex,
+    setShouldClearDropzone,
+    handleImageDrop: sharedHandleImageDrop,
+    handleRemoveFile: sharedHandleRemoveFile,
+    handleRemoveAllFiles: sharedHandleRemoveAllFiles,
+    handleDropzoneClearComplete: sharedHandleDropzoneClearComplete
+  } = useFileManagement({
+    clearAllProgress,
+    adjustProgressIndices,
+    onResultsReset: () => setResults([]),
+    onJobMappingReset: () => setFileJobMapping({})
+  });
+  
+  const { makeApiRequestWithRateLimitTracking } = useApiWithRateLimit();
+  
+  const {
+    isArchiveLoading,
+    handleDownloadArchive: sharedHandleDownloadArchive
+  } = useArchiveDownload({
+    toolName: "compressed",
+    toolAction: "compress",
+    makeApiRequestWithRateLimitTracking
+  });
+  
+  const { renderProgressBadge } = useProgressBadges();
+  const { renderBackgroundJobProgress, renderVisualProgress, renderBatchProgress } = useProgressDisplay();
+  const { renderHeicWarning } = useHeicDetection();
+  
+  const {
+    jobIds,
+    jobProgress,
+    queueStatus,
+    fileJobMapping,
+    setJobIds,
+    setJobProgress,
+    setQueueStatus,
+    setFileJobMapping,
+    startJobPolling,
+    cleanupJobState,
+    clearAllJobs
+  } = useJobManagement({
+    setVisualProgress,
+    setProcessingFiles,
+    setResults,
+    setRateLimitUsage
   });
   
   // Calculate retry countdown
@@ -104,160 +142,28 @@ export default function CompressTool() {
     return () => clearInterval(intervalId);
   }, [nextRetryTime]);
   
-  // Visual progress simulation function
-  const simulateProgress = (fileIndex: number, duration: number = 2000) => {
-    return new Promise<void>((resolve) => {
-      const startTime = Date.now();
-      const interval = 50; // Update every 50ms for smooth animation
-      
-      const updateProgress = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(100, (elapsed / duration) * 100);
-        
-        setVisualProgress(prev => ({
-          ...prev,
-          [fileIndex]: Math.round(progress)
-        }));
-        
-        if (progress >= 100) {
-          resolve();
-        } else {
-          setTimeout(updateProgress, interval);
-        }
-      };
-      
-      updateProgress();
-    });
-  };
-  
-  // Function to show results after progress completes
+  // Create a wrapper for showResultsAfterProgress that provides setResults
   const showResultsAfterProgress = async (fileIndex: number, result: any) => {
-    // Wait for visual progress to complete
-    await simulateProgress(fileIndex);
-    
-    // Now show the actual result
-    setResults(prevResults => {
-      const newResults = [...prevResults];
-      newResults[fileIndex] = result;
-      return newResults;
-    });
-    
-    // Clean up progress state
-    setVisualProgress(prev => {
-      const newProgress = { ...prev };
-      delete newProgress[fileIndex];
-      return newProgress;
-    });
-    
-    setProcessingFiles(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(fileIndex);
-      return newSet;
-    });
+    await sharedShowResultsAfterProgress(fileIndex, result, setResults);
   };
   
-  // Generate preview URLs when files change
-  useEffect(() => {
-    // Revoke old object URLs to avoid memory leaks
-    previews.forEach(preview => URL.revokeObjectURL(preview))
-    
-    // Create new preview URLs
-    const newPreviews = files.map(file => URL.createObjectURL(file))
-    setPreviews(newPreviews)
-    
-    // Clean up function to revoke URLs when component unmounts
-    return () => {
-      newPreviews.forEach(preview => URL.revokeObjectURL(preview))
-    }
-  }, [files])
+  // Result processor for compress jobs
+  const createCompressResult = (jobResult: any, file: File) => ({
+    filename: file.name,
+    originalSize: file.size,
+    compressedSize: jobResult.compressedSize,
+    compressionRatio: jobResult.compressionRatio,
+    qualityUsed: quality,
+    originalFilename: jobResult.originalFilename,
+    resultFilename: jobResult.filename,
+    downloadUrl: jobResult.downloadUrl
+  });
   
-  const handleImageDrop = async (droppedFiles: File[]) => {
-    // First convert any HEIC/HEIF files to JPEG
-    try {
-      const processedFiles = await processHeicFiles(droppedFiles);
-      
-      // ImageDropzone now handles file limits dynamically, so we just add all processed files
-      setFiles(prevFiles => {
-        const updatedFiles = [...prevFiles, ...processedFiles];
-        // Automatically select the first file if none is currently selected
-        if (selectedFileIndex === null && updatedFiles.length > 0) {
-          setTimeout(() => setSelectedFileIndex(0), 0);
-        }
-        return updatedFiles;
-      });
-      
-      // Reset results and progress states when new files are uploaded
-      setResults([]);
-      setVisualProgress({});
-      setProcessingFiles(new Set());
-    } catch (error) {
-      toast({
-        title: "Error processing HEIC images",
-        description: "There was an error processing one or more HEIC images. Try converting them to JPEG before uploading.",
-        variant: "destructive"
-      });
-    }
-  }
-  
-  const handleRemoveFile = (index: number) => {
-    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index))
-    // Also remove from results if it was already compressed
-    setResults(prevResults => prevResults.filter((_, i) => i !== index))
-    
-    // Clean up progress states for this file
-    setVisualProgress(prev => {
-      const newProgress = { ...prev };
-      delete newProgress[index];
-      // Also need to adjust indices for remaining files
-      const adjustedProgress: Record<number, number> = {};
-      Object.entries(newProgress).forEach(([key, value]) => {
-        const oldIndex = parseInt(key);
-        if (oldIndex > index) {
-          adjustedProgress[oldIndex - 1] = value;
-        } else if (oldIndex < index) {
-          adjustedProgress[oldIndex] = value;
-        }
-      });
-      return adjustedProgress;
-    });
-    
-    setProcessingFiles(prev => {
-      const newSet = new Set<number>();
-      prev.forEach(fileIndex => {
-        if (fileIndex < index) {
-          newSet.add(fileIndex);
-        } else if (fileIndex > index) {
-          newSet.add(fileIndex - 1);
-        }
-        // Don't add the removed index
-      });
-      return newSet;
-    });
-    
-    if (selectedFileIndex === index) {
-      setSelectedFileIndex(null)
-    } else if (selectedFileIndex !== null && selectedFileIndex > index) {
-      setSelectedFileIndex(selectedFileIndex - 1)
-    }
-  }
-  
-  const handleRemoveAllFiles = () => {
-    setFiles([])
-    setPreviews([])
-    setResults([])
-    setSelectedFileIndex(null)
-    // Clean up all progress states
-    setVisualProgress({});
-    setProcessingFiles(new Set());
-    setFileJobMapping({});
-    // Trigger dropzone clearing
-    setShouldClearDropzone(true);
-  }
-  
-  // Callback for when dropzone completes clearing
-  const handleDropzoneClearComplete = () => {
-    setShouldClearDropzone(false);
-  }
+  // Create wrapper functions that pass the required parameters
+  const handleImageDrop = (droppedFiles: File[]) => sharedHandleImageDrop(droppedFiles);
+  const handleRemoveFile = (index: number) => sharedHandleRemoveFile(index, results, setResults);
+  const handleRemoveAllFiles = () => sharedHandleRemoveAllFiles(results, setResults);
+  const handleDropzoneClearComplete = () => sharedHandleDropzoneClearComplete();
   
   const handleCompressSingle = async () => {
     if (selectedFileIndex === null) {
@@ -319,7 +225,6 @@ export default function CompressTool() {
   const compressFiles = async (filesToCompress: File[], fileIndices: number[]) => {
     setIsLoading(true)
     const compressedResults: any[] = [...results]
-    const newJobIds: string[] = []
     
     // Mark files as being processed and start visual progress
     setProcessingFiles(new Set(fileIndices))
@@ -353,7 +258,7 @@ export default function CompressTool() {
         formData.append('quality', quality.toString())
         
         try {
-          // Use the enhanced API request function
+          // Use the shared API request function with rate limit tracking
           const result = await makeApiRequestWithRateLimitTracking<CompressResponse>('images/compress', {
             method: 'POST',
             body: formData,
@@ -362,148 +267,12 @@ export default function CompressTool() {
           
           // Handle queued response (with jobId) vs direct response
           if (result.status === 'processing' && result.data.jobId) {
-            // Queued processing - store job ID for polling
-            newJobIds.push(result.data.jobId)
-            
-            // Map this file index to the job ID
-            setFileJobMapping(prev => ({
-              ...prev,
-              [index]: result.data.jobId as string
-            }));
-            
-            // Start polling this job
-            pollJobStatus(result.data.jobId, 'compress', {
-              intervalMs: 1000,
-              onProgress: (progress, queuePosition, estimatedWaitTime) => {
-                // Update visual progress for queued jobs (use actual progress)
-                setVisualProgress(prev => ({
-                  ...prev,
-                  [index]: progress
-                }));
-                
-                setJobProgress(prev => ({
-                  ...prev,
-                  [result.data.jobId as string]: progress
-                }))
-                
-                // Update queue status
-                setQueueStatus(prev => ({
-                  ...prev,
-                  [result.data.jobId as string]: {
-                    position: queuePosition,
-                    waitTime: estimatedWaitTime,
-                    isProcessing: progress > 0
-                  }
-                }))
-              },
-              onQueueStatus: (position, waitTime) => {
-                setQueueStatus(prev => ({
-                  ...prev,
-                  [result.data.jobId as string]: {
-                    position,
-                    waitTime,
-                    isProcessing: false
-                  }
-                }))
-              },
-              onComplete: async (jobResult) => {
-                // Prepare result object
-                const resultObj = {
-                  filename: file.name,
-                  originalSize: file.size,
-                  compressedSize: jobResult.compressedSize,
-                  compressionRatio: jobResult.compressionRatio,
-                  qualityUsed: quality,
-                  originalFilename: jobResult.originalFilename,
-                  resultFilename: jobResult.filename,
-                  downloadUrl: jobResult.downloadUrl
-                };
-                
-                // Show progress completion and then result
-                setVisualProgress(prev => ({
-                  ...prev,
-                  [index]: 100
-                }));
-                
-                // Wait a moment for the 100% to be visible, then show result
-                setTimeout(() => {
-                  setResults(prevResults => {
-                    const newResults = [...prevResults];
-                    newResults[index] = resultObj;
-                    return newResults;
-                  });
-                  
-                  // Clean up progress state
-                  setVisualProgress(prev => {
-                    const newProgress = { ...prev };
-                    delete newProgress[index];
-                    return newProgress;
-                  });
-                  
-                  setProcessingFiles(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(index);
-                    return newSet;
-                  });
-                  
-                  // Show success notification
-                  toast({
-                    title: "✅ Compression completed!",
-                    description: `${file.name} compressed successfully (${jobResult.compressionRatio}% file size reduction)`,
-                  });
-                }, 500);
-                
-                // Remove job from active jobs
-                setJobIds(prev => prev.filter(id => id !== result.data.jobId))
-                
-                // Clean up file job mapping
-                setFileJobMapping(prev => {
-                  const newMapping = { ...prev };
-                  delete newMapping[index];
-                  return newMapping;
-                });
-              },
-              onError: (error) => {
-                console.error(`Job ${result.data.jobId} failed:`, error)
-                
-                // Clean up progress state on error
-                setVisualProgress(prev => {
-                  const newProgress = { ...prev };
-                  delete newProgress[index];
-                  return newProgress;
-                });
-                
-                setProcessingFiles(prev => {
-                  const newSet = new Set(prev);
-                  newSet.delete(index);
-                  return newSet;
-                });
-                
-                toast({
-                  title: "Compression failed",
-                  description: error,
-                  variant: "destructive"
-                })
-                
-                // Remove job from active jobs
-                setJobIds(prev => prev.filter(id => id !== result.data.jobId))
-              }
-            }).catch(error => {
-              console.error('Polling error:', error)
-            })
+            // Queued processing - use shared job polling
+            startJobPolling(result.data.jobId, 'compress', index, file, createCompressResult);
             
           } else {
             // Direct processing - immediate result, but use visual progress
-            const resultObj = {
-              filename: file.name,
-              originalSize: file.size,
-              compressedSize: result.data.compressedSize,
-              compressionRatio: result.data.compressionRatio,
-              qualityUsed: quality,
-              originalFilename: result.data.originalFilename,
-              resultFilename: result.data.filename,
-              downloadUrl: result.data.downloadUrl
-            };
+            const resultObj = createCompressResult(result.data, file);
             
             // Start visual progress simulation for direct processing
             showResultsAfterProgress(index, resultObj).then(() => {
@@ -515,29 +284,15 @@ export default function CompressTool() {
             });
           }
         } catch (error: any) {
-          console.error(`Failed to compress file ${i+1}/${filesToCompress.length}:`, error);
+          // Update rate limit info from error
+          updateRateLimitFromError(error);
           
-          // Clean up progress state on error
-          setVisualProgress(prev => {
-            const newProgress = { ...prev };
-            delete newProgress[index];
-            return newProgress;
-          });
-          
-          setProcessingFiles(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(index);
-            return newSet;
-          });
-          
-          // Special handling for rate limit errors
           if (error.status === 429) {
-            // Force show a toast notification
+            // Show rate limit error toast
             toast({
-              title: "Rate Limit Reached",
-              description: "You've reached your limit for image processing. It will reset after some time.",
-              variant: "destructive",
-              duration: 5000 // Make it display longer
+              title: "Rate limit reached",
+              description: "You've reached the image processing limit. Please try again later.",
+              variant: "destructive"
             });
             
             // Explicitly set the rate limit reached flag
@@ -546,11 +301,21 @@ export default function CompressTool() {
               isLimitReached: true
             }));
             
-            // Do not mark files as compressed if they hit the rate limit
-            compressedResults[index] = null;
+            // Clean up progress state on error
+            setVisualProgress(prev => {
+              const newProgress = { ...prev };
+              delete newProgress[index];
+              return newProgress;
+            });
             
-            // Stop processing more files if we hit a rate limit
-            break;
+            setProcessingFiles(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(index);
+              return newSet;
+            });
+            
+            // Mark the file as failed
+            compressedResults[index] = null;
           } else {
             // For other errors, just continue to the next file
             toast({
@@ -567,9 +332,6 @@ export default function CompressTool() {
           continue;
         }
       }
-      
-      // Store new job IDs
-      setJobIds(prev => [...prev, ...newJobIds])
       
       // Update results for direct processing (this is handled by showResultsAfterProgress now)
       // setResults(compressedResults)
@@ -591,7 +353,7 @@ export default function CompressTool() {
       })
     } finally {
       // Only set loading to false if direct processing or all jobs failed
-      if (processingMode !== 'queued' || newJobIds.length === 0) {
+      if (processingMode !== 'queued' || jobIds.length === 0) {
         setIsLoading(false)
       }
     }
@@ -604,112 +366,11 @@ export default function CompressTool() {
     }
   }, [jobIds, isLoading])
   
-  const handleDownloadArchive = async () => {
-    if (results.filter(r => r).length === 0) {
-      toast({
-        title: "No compressed images",
-        description: "Please compress at least one image first",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    setIsArchiveLoading(true)
-    
-    try {
-      // Get all file IDs that have been compressed
-      const fileIds = results
-        .map((result, index) => result ? { filename: result.resultFilename, originalName: result.originalFilename } : null)
-        .filter(item => item !== null)
-      
-      // Use enhanced API request function
-      const result = await makeApiRequestWithRateLimitTracking<ArchiveResponse>('images/archive', {
-        method: 'POST',
-        body: { files: fileIds },
-      });
-      
-      // Trigger download - use getApiUrl to ensure consistent URL format
-      const baseUrl = getApiUrl().replace('/api', ''); // Remove '/api' as it's included in the downloadUrl
-      window.location.href = `${baseUrl}${result.data.downloadUrl}`;
-      
-      toast({
-        title: "Archive created",
-        description: "Your compressed images are being downloaded as a ZIP file"
-      })
-    } catch (error: any) {
-      console.error('Archive error:', error);
-      
-      // Special handling for rate limit errors
-      if (error.status === 429) {
-        toast({
-          title: "Rate Limit Reached",
-          description: "You've reached your limit for batch operations. It will reset after some time.",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Archive creation failed",
-          description: error instanceof Error ? error.message : "An unknown error occurred",
-          variant: "destructive"
-        });
-      }
-    } finally {
-      setIsArchiveLoading(false)
-    }
-  }
-  
-  // Function to update rate limit info based on response headers
-  const updateRateLimitInfo = (headers: Headers) => {
-    const remaining = headers.get('RateLimit-Remaining');
-    const limit = headers.get('RateLimit-Limit');
-    const resetAfter = headers.get('RateLimit-Reset-After');
-    
-    if (remaining && limit) {
-      const used = Number(limit) - Number(remaining);
-      setRateLimitUsage(prev => ({
-        ...prev,
-        used,
-        limit: Number(limit),
-        resetsIn: resetAfter ? Number(resetAfter) : null
-      }));
-    }
-  };
-  
-  // Update the apiRequest call to capture rate limit headers
-  const makeApiRequestWithRateLimitTracking = async <T,>(endpoint: string, options: any): Promise<T> => {
-    try {
-      // Make the actual API request
-      const result = await apiRequest<T>(endpoint, options);
-      
-      // No direct access to headers from apiRequest
-      // We'll update rate limit info on errors instead
-      
-      return result;
-    } catch (error: any) {
-      // If rate limit info is available on the error, update the state
-      if (error.rateLimitInfo) {
-        const { limit, remaining, resetAfter } = error.rateLimitInfo;
-        if (limit && remaining) {
-          const used = Number(limit) - Number(remaining);
-          setRateLimitUsage({
-            used,
-            limit: Number(limit),
-            resetsIn: resetAfter ? Number(resetAfter) : null,
-            isLimitReached: error.status === 429
-          });
-        }
-      }
-      
-      // If this is a rate limit error, set the flag even without detailed info
-      if (error.status === 429) {
-        setRateLimitUsage(prev => ({
-          ...prev,
-          isLimitReached: true
-        }));
-      }
-      
-      throw error; // Re-throw the error for the caller to handle
-    }
+  const handleDownloadArchive = () => {
+    sharedHandleDownloadArchive(results, (result) => ({
+      filename: result.resultFilename,
+      originalName: result.originalFilename
+    }));
   };
   
   return (
@@ -849,11 +510,11 @@ export default function CompressTool() {
               
               {/* Rate Limit Indicator */}
               {rateLimitUsage.used > 0 && (
-                <RateLimitIndicator 
+                <LocalRateLimitIndicator 
                   usage={rateLimitUsage.used} 
+                  limit={rateLimitUsage.limit}
                   resetsIn={rateLimitUsage.resetsIn} 
                   isLimitReached={rateLimitUsage.isLimitReached}
-                  type="imageProcessing"
                 />
               )}
               
@@ -904,17 +565,15 @@ export default function CompressTool() {
                                 )}
                               </p>
                               {/* Show appropriate badge based on processing state */}
-                              {results[index] ? (
-                                <Badge className="bg-green-600 text-xs" variant="secondary">
-                                  Compressed
-                                </Badge>
-                              ) : (
-                                fileJobMapping[index] && (
-                                  <Badge className="bg-yellow-600 text-xs" variant="secondary">
-                                    Processing {jobProgress[fileJobMapping[index]] ? `${Math.round(jobProgress[fileJobMapping[index]])}%` : ''}
-                                  </Badge>
-                                )
-                              )}
+                              {renderProgressBadge({
+                                index,
+                                results,
+                                processingFiles,
+                                visualProgress,
+                                fileJobMapping,
+                                jobProgress,
+                                completedText: "Compressed"
+                              })}
                             </div>
                           </div>
                         </div>
@@ -987,35 +646,13 @@ export default function CompressTool() {
                     )}
                     
                     {/* Show progress for background jobs */}
-                    {selectedFileIndex !== null && 
-                     !results[selectedFileIndex] && 
-                     fileJobMapping[selectedFileIndex] && (
-                      <div className="mt-3 pt-3 border-t">
-                        <p className="font-medium text-yellow-600 mb-2">Processing Image...</p>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mb-2">
-                          <div
-                            className="h-full bg-yellow-500 transition-all duration-300"
-                            style={{ width: `${jobProgress[fileJobMapping[selectedFileIndex]] || 0}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          {jobProgress[fileJobMapping[selectedFileIndex]] 
-                            ? `${Math.round(jobProgress[fileJobMapping[selectedFileIndex]])}% complete` 
-                            : 'Starting process...'}
-                        </p>
-                        
-                        {/* Show queue status if available */}
-                        {fileJobMapping[selectedFileIndex] && queueStatus[fileJobMapping[selectedFileIndex]] && (
-                          <div className="mt-2">
-                            <QueueStatusIndicator
-                              queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
-                              estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
-                              isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {renderBackgroundJobProgress({
+                      selectedFileIndex,
+                      results,
+                      fileJobMapping,
+                      jobProgress,
+                      queueStatus
+                    })}
                   </div>
                 </div>
               ) : (
@@ -1036,185 +673,169 @@ export default function CompressTool() {
         
         {/* Compression settings and actions */}
         <Card className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h3 className="text-lg font-medium">Compression Settings</h3>
+          <Tabs defaultValue="single" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <h3 className="text-lg font-medium">Compression Settings</h3>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                {processingMode === 'queued' && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Server className="h-3 w-3" /> Queue mode
+                  </span>
+                )}
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="single" disabled={files.length === 0} className="flex-1 sm:flex-none">
+                    Single Image
+                  </TabsTrigger>
+                  <TabsTrigger value="batch" disabled={files.length < 2} className="flex-1 sm:flex-none">
+                    Batch Compress
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              {processingMode === 'queued' && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Server className="h-3 w-3" /> Queue mode
-                </span>
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-sm font-medium mb-3">Quality: {quality}%</h4>
+                <Slider
+                  value={[quality]}
+                  onValueChange={(values: number[]) => setQuality(values[0])}
+                  max={100}
+                  min={1}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                  <span>Lower quality, smaller size</span>
+                  <span>Higher quality, larger size</span>
+                </div>
+                {/* HEIC/HEIF Detection Warning */}
+                {renderHeicWarning({
+                  files,
+                  selectedFileIndex,
+                  message: "HEIC/HEIF files are automatically converted to JPEG before compression. Original files remain unchanged."
+                })}
+              </div>
+              
+              {/* Queue Status Indicator for Single Image */}
+              {selectedFileIndex !== null && 
+               !results[selectedFileIndex] && 
+               fileJobMapping[selectedFileIndex] && 
+               queueStatus[fileJobMapping[selectedFileIndex]] && (
+                <QueueStatusIndicator
+                  queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
+                  estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
+                  isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
+                />
               )}
             </div>
-          </div>
-          
-          <div className="space-y-6">
-            <div>
-              <h4 className="text-sm font-medium mb-3">Quality: {quality}%</h4>
-              <Slider
-                value={[quality]}
-                onValueChange={(values: number[]) => setQuality(values[0])}
-                max={100}
-                min={1}
-                step={1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>Lower quality, smaller size</span>
-                <span>Higher quality, larger size</span>
-              </div>
-            </div>
             
-            {/* Queue Status Indicator for Single Image */}
-            {selectedFileIndex !== null && 
-             !results[selectedFileIndex] && 
-             fileJobMapping[selectedFileIndex] && 
-             queueStatus[fileJobMapping[selectedFileIndex]] && (
-              <QueueStatusIndicator
-                queuePosition={queueStatus[fileJobMapping[selectedFileIndex]]?.position}
-                estimatedWaitTime={queueStatus[fileJobMapping[selectedFileIndex]]?.waitTime}
-                isProcessing={queueStatus[fileJobMapping[selectedFileIndex]]?.isProcessing}
-              />
-            )}
-            
-            {/* Visual Progress Bar for Single Image */}
-            {selectedFileIndex !== null && processingFiles.has(selectedFileIndex) && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Compressing image...</span>
-                  <span className="font-medium">{visualProgress[selectedFileIndex] || 0}%</span>
-                </div>
-                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-300 ease-out"
-                    style={{ width: `${visualProgress[selectedFileIndex] || 0}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            
-            {/* Visual Progress Bar for Batch Processing */}
-            {processingFiles.size > 1 && (
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    Compressing {processingFiles.size} images...
-                  </span>
-                  <span className="font-medium">
-                    {Object.keys(visualProgress).length > 0 
-                      ? `${Math.round(Object.values(visualProgress).reduce((a, b) => a + b, 0) / Object.values(visualProgress).length)}%`
-                      : '0%'
-                    }
-                  </span>
-                </div>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {Array.from(processingFiles).map(fileIndex => (
-                    <div key={fileIndex} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="truncate text-muted-foreground flex-1 mr-2" title={files[fileIndex]?.name}>
-                          {files[fileIndex]?.name || `File ${fileIndex + 1}`}
-                        </span>
-                        <span className="font-medium flex-shrink-0">{visualProgress[fileIndex] || 0}%</span>
-                      </div>
-                      <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all duration-300 ease-out"
-                          style={{ width: `${visualProgress[fileIndex] || 0}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <div className="flex flex-col sm:flex-row gap-3">
+            <TabsContent value="single" className="space-y-4 mt-4">
+              {/* Visual Progress Bar for Single Image */}
+              {renderVisualProgress({
+                selectedFileIndex,
+                processingFiles,
+                visualProgress,
+                actionText: "Compressing image"
+              })}
+              
               <Button 
-                className="flex-1" 
+                className="w-full" 
+                size="lg" 
                 onClick={handleCompressSingle}
                 disabled={isLoading || selectedFileIndex === null || (selectedFileIndex !== null && results[selectedFileIndex])}
                 variant="default"
               >
-                {isLoading && selectedFileIndex !== null && processingFiles.has(selectedFileIndex) ? (
-                  <span className="flex items-center text-sm">
-                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
                 ) : (
-                  <span className="flex items-center text-sm">
+                  <>
                     <Download className="mr-2 h-4 w-4" /> Compress Selected Image
-                  </span>
+                  </>
                 )}
               </Button>
               
+              {/* Show message if already processed */}
+              {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Image already compressed and ready for download.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="batch" className="space-y-4 mt-4">
+              {/* Visual Progress Bar for Batch Processing */}
+              {renderBatchProgress({
+                processingFiles,
+                visualProgress,
+                files,
+                actionText: "Compressing"
+              })}
+              
               <Button 
-                className="flex-1" 
+                className="w-full" 
+                size="lg" 
                 onClick={handleCompressAll}
                 disabled={isLoading || files.length === 0 || files.every((_, index) => results[index])}
-                variant="outline"
               >
-                {isLoading && processingFiles.size > 1 ? (
-                  <span className="flex items-center text-sm">
-                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
                   </span>
                 ) : (
-                  <span className="flex items-center text-sm">
+                  <>
                     <Download className="mr-2 h-4 w-4" /> Compress All Images
-                  </span>
+                  </>
                 )}
               </Button>
-            </div>
-            
-            {/* Show message if already processed */}
-            {selectedFileIndex !== null && results[selectedFileIndex] && !isLoading && (
-              <div className="text-center text-sm text-muted-foreground">
-                <p className="flex items-center justify-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Image already compressed and ready for download.
-                </p>
-              </div>
-            )}
-            
-            {/* Show message if all files are already processed */}
-            {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
-              <div className="text-center text-sm text-muted-foreground">
-                <p className="flex items-center justify-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  All images already compressed and ready for download.
-                </p>
-              </div>
-            )}
-            
-            {results.filter(r => r).length > 1 && (
-              <Button 
-                className="w-full" 
-                variant="outline"
-                onClick={handleDownloadArchive}
-                disabled={isArchiveLoading}
-              >
-                {isArchiveLoading ? (
-                  <span className="flex items-center text-sm">
-                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creating archive...
-                  </span>
-                ) : (
-                  <span className="flex items-center text-sm">
-                    <Package className="mr-2 h-4 w-4" /> Download All as ZIP
-                  </span>
-                )}
-              </Button>
-            )}
-          </div>
+              
+              {/* Show message if all files are already processed */}
+              {files.length > 0 && files.every((_, index) => results[index]) && !isLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    All images already compressed and ready for download.
+                  </p>
+                </div>
+              )}
+              
+              {results.filter(r => r).length > 1 && (
+                <Button 
+                  className="w-full" 
+                  variant="outline"
+                  onClick={handleDownloadArchive}
+                  disabled={isArchiveLoading}
+                >
+                  {isArchiveLoading ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating archive...
+                    </span>
+                  ) : (
+                    <>
+                      <Package className="mr-2 h-4 w-4" /> Download All as ZIP
+                    </>
+                  )}
+                </Button>
+              )}
+            </TabsContent>
+          </Tabs>
         </Card>
       </div>
     </div>

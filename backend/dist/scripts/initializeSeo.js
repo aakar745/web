@@ -74,6 +74,17 @@ const defaultPages = [
         priority: 6
     },
     {
+        pagePath: '/image/metadata',
+        pageType: 'tool',
+        pageName: 'Image Metadata Analyzer',
+        metaTitle: 'Free Image Metadata Analyzer - Extract EXIF & Image Data Online',
+        metaDescription: 'Analyze image metadata, extract EXIF data, and view technical specifications. Free online image metadata analyzer with comprehensive insights. Privacy-focused.',
+        metaKeywords: ['image metadata', 'EXIF data', 'image analyzer', 'image properties', 'metadata extractor', 'image information', 'technical specifications', 'photo metadata'],
+        ogType: 'website',
+        twitterCard: 'summary_large_image',
+        priority: 7
+    },
+    {
         pagePath: '/about',
         pageType: 'about',
         pageName: 'About Us',

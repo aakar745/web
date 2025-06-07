@@ -493,3 +493,1239 @@
 {"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-06 18:35:12:3512"}
 {"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-06 18:35:12:3512"}
 {"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-06 18:35:12:3512"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-06 18:40:13:4013"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-06 18:40:13:4013"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-06 18:40:13:4013"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-06 18:43:39:4339"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-06-06 18:43:47:4347"}
+{"level":"warn","message":"Triggering emergency file cleanup due to high load","timestamp":"2025-06-06 18:43:47:4347"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:43:58:4358"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:44:40:4440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:44:40:4440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:44:40:4440"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:45:18:4518"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:45:19:4519"}
+{"level":"info","message":"Exiting degradation mode - system load has normalized","timestamp":"2025-06-06 18:45:19:4519"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-06 18:45:40:4540"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-06 18:45:40:4540"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-06 18:45:40:4540"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/683d8f536602dc6e06b066a4/comments","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/683d8f536602dc6e06b066a4","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /auth/me","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /scripts/public","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/683d8f536602dc6e06b066a4/like","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs/683d8f536602dc6e06b066a4/comments","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /blogs","timestamp":"2025-06-06 18:45:41:4541"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:45:58:4558"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-06 18:46:14:4614"}
+{"level":"info","message":"Exiting degradation mode - system load has normalized","timestamp":"2025-06-06 18:46:14:4614"}
+{"level":"warn","message":"Redis connection failed - dead letter queue will use fallback mode","timestamp":"2025-06-06 18:51:28:5128"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 10:43:01:431"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-07 10:43:28:4328"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-07 10:43:28:4328"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-07 10:43:28:4328"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-07 10:43:28:4328"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-07 10:43:28:4328"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-07 10:43:28:4328"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-07 11:14:12:1412"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-07 11:14:12:1412"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-07 11:14:12:1412"}
+{"level":"info","message":"Scheduler status requested from admin panel","timestamp":"2025-06-07 11:35:05:355"}
+{"level":"info","message":"Scheduler status requested from admin panel","timestamp":"2025-06-07 11:35:05:355"}
+{"level":"info","message":"System status requested from admin panel","timestamp":"2025-06-07 11:35:06:356"}
+{"level":"info","message":"System status requested from admin panel","timestamp":"2025-06-07 11:35:06:356"}
+{"level":"info","message":"System settings updated by admin:","timestamp":"2025-06-07 11:35:14:3514","updatedBy":"admin@example.com","updates":{"__v":0,"_id":"6836adae8439da3fc6ab8a50","apiMaxRequests":1000,"apiWindowMs":900000,"archiveFileRetentionHours":24,"autoCleanupEnabled":true,"batchOperationMaxRequests":2,"batchOperationWindowMs":600000,"cleanupIntervalHours":6,"createdAt":"2025-05-28T06:31:10.755Z","degradationCooldownMs":15000,"imageProcessingMaxRequests":5,"imageProcessingWindowMs":900000,"jobRetryAttempts":3,"jobTimeoutMs":180000,"maxFileSize":52428800,"maxFiles":10,"maxLoadThreshold":0.9,"maxMemoryUsagePercent":90,"nodeMemoryLimit":4096,"processedFileRetentionHours":48,"tempFileRetentionHours":2,"updatedAt":"2025-06-06T07:28:22.827Z","workerConcurrency":25}}
+{"level":"info","message":"Settings cache cleared","timestamp":"2025-06-07 11:35:14:3514"}
+{"level":"debug","message":"Recorded completed convert job (1307ms) for monitoring","timestamp":"2025-06-07 11:35:36:3536"}
+{"level":"debug","message":"Recorded completed convert job (291ms) for monitoring","timestamp":"2025-06-07 11:35:41:3541"}
+{"level":"debug","message":"Recorded completed convert job (281ms) for monitoring","timestamp":"2025-06-07 11:35:44:3544"}
+{"level":"debug","message":"Recorded completed convert job (514ms) for monitoring","timestamp":"2025-06-07 11:35:47:3547"}
+{"level":"debug","message":"Recorded completed convert job (468ms) for monitoring","timestamp":"2025-06-07 11:35:53:3553"}
+{"level":"info","message":"System settings updated by admin:","timestamp":"2025-06-07 11:41:11:4111","updatedBy":"admin@example.com","updates":{"__v":0,"_id":"6836adae8439da3fc6ab8a50","apiMaxRequests":1000,"apiWindowMs":900000,"archiveFileRetentionHours":24,"autoCleanupEnabled":true,"batchOperationMaxRequests":2,"batchOperationWindowMs":600000,"cleanupIntervalHours":6,"createdAt":"2025-05-28T06:31:10.755Z","degradationCooldownMs":15000,"imageProcessingMaxRequests":7,"imageProcessingWindowMs":900000,"jobRetryAttempts":3,"jobTimeoutMs":180000,"maxFileSize":52428800,"maxFiles":10,"maxLoadThreshold":0.9,"maxMemoryUsagePercent":90,"nodeMemoryLimit":4096,"processedFileRetentionHours":48,"tempFileRetentionHours":2,"updatedAt":"2025-06-07T06:05:14.483Z","workerConcurrency":25}}
+{"level":"info","message":"Settings cache cleared","timestamp":"2025-06-07 11:41:11:4111"}
+{"level":"info","message":"Redis is now available! Reinitializing dead letter queue...","timestamp":"2025-06-07 11:42:42:4242"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 11:42:42:4242"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 11:42:42:4242"}
+{"level":"info","message":"Dead letter queue successfully reinitialized with Redis!","timestamp":"2025-06-07 11:42:42:4242"}
+{"level":"debug","message":"Recorded completed compress job (151ms) for monitoring","timestamp":"2025-06-07 11:43:02:432"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 11:43:56:4356"}
+{"level":"debug","message":"Recorded completed compress job (27ms) for monitoring","timestamp":"2025-06-07 11:44:29:4429"}
+{"level":"debug","message":"Recorded completed compress job (143ms) for monitoring","timestamp":"2025-06-07 11:44:44:4444"}
+{"level":"debug","message":"Recorded completed compress job (35ms) for monitoring","timestamp":"2025-06-07 11:44:45:4445"}
+{"level":"debug","message":"Recorded completed compress job (33ms) for monitoring","timestamp":"2025-06-07 11:44:48:4448"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 11:53:56:5356"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 11:54:55:5455"}
+{"level":"debug","message":"Recorded completed compress job (239ms) for monitoring","timestamp":"2025-06-07 11:55:16:5516"}
+{"level":"debug","message":"Recorded completed compress job (52ms) for monitoring","timestamp":"2025-06-07 11:55:22:5522"}
+{"level":"debug","message":"Recorded completed compress job (239ms) for monitoring","timestamp":"2025-06-07 11:55:35:5535"}
+{"level":"debug","message":"Recorded completed compress job (56ms) for monitoring","timestamp":"2025-06-07 11:55:36:5536"}
+{"level":"debug","message":"Recorded completed compress job (52ms) for monitoring","timestamp":"2025-06-07 11:55:36:5536"}
+{"level":"debug","message":"Recorded completed compress job (101ms) for monitoring","timestamp":"2025-06-07 11:55:36:5536"}
+{"level":"debug","message":"Recorded completed resize job (244ms) for monitoring","timestamp":"2025-06-07 11:58:33:5833"}
+{"level":"info","message":"System settings updated by admin:","timestamp":"2025-06-07 12:00:06:06","updatedBy":"admin@example.com","updates":{"__v":0,"_id":"6836adae8439da3fc6ab8a50","apiMaxRequests":1000,"apiWindowMs":900000,"archiveFileRetentionHours":24,"autoCleanupEnabled":true,"batchOperationMaxRequests":2,"batchOperationWindowMs":600000,"cleanupIntervalHours":6,"createdAt":"2025-05-28T06:31:10.755Z","degradationCooldownMs":15000,"imageProcessingMaxRequests":15,"imageProcessingWindowMs":900000,"jobRetryAttempts":3,"jobTimeoutMs":180000,"maxFileSize":52428800,"maxFiles":10,"maxLoadThreshold":0.9,"maxMemoryUsagePercent":90,"nodeMemoryLimit":4096,"processedFileRetentionHours":48,"tempFileRetentionHours":2,"updatedAt":"2025-06-07T06:11:11.336Z","workerConcurrency":25}}
+{"level":"info","message":"Settings cache cleared","timestamp":"2025-06-07 12:00:06:06"}
+{"level":"debug","message":"Recorded completed convert job (1951ms) for monitoring","timestamp":"2025-06-07 12:00:17:017"}
+{"level":"debug","message":"Recorded completed crop job (118ms) for monitoring","timestamp":"2025-06-07 12:02:38:238"}
+{"level":"debug","message":"Recorded completed compress job (244ms) for monitoring","timestamp":"2025-06-07 12:02:57:257"}
+{"level":"debug","message":"Recorded completed compress job (55ms) for monitoring","timestamp":"2025-06-07 12:02:57:257"}
+{"level":"debug","message":"Recorded completed compress job (53ms) for monitoring","timestamp":"2025-06-07 12:02:57:257"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 12:04:58:458"}
+{"level":"debug","message":"Recorded completed convert job (1984ms) for monitoring","timestamp":"2025-06-07 12:07:05:75"}
+{"level":"debug","message":"Recorded completed compress job (255ms) for monitoring","timestamp":"2025-06-07 12:07:16:716"}
+{"level":"debug","message":"Recorded completed resize job (241ms) for monitoring","timestamp":"2025-06-07 12:07:51:751"}
+{"level":"debug","message":"Recorded completed compress job (256ms) for monitoring","timestamp":"2025-06-07 12:13:10:1310"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 12:14:58:1458"}
+{"level":"debug","message":"Recorded completed convert job (1890ms) for monitoring","timestamp":"2025-06-07 12:16:12:1612"}
+{"level":"debug","message":"Recorded completed convert job (463ms) for monitoring","timestamp":"2025-06-07 12:16:13:1613"}
+{"level":"debug","message":"Recorded completed convert job (432ms) for monitoring","timestamp":"2025-06-07 12:16:13:1613"}
+{"level":"debug","message":"Recorded completed convert job (779ms) for monitoring","timestamp":"2025-06-07 12:16:14:1614"}
+{"level":"debug","message":"Recorded completed convert job (1879ms) for monitoring","timestamp":"2025-06-07 12:22:04:224"}
+{"level":"debug","message":"Recorded completed convert job (441ms) for monitoring","timestamp":"2025-06-07 12:22:05:225"}
+{"level":"debug","message":"Recorded completed convert job (428ms) for monitoring","timestamp":"2025-06-07 12:22:05:225"}
+{"level":"debug","message":"Recorded completed convert job (779ms) for monitoring","timestamp":"2025-06-07 12:22:06:226"}
+{"level":"debug","message":"Recorded completed convert job (1852ms) for monitoring","timestamp":"2025-06-07 12:22:19:2219"}
+{"level":"debug","message":"Recorded completed convert job (459ms) for monitoring","timestamp":"2025-06-07 12:22:19:2219"}
+{"level":"debug","message":"Recorded completed convert job (433ms) for monitoring","timestamp":"2025-06-07 12:22:20:2220"}
+{"level":"debug","message":"Recorded completed convert job (775ms) for monitoring","timestamp":"2025-06-07 12:22:20:2220"}
+{"level":"debug","message":"Recorded completed convert job (693ms) for monitoring","timestamp":"2025-06-07 12:22:21:2221"}
+{"level":"debug","message":"Recorded completed convert job (1886ms) for monitoring","timestamp":"2025-06-07 12:22:45:2245"}
+{"level":"debug","message":"Recorded completed convert job (444ms) for monitoring","timestamp":"2025-06-07 12:22:45:2245"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 12:24:58:2458"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 12:31:04:314"}
+{"level":"debug","message":"Recorded completed compress job (244ms) for monitoring","timestamp":"2025-06-07 12:31:27:3127"}
+{"level":"debug","message":"Recorded completed compress job (227ms) for monitoring","timestamp":"2025-06-07 12:36:55:3655"}
+{"level":"debug","message":"Recorded completed compress job (60ms) for monitoring","timestamp":"2025-06-07 12:36:55:3655"}
+{"level":"debug","message":"Recorded completed crop job (144ms) for monitoring","timestamp":"2025-06-07 12:37:28:3728"}
+{"level":"debug","message":"Recorded completed convert job (1910ms) for monitoring","timestamp":"2025-06-07 12:38:05:385"}
+{"level":"debug","message":"Recorded completed convert job (442ms) for monitoring","timestamp":"2025-06-07 12:38:06:386"}
+{"level":"debug","message":"Recorded completed convert job (437ms) for monitoring","timestamp":"2025-06-07 12:38:06:386"}
+{"level":"debug","message":"Recorded completed convert job (781ms) for monitoring","timestamp":"2025-06-07 12:38:07:387"}
+{"level":"debug","message":"Recorded completed convert job (687ms) for monitoring","timestamp":"2025-06-07 12:38:08:388"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 12:41:07:417"}
+{"level":"debug","message":"Recorded completed compress job (245ms) for monitoring","timestamp":"2025-06-07 12:41:48:4148"}
+{"level":"debug","message":"Recorded completed compress job (56ms) for monitoring","timestamp":"2025-06-07 12:42:09:429"}
+{"level":"debug","message":"Recorded completed compress job (52ms) for monitoring","timestamp":"2025-06-07 12:42:09:429"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 12:51:07:517"}
+{"level":"debug","message":"Recorded completed compress job (241ms) for monitoring","timestamp":"2025-06-07 12:56:49:5649"}
+{"level":"debug","message":"Recorded completed compress job (56ms) for monitoring","timestamp":"2025-06-07 12:56:54:5654"}
+{"level":"debug","message":"Recorded completed compress job (51ms) for monitoring","timestamp":"2025-06-07 12:56:54:5654"}
+{"level":"debug","message":"Recorded completed compress job (95ms) for monitoring","timestamp":"2025-06-07 12:56:54:5654"}
+{"level":"debug","message":"Recorded completed crop job (334ms) for monitoring","timestamp":"2025-06-07 12:57:13:5713"}
+{"level":"debug","message":"Recorded completed resize job (42ms) for monitoring","timestamp":"2025-06-07 12:57:44:5744"}
+{"level":"debug","message":"Recorded completed resize job (1534ms) for monitoring","timestamp":"2025-06-07 12:58:17:5817"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 13:01:07:17"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 13:11:07:117"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 13:29:11:2911"}
+{"level":"debug","message":"Recorded completed compress job (38ms) for monitoring","timestamp":"2025-06-07 13:32:24:3224"}
+{"level":"debug","message":"Recorded completed convert job (183ms) for monitoring","timestamp":"2025-06-07 13:36:58:3658"}
+{"level":"debug","message":"Recorded completed convert job (29ms) for monitoring","timestamp":"2025-06-07 13:37:35:3735"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 13:39:11:3911"}
+{"level":"debug","message":"Recorded completed compress job (233ms) for monitoring","timestamp":"2025-06-07 13:45:00:450"}
+{"level":"debug","message":"Recorded completed compress job (244ms) for monitoring","timestamp":"2025-06-07 13:45:14:4514"}
+{"level":"debug","message":"Recorded completed compress job (56ms) for monitoring","timestamp":"2025-06-07 13:45:14:4514"}
+{"level":"debug","message":"Recorded completed compress job (53ms) for monitoring","timestamp":"2025-06-07 13:45:14:4514"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 13:49:11:4911"}
+{"level":"debug","message":"Recorded completed crop job (132ms) for monitoring","timestamp":"2025-06-07 13:51:39:5139"}
+{"level":"debug","message":"Recorded completed crop job (35ms) for monitoring","timestamp":"2025-06-07 13:51:45:5145"}
+{"level":"debug","message":"Recorded completed crop job (39ms) for monitoring","timestamp":"2025-06-07 13:52:04:524"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 13:55:09:559"}
+{"level":"debug","message":"Recorded completed convert job (433ms) for monitoring","timestamp":"2025-06-07 14:00:47:047"}
+{"level":"debug","message":"Recorded completed convert job (606ms) for monitoring","timestamp":"2025-06-07 14:01:02:12"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 14:05:12:512"}
+{"level":"warn","message":"Entering degradation mode - system under high load","timestamp":"2025-06-07 14:08:27:827"}
+{"level":"warn","message":"Triggering emergency file cleanup due to high load","timestamp":"2025-06-07 14:08:27:827"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /admin/settings/file-upload","timestamp":"2025-06-07 14:08:27:827"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-07 14:08:27:827"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /scripts/public","timestamp":"2025-06-07 14:08:27:827"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /seo/page/image%2Fconvert","timestamp":"2025-06-07 14:08:27:827"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /admin/settings/file-upload","timestamp":"2025-06-07 14:08:40:840"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /seo/page/image%2Fconvert","timestamp":"2025-06-07 14:08:41:841"}
+{"level":"info","message":"Processing non-priority request during degradation: GET /health","timestamp":"2025-06-07 14:08:53:853"}
+{"level":"info","message":"Exiting degradation mode - system load has normalized","timestamp":"2025-06-07 14:08:53:853"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 14:15:12:1512"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 14:25:12:2512"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 14:35:12:3512"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 14:45:12:4512"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 14:49:44:4944"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 14:50:47:5047"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 14:52:08:528"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 14:54:07:547"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 15:04:10:410"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:05:02:52"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 15:15:05:155"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:23:26:2326"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:23:27:2327"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:23:27:2327"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:23:27:2327"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:23:57:2357"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:26:03:263"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:27:17:2717"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:30:15:3015"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:30:48:3048"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:30:58:3058"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:31:23:3123"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:31:47:3147"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:31:59:3159"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:32:15:3215"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:34:28:3428"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:34:43:3443"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:34:59:3459"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:35:25:3525"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:36:24:3624"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:36:25:3625"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:36:25:3625"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:36:25:3625"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:36:25:3625"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:36:25:3625"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:36:39:3639"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:37:01:371"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:37:17:3717"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:37:38:3738"}
+{"level":"debug","message":"Recorded completed compress job (46ms) for monitoring","timestamp":"2025-06-07 15:39:35:3935"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 15:47:41:4741"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:49:05:495"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:51:34:5134"}
+{"level":"info","message":"Scheduler status requested from admin panel","timestamp":"2025-06-07 15:53:26:5326"}
+{"level":"info","message":"Scheduler status requested from admin panel","timestamp":"2025-06-07 15:53:26:5326"}
+{"level":"info","message":"System status requested from admin panel","timestamp":"2025-06-07 15:53:26:5326"}
+{"level":"info","message":"System status requested from admin panel","timestamp":"2025-06-07 15:53:26:5326"}
+{"level":"info","message":"Scheduler status requested from admin panel","timestamp":"2025-06-07 15:53:29:5329"}
+{"level":"info","message":"Scheduler status requested from admin panel","timestamp":"2025-06-07 15:53:29:5329"}
+{"level":"info","message":"System status requested from admin panel","timestamp":"2025-06-07 15:53:29:5329"}
+{"level":"info","message":"System status requested from admin panel","timestamp":"2025-06-07 15:53:29:5329"}
+{"level":"info","message":"Initialized SEO settings: 1 created, 6 already existed","timestamp":"2025-06-07 15:53:41:5341"}
+{"level":"info","message":"Updated SEO settings for page: /image/metadata","timestamp":"2025-06-07 15:53:58:5358"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:54:49:5449"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:54:58:5458"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 15:55:08:558"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:00:56:056"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:02:58:258"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:03:13:313"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:03:24:324"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:03:31:331"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:03:44:344"}
+{"level":"info","message":"Cleaned up 0 old dead letter jobs","timestamp":"2025-06-07 16:13:47:1347"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:16:18:1618"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:17:41:1741"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:18:53:1853"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:19:02:192"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:19:10:1910"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:19:11:1911"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:19:30:1930"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:24:44:2444"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:30:05:305"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:30:16:3016"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:30:27:3027"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:31:22:3122"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:34:14:3414"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:39:23:3923"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:42:21:4221"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:44:37:4437"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:44:59:4459"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:00:450"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:06:456"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:12:4512"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:18:4518"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:23:4523"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:30:4530"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:38:4538"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:43:4543"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:49:4549"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:45:54:4554"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:00:460"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:05:465"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:11:4611"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:16:4616"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:22:4622"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:28:4628"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:38:4638"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:43:4643"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:46:4646"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:49:4649"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:46:59:4659"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:04:474"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:10:4710"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:16:4716"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:21:4721"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:22:4722"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:28:4728"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:38:4738"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:39:4739"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:46:4746"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:51:4751"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:47:57:4757"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:48:02:482"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:48:03:483"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:48:06:486"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:48:08:488"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:48:14:4814"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:48:19:4819"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:48:27:4827"}
+{"level":"info","message":"Looking up blog SEO data for: whats-is-b-to-b-marketing-f-ddd","timestamp":"2025-06-07 16:52:14:5214"}
+{"level":"info","message":"Found blog post for SEO: whats is B To B marketing F ddd (ID: 683d8f536602dc6e06b066a4)","timestamp":"2025-06-07 16:52:14:5214"}
+{"level":"debug","message":"Blog SEO data: title=whats is B To B marketing salse new aaaaaaaaaaaaaaaaaaaaaSd, desc=It is a long established fact ...","timestamp":"2025-06-07 16:52:14:5214"}
+{"level":"info","message":"Initializing scheduler system...","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"debug","message":"Call to mongodb was successful","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"debug","message":"MongoDB connection successful","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"warn","message":"Redis unavailable - dead letter queue will not be initialized","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"Redis became available - initializing dead letter queue","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"Restored 0 active schedulers from database","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"Scheduler system initialized","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"Initializing dead letter queue with Redis host: localhost","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"Dead letter queue initialized successfully with Redis options","timestamp":"2025-06-07 16:53:02:532"}
+{"level":"info","message":"Dead letter queue successfully initialized with Redis","timestamp":"2025-06-07 16:53:02:532"}

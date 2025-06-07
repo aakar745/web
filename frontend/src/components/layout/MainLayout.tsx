@@ -20,7 +20,8 @@ import {
   RefreshCw,
   Crop,
   ImageIcon,
-  Newspaper
+  Newspaper,
+  Info
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -236,6 +237,23 @@ export function MainLayout({ children }: MainLayoutProps) {
                         <div className="text-xs text-gray-500 dark:text-gray-400">Trim & cut</div>
                       </div>
                     </Link>
+                    
+                    <Link
+                      href="/image/metadata"
+                      className={`group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActiveLink('/image/metadata') ? 'bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
+                      onClick={() => {
+                        setIsToolsDropdownOpen(false)
+                        closeMenu()
+                      }}
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-white mr-3 group-hover:scale-110 transition-transform duration-200">
+                        <Info className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">Metadata</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Image analysis</div>
+                      </div>
+                    </Link>
                   </div>
                 </motion.div>
               </div>
@@ -384,6 +402,20 @@ export function MainLayout({ children }: MainLayoutProps) {
                     <div>
                       <div className="font-semibold">Crop</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">Trim & cut</div>
+                    </div>
+                  </Link>
+                  
+                  <Link
+                    href="/image/metadata"
+                    className={`group flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ml-2 mr-1 ${isActiveLink('/image/metadata') ? 'bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-750 text-gray-700 dark:text-gray-300'}`}
+                    onClick={closeMenu}
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-white mr-3 group-active:scale-95 transition-transform duration-150">
+                      <Info className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Metadata</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Image analysis</div>
                     </div>
                   </Link>
                 </div>
@@ -590,6 +622,12 @@ export function MainLayout({ children }: MainLayoutProps) {
                     Image Crop
                   </Link>
                 </li>
+                <li>
+                  <Link href="/image/metadata" className="text-muted-foreground hover:text-primary transition-colors">
+                    Image Metadata
+                  </Link>
+                </li>
+
               </ul>
             </div>
             
