@@ -373,6 +373,96 @@ const QuickStats: React.FC<{ metadata: any }> = ({ metadata }) => {
   )
 }
 
+// Helper function to parse structured camera comments (e.g., MediaTek)
+const parseCameraComment = (comment: string) => {
+  if (!comment || typeof comment !== 'string') return null;
+  
+  // Check if it looks like MediaTek structured data
+  if (comment.includes(';') && comment.includes(':')) {
+    const pairs = comment.split(';').map(pair => pair.trim()).filter(Boolean);
+    const parsed: Record<string, string> = {};
+    
+    pairs.forEach(pair => {
+      const [key, value] = pair.split(':').map(str => str.trim());
+      if (key && value !== undefined) {
+        parsed[key] = value;
+      }
+    });
+    
+    return Object.keys(parsed).length > 0 ? parsed : null;
+  }
+  
+  return null;
+}
+
+// Component to display parsed camera comment
+const CameraCommentDisplay: React.FC<{ comment: string }> = ({ comment }) => {
+  const parsedData = parseCameraComment(comment);
+  
+  if (!parsedData) {
+    return <p className="font-medium text-sm leading-relaxed">{comment}</p>;
+  }
+  
+  // Group parameters by category
+  const categories = {
+    'Camera Settings': ['filter', 'filterIntensity', 'filterMask', 'captureOrientation', 'sceneMode', 'module'],
+    'Processing': ['algolist', 'multi-frame', 'hw-remosaic', 'brp_mask', 'brp_del_th', 'brp_del_sen'],
+    'Scene Analysis': ['AI_Scene', 'aec_lux', 'aec_lux_index', 'cct_value', 'motionLevel'],
+    'Environment': ['weatherinfo', 'temperature', 'touch', 'albedo', 'confidence', 'delta']
+  };
+  
+  return (
+    <div className="space-y-4">
+      {Object.entries(categories).map(([category, keys]) => {
+        const categoryData = keys.reduce((acc, key) => {
+          if (parsedData[key] !== undefined) {
+            acc[key] = parsedData[key];
+          }
+          return acc;
+        }, {} as Record<string, string>);
+        
+        if (Object.keys(categoryData).length === 0) return null;
+        
+        return (
+          <div key={category} className="space-y-2">
+            <h5 className="font-medium text-sm text-muted-foreground">{category}</h5>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {Object.entries(categoryData).map(([key, value]) => (
+                <div key={key} className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span className="font-medium">{value === 'null' ? 'N/A' : value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      
+      {/* Show any remaining parameters */}
+      {(() => {
+        const allCategoryKeys = Object.values(categories).flat();
+        const remaining = Object.entries(parsedData).filter(([key]) => !allCategoryKeys.includes(key));
+        
+        if (remaining.length === 0) return null;
+        
+        return (
+          <div className="space-y-2">
+            <h5 className="font-medium text-sm text-muted-foreground">Other Parameters</h5>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {remaining.map(([key, value]) => (
+                <div key={key} className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span className="font-medium">{value === 'null' ? 'N/A' : value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
 export default function MetadataAnalysisTool() {
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<(string | null)[]>([])
@@ -1186,9 +1276,9 @@ export default function MetadataAnalysisTool() {
                                     </div>
                                   )}
                                   {metadata.exif.userComment && (
-                                    <div className="space-y-1">
+                                    <div className="space-y-3">
                                       <span className="text-muted-foreground">User Comment</span>
-                                      <p className="font-medium">{metadata.exif.userComment}</p>
+                                      <CameraCommentDisplay comment={metadata.exif.userComment} />
                                     </div>
                                   )}
                                 </div>
